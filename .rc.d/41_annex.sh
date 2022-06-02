@@ -42,7 +42,8 @@ annex_root() {
 ########################################
 # Init annex
 annex_init() {
-  git init "${1:-.}" && git --git-dir="${1:-.}/.git" annex init "${2:-$(uname -n)}"
+  git_exists "${1:-.}" || git init "${1:-.}"
+  git ${1:+--git-dir="${1:-.}/.git"} annex init "${2:-$(uname -n)}"
 }
 
 # Init annex bare repo
@@ -54,11 +55,6 @@ annex_init_bare() {
 annex_uninit() {
   git --git-dir="${1:-.}" annex uninit && 
   git --git-dir="${1:-.}" config --replace-all core.bare false
-}
-
-# Init annex in direct mode
-annex_init_direct() {
-  annex_init "$@" && git --git-dir="${1:-.}" annex direct
 }
 
 # Setup v7 annex in dual mode: plain & annexed files
@@ -204,7 +200,7 @@ annex_isuuid() {
 }
 
 # Get local uuid
-annex_local_uuid() {
+annex_uuid() {
   [ $# -eq 0 ] && git config annex.uuid
 }
 
