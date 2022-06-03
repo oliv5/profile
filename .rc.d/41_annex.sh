@@ -987,8 +987,9 @@ annex_find_repo() {
 annex_preferred() {
   annex_exists || return 1
   local REPO="${1:-.}"
-  local REQUIRED_FILE="$(annex_root)/.required"
-  local WANTED_FILE="$(annex_root)/.wanted"
+  local ROOT="$(annex_root)"
+  local REQUIRED_FILE="$ROOT/.required"
+  local WANTED_FILE="$ROOT/.wanted"
   local REQUIRED="${2:-$REQUIRED_FILE}"
   local WANTED="${3:-$WANTED_FILE}"
   if [ -r "$REQUIRED" ]; then
