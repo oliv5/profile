@@ -4,6 +4,8 @@
 .rc.d/01_path.sh
 .rc.d/02_cd.sh
 .rc.d/10_find.sh
+.rc.d/12_fdind.sh
+.rc.d/12_rgrep.sh
 .rc.d/15_gz.sh
 .rc.d/15_tar.sh
 .rc.d/15_zip.sh
