@@ -116,7 +116,7 @@ alias p='cd ..'
 
 # Cd helper
 cdrp() { cd "$(realpath "$@")"; }
-cdr() { cd "$(_rfind "$@")"; }
+cdr() { command -v _rfind >/dev/null && cd "$(_rfind "$@")"; }
 alias r='cdr'
 
 # Vim & co
