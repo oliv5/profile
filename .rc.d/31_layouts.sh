@@ -120,7 +120,8 @@ use_pyenv() {
   # version in reverse order so that the first listed version ends up
   # first in the path
   local i
-  for ((i = $#; i > 0; i--)); do
+  #~ for ((i = $#; i > 0; i--)); do
+  for i in $(seq $# -1 1); do
     local python_version=${!i}
     local pyenv_python
     pyenv_python=$(pyenv root)/versions/${python_version}/bin/python
