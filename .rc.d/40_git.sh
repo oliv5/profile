@@ -718,115 +718,6 @@ git_diffm_all() {
 }
 
 ########################################
-# Get stash name by index
-git_stash_name() {
-  git stash list | awk "NR==$((${1:-0}+1)){print \$2}"
-}
-
-# Get stash count
-git_stash_count() {
-  git stash list | wc -l
-}
-
-# Push changes onto stash, revert changes
-git_stash_save() {
-  local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
-  git stash save "$STASH" "$@"
-}
-git_stash_save_all() {
-  local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
-  git stash save --all "$STASH" "$@"
-}
-git_stash_save_untracked() {
-  local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
-  git stash save --untracked "$STASH" "$@"
-}
-git_stash_save_lazy() {
-  local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
-  git stash save --keep-index "$STASH" "$@"
-}
-
-# Push changes onto stash, does not revert anything
-git_stash_create() {
-  local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
-  if [ $(git_stash_count) -eq 0 ]; then
-    git stash save -q "$STASH" &&
-    git stash apply -q
-  else
-    local REF="$(git stash create)"
-    true "${REF:?Nothing to stash...}"
-    git stash store -m "$STASH" "$REF" 2>/dev/null ||
-      git update-ref -m "$STASH" refs/stash "$REF"
-  fi
-}
-
-# Pop change from stash
-git_stash_pop() {
-  git stash pop "stash@{${1:-0}}"
-}
-git_stash_pop_forced() {
-  git stash show -p "stash@{${1:-0}}" | git apply && git stash drop "stash@{${1:-0}}"
-}
-
-# Apply change from stash
-git_stash_apply() {
-  git stash apply "stash@{${1:-0}}"
-}
-git_stash_apply_forced() {
-  git stash show -p "stash@{${1:-0}}" | git apply
-}
-git_stash_apply_branch() {
-  git stash branch "$(git_stash_name "${1:-0}")" "stash@{${1:-0}}"
-}
-
-# Show diff between stash and local copy
-git_stash_diff() {
-  local STASH="${1:-0}"; shift 2>/dev/null
-  git diff "stash@{$STASH}" "$@"
-}
-git_stash_diffm() {
-  local STASH="${1:-0}"; shift 2>/dev/null
-  git difftool -y "stash@{$STASH}" "$@" 
-}
-git_stash_diffl() {
-  git_stash_diff "${@:-0}" --name-only
-}
-
-# Show stash file list
-git_stash_file() {
-  local STASH="${1:-0}"; shift 2>/dev/null
-  git stash show "stash@{$STASH}" "$@"
-}
-git_stash_file_all() {
-  local START="${1:-0}"
-  local NUM="${2:-$(git stash list | wc -l)}"
-  shift 2 2>/dev/null
-  while git stash list --skip $START -n 1; do
-    git_stash_file $START
-    START=$((START+1))
-    eval "${1:-echo}"
-  done
-}
-
-# Show stash file content
-alias git_stash_patch='git_stash_cat'
-git_stash_cat() {
-  local STASH="${1:-0}"; shift 2>/dev/null
-  git stash show -p "stash@{$STASH}" "$@"
-}
-
-# Drop a stash
-git_stash_drop() {
-  local STASH="${1:-0}"; shift 2>/dev/null
-  git stash drop "stash@{$STASH}" "$@"
-}
-
-# Flush the stash
-git_stash_flush() {
-  if ask_question "Flush the stash? (y/n): " y Y >/dev/null; then
-    git stash clear
-  fi
-}
 
 # Backup stashes in .git/backup
 #git stash list --pretty=format:"%h %gd %ci" | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}'
@@ -842,6 +733,125 @@ git_stash_backup() {
       echo "Backup $HASH in $FILE"
       git stash show -p "$HASH" "$@" | gzip --best > "$FILE"
     fi
+  done
+}
+
+# Get stash name by index
+git_stash_name() {
+  git stash list | awk "NR==$((${1:-0}+1)){print \$2}"
+}
+
+###
+# Push changes onto stash, keep them
+if [ $(git_version) -ge 2000000 ]; then
+
+git_stash_create() {
+  local MSG="$(git_name)${1:+.$1}"
+  git stash store -m "$MSG" "$(git stash create)"
+}
+
+else # git_version
+
+git_stash_create() {
+  local MSG="$(git_name)${1:+.$1}"; shift 2>/dev/null
+  if [ $(git stash list | wc -l) -eq 0 ]; then
+    git stash save -q "$MSG" &&
+    git stash apply -q
+  else
+    local REF="$(git stash create)"
+    : "${REF:?Nothing to stash...}"
+    git stash store -m "$MSG" "$REF" 2>/dev/null ||
+      git update-ref -m "$MSG" refs/stash "$REF"
+  fi
+}
+
+fi # git_version
+
+###
+# Push changes onto stash, revert them
+if [ $(git_version) -ge 2000000 ]; then
+
+git_stash_save() {
+  local MSG="$(git_name)${1:+.$1}"; shift 2>/dev/null
+  git stash push -m "$MSG" "$@"
+}
+git_stash_save_all() {
+  local MSG="$(git_name)${1:+.$1}"; shift 2>/dev/null
+  git stash push --all -m "$MSG" "$@"
+}
+git_stash_save_untracked() {
+  local MSG="$(git_name)${1:+.$1}"; shift 2>/dev/null
+  git stash push --untracked -m "$MSG" "$@"
+}
+
+else # git_version
+
+git_stash_save() {
+  local MSG="$(git_name)${1:+.$1}"; shift 2>/dev/null
+  git stash save "$MSG" "$@"
+}
+git_stash_save_all() {
+  local MSG="$(git_name)${1:+.$1}"; shift 2>/dev/null
+  git stash save --all "$MSG" "$@"
+}
+git_stash_save_untracked() {
+  local MSG="$(git_name)${1:+.$1}"; shift 2>/dev/null
+  git stash save --untracked "$MSG" "$@"
+}
+
+fi # git_version
+
+###
+# Show diff between stash and local copy
+git_stash_diff() {
+  local STASH="${1:-0}"; shift 2>/dev/null
+  git diff "stash@{$STASH}" "$@"
+}
+git_stash_diffm() {
+  local STASH="${1:-0}"; shift 2>/dev/null
+  git difftool -y "stash@{$STASH}" "$@" 
+}
+git_stash_diffl() {
+  git_stash_diff "${@:-0}" --name-only
+}
+
+###
+# Force apply changes
+git_stash_apply_forced() {
+  git stash show -p "$@" | git apply
+}
+
+# Force pop changes
+git_stash_pop_forced() {
+  git_stash_apply_forced "$@" && git stash drop "$@"
+}
+
+# Pop in a new branch
+git_stash_pop_branch() {
+  git stash branch "$(git_stash_name "${1:-0}")" "stash@{${1:-0}}"
+}
+
+###
+# Show stash file list
+git_stash_ls() { git stash show "$@"; }
+git_stash_ls_range() {
+  local START="${1:-0}"
+  local END="${2:-0}"
+  for NUM in $(seq $START $(($END>$START ? $END : $START))); do
+    git stash show $NUM
+    eval "${1:-echo}"
+  done
+}
+
+###
+# Show stash file content
+git_stash_cat() { git stash show -p "$@"; }
+git_stash_cat_range() {
+  local START="${1:-0}"
+  local END="${2:-0}"
+  for NUM in $(seq $START $(($END>$START ? $END : $START))); do
+    git stash show -p $NUM
+    eval "${1:-echo}"
   done
 }
 
@@ -1553,28 +1563,21 @@ alias gsc='git_stash_create'
 alias gss='git_stash_save'
 alias gssa='git_stash_save_all'
 alias gssu='git_stash_save_untracked'
-alias gssl='git_stash_save_lazy'
-alias gsp='git_stash_pop'
-alias gsa='git_stash_apply'
+alias gsp='git stash pop'
+alias gspf='git_stash_pop_forced'
+alias gspb='git_stash_pop_branch'
+alias gsa='git stash apply'
 alias gsaf='git_stash_apply_forced'
-alias gsab='git_stash_apply_branch'
 alias gsl='git stash list'
 alias gslg='git stash list | grep'
 alias gslgi='git stash list | grep -i'
 alias gslc='git stash list | wc -l'
-alias gsf='git_stash_file'
-alias gsfa='git_stash_file_all'
-alias gsfc='git_stash_cat'
-alias gsd='git_stash_diff'
-alias gsd0='git_stash_diff 0'
-alias gsdd='git_stash_diff'
-alias gsdm='git_stash_diffm'
-alias gsdm0='git_stash_diffm 0'
-alias gsdl='git_stash_diffl'
-alias gsdl0='git_stash_diffl 0'
-alias gsb='git_stash_backup'
-alias gsrm='git_stash_drop'
-alias gsm='gsdm'
+alias gsd='git stash diff'
+alias gsdd='git stash diff'
+alias gsm='git stash difftool'
+alias gsdm='git stash difftool'
+alias gscat='git stash show -p'
+alias gsls='git stash show'
 # Gitignore aliases
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
