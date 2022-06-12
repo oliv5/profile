@@ -834,24 +834,19 @@ git_stash_pop_branch() {
 ###
 # Show stash file list
 git_stash_ls() { git stash show "$@"; }
-git_stash_ls_range() {
+
+# Show stash file content
+git_stash_cat() { git stash show -p "$@"; }
+
+# Show stash history
+git_stash_history() {
   local START="${1:-0}"
   local END="${2:-0}"
   for NUM in $(seq $START $(($END>$START ? $END : $START))); do
     git stash show $NUM
-    eval "${1:-echo}"
-  done
-}
-
-###
-# Show stash file content
-git_stash_cat() { git stash show -p "$@"; }
-git_stash_cat_range() {
-  local START="${1:-0}"
-  local END="${2:-0}"
-  for NUM in $(seq $START $(($END>$START ? $END : $START))); do
     git stash show -p $NUM
-    eval "${1:-echo}"
+    echo "------"
+    echo
   done
 }
 
@@ -1572,12 +1567,13 @@ alias gsl='git stash list'
 alias gslg='git stash list | grep'
 alias gslgi='git stash list | grep -i'
 alias gslc='git stash list | wc -l'
-alias gsd='git stash diff'
-alias gsdd='git stash diff'
-alias gsm='git stash difftool'
-alias gsdm='git stash difftool'
-alias gscat='git stash show -p'
+alias gsd='git_stash_diff'
+alias gsdd='git_stash_diff'
+alias gsm='git_stash_diffm'
+alias gsdm='git_stash_diffm'
+alias gsf='git stash show'
 alias gsls='git stash show'
+alias gscat='git stash show -p'
 # Gitignore aliases
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
