@@ -1314,7 +1314,7 @@ annex_duplicates() {
 # Remove one duplicate
 annex_rm_duplicates() {
   annex_duplicates0 "$1" --repeated |
-    xargs -r0 git rm
+    xargs -r0 echo git rm
 }
 
 ########################################
