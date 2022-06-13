@@ -841,7 +841,7 @@ git_stash_cat() { git stash show -p "$@"; }
 # Show stash history
 git_stash_history() {
   local START="${1:-0}"
-  local END="${2:-0}"
+  local END="${2:-$(($(git stash list | wc -l) - 1))}"
   for NUM in $(seq $START $(($END>$START ? $END : $START))); do
     git stash show $NUM
     git stash show -p $NUM
