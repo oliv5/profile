@@ -454,17 +454,13 @@ alias git_authors_all='git shortlog -s -n -a'
 
 ########################################
 # Extract a path from a repo without cloning/checking it out
-git_extract_dir() {
-  local URL="${1:?No url specified...}"
-  local REF="${2:?No refs specified...}"
-  local DIR="${3:?No DIR specified...}"
-  git archive --format=tar --remote="$URL" "$REF" -- "$DIR" | tar xv
-}
-git_extract_file() {
-  local URL="${1:?No url specified...}"
-  local REF="${2:?No refs specified...}"
-  local FILE="${3:?No FILE specified...}"
-  git archive --format=tar --remote="$URL" "$REF" -- "$FILE" | tar -xO
+git_extract() {
+  local REF="${1:-HEAD}"
+  local SRC="${2:-.}"
+  local DST="${3:-.}"
+  local URL="$4"
+  mkdir -p "$DST"
+  git archive --format=tar ${URL:+--remote="$URL"} "$REF" ${DIR:+-- "$DIR"} | tar xv -C "$DST"
 }
 
 ########################################
