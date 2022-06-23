@@ -112,15 +112,6 @@ waitpid(){
 }
 
 ################################
-# Syslog
-alias syslog='sudo tail /var/log/syslog'
-alias auth='sudo tail /var/log/auth.log'
-log() {
-  local LOG="${1:?No log specified...}"
-  shift
-  sudo tail "/var/log/${LOG}" "$@"
-}
-
 # System information
 sys_iostat() {
   iostat -x 2

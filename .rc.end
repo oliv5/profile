@@ -317,6 +317,15 @@ if command -v batcat >/dev/null; then
 alias bat='batcat'
 fi
 
+# syslog
+alias syslog='sudo tail /var/log/syslog'
+alias auth='sudo tail /var/log/auth.log'
+log() {
+  local LOG="${1:?No log specified...}"
+  shift
+  sudo tail "/var/log/${LOG}" "$@"
+}
+
 # Misc
 alias mo='mimeopen'
 alias xo='xdg-open'
