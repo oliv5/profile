@@ -710,8 +710,9 @@ if !exists('g:loaded_gutentags')
 
 	let g:gutentags_modules += [ 'ctags' ]
 	let g:gutentags_ctags_tagfile = '.tags'
-	let g:gutentags_ctags_exclude = []
+	let g:gutentags_ctags_exclude = [ '*boost*' ]
 	let g:gutentags_ctags_exclude_wildignore = 1
+	let g:gutentags_ctags_extra_args = [ '--tag-relative=yes', '--fields=+ailmnS', ]
 
 	"let g:gutentags_modules += [ 'cscope' ]
 	"let g:gutentags_scopefile = '.cscope.out'
