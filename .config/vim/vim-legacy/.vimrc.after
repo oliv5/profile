@@ -327,12 +327,16 @@ if !exists('g:loaded_airline') && !exists('g:vimrc_nostatusline')
 	" Set status line content
 	function! s:Statusline(local)
 		if has("statusline") && &modifiable
+			exe "set" . a:local "statusline="
 			if exists('g:buftabs_enabled')
-				exe "set" . a:local "statusline=\\ %{buftabs#statusline(-45)}"
+				exe "set" . a:local "statusline+=\\ %{buftabs#statusline(-45)}"
 			else
-				exe "set" . a:local "statusline=\\ [%n]\\ %<%F"
+				exe "set" . a:local "statusline+=\\ [%n]\\ %<%F"
 			endif
 			exe "set" . a:local "statusline+=\\ %="
+			if exists('g:gutentags_enabled')
+				exe "set" . a:local "statusline+=%{strlen(gutentags#statusline())?\\ '['.gutentags#statusline().'\\ running]':''}"
+			endif
 			exe "set" . a:local "statusline+=\\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r"
 			exe "set" . a:local "statusline+=\\ [%{&expandtab==0?'tabs':'space'}%{StatuslineWarning()}]"
 			exe "set" . a:local "statusline+=\\ %y\\ %c,%l/%L\\ %P"
