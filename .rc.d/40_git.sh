@@ -460,7 +460,7 @@ git_extract() {
   local DST="${3:-.}"
   local URL="$4"
   mkdir -p "$DST"
-  git archive --format=tar ${URL:+--remote="$URL"} "$REF" ${DIR:+-- "$DIR"} | tar xv -C "$DST"
+  git archive --format=tar ${URL:+--remote="$URL"} "$REF" ${SRC:+-- "$SRC"} | tar xv -C "$DST"
 }
 
 ########################################
@@ -1565,6 +1565,7 @@ alias gslgi='git stash list | grep -i'
 alias gslc='git stash list | wc -l'
 alias gsd='git_stash_diff'
 alias gsdd='git_stash_diff'
+alias gsdl='git_stash_diffl'
 alias gsm='git_stash_diffm'
 alias gsdm='git_stash_diffm'
 alias gsf='git stash show'
