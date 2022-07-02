@@ -861,7 +861,7 @@ annex_upkeep() {
   local REMOTES=""
   # Get arguments
   OPTIND=1
-  while getopts "adoscpum:gexfti:v:w:zh" OPTFLAG; do
+  while getopts "adoscpunm:gexfti:v:w:zh" OPTFLAG; do
     case "$OPTFLAG" in
       # Add
       a) ADD=1;;
@@ -873,6 +873,7 @@ annex_upkeep() {
       p) SYNC=1; NO_PULL="";;
       u) SYNC=1; NO_PUSH="";;
       t) SYNC=1; CONTENT="--content";;
+      n) SYNC=1;;
       m) MSG="${OPTARG}";;
       # UL/DL
       g) GET=1;;
@@ -916,7 +917,7 @@ annex_upkeep() {
   fi
   # Revert deleted files
   if [ -z "$DEL" ] && ! annex_direct; then
-    gstx D | xargs -r0 $DBG git checkout || return $?
+    gstx D | xargs -r0 $DBG git reset HEAD -- || return $?
     #annex_st D | xargs -r $DBG git checkout || return $?
   fi
   # Sync
