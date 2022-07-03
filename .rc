@@ -16,7 +16,7 @@ rc_source() {
   local RC_SHELLOPTS="$(set +o | grep noglob)" # shell options
   local RC_VERBOSE="$RC_VERBOSE" # for recursive calls
   local RC_DRYRUN="$RC_DRYRUN" # for recursive calls
-  local RC_ALL="$RC_ALL" # for recursive calls
+  local RC_ALL="" # disabled in recursive calls
   local RC_CNT=$(($RC_CNT+1))
   local RC_ERR=0
 
@@ -140,8 +140,13 @@ rc_source() {
       if [ -n "$ANDROID_ROOT" ]; then
         rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
       fi
-      rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/*$PATTERN*.sh"
-      rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/*/*$PATTERN*.sh"
+      if [ -d "$RC_DIR_LOCAL" ]; then
+        local DIR="$RC_DIR_LOCAL/.rc.local.d"
+        for LOOP in $(seq 1 5); do
+          rc_sourcemod "$DIR/*$PATTERN*.sh"
+          DIR="$DIR/*/"
+        done
+      fi
     fi
   done
 
