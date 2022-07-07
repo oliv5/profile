@@ -12,9 +12,9 @@ if command -v "locale" >/dev/null 2>&1; then
   # Set the default locale variable LANG
   LOCALES="$(locale -a 2>/dev/null | sort -u | sed -e 's/utf8/UTF-8/')"
   for LANG in \
-      "$(echo $LOCALES | xargs -rn1 | grep -ie "fr_fr.*utf-\?8" | head -n 1)" \
-      "$(echo $LOCALES | xargs -rn1 | grep -ie "utf-\?8" | head -n 1)" \
-      "$(echo $LOCALES | xargs -r -l1)"; do
+      $(echo $LOCALES | xargs -rn1 | grep -ie "fr_fr.*utf-\?8" | head -n 1) \
+      $(echo $LOCALES | xargs -rn1 | grep -ie "utf-\?8" | head -n 1) \
+      $(echo $LOCALES | xargs -r -l1); do
     export LANG="$LANG"
     break
   done
