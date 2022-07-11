@@ -1056,8 +1056,11 @@ git_purge_author() {
     "$REV"
 }
 
+# Various cleanup fcts
+git_gc_all() { git_find0 | xargs -r0 -I {} -n 1 sh -c "echo Process \"{}\"; git --git-dir=\"{}\" gc --prune=now"; }
+
 # Forced garbage-collector (use after git_purge_file) 
-git_purge_gc() {
+git_gc_purge() {
   # Purge known remotes refs
   rm -rf .git/refs/remotes/ .git/*_HEAD
   # Remove git filter-branch backups
@@ -1072,9 +1075,6 @@ git_purge_gc() {
 }
 
 ########################################
-
-# Various cleanup fcts
-git_gc_all() { git_find0 | xargs -r0 -I {} -n 1 sh -c "echo \"{}\"; git --git-dir=\"{}\" gc --prune=now"; }
 
 # Repack with different memory usage settings
 git_repack_all() {
