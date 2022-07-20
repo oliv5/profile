@@ -50,13 +50,15 @@ cat <<EOF
   git config --global --add push.default current
   # Diff
   git config --global --unset-all diff.tool; git config --unset-all diff.tool
-  git config --global diff.tool meld
+  git config --global diff.tool mydiff
+  git config --global difftool.mydiff.cmd \
+    'meld --diff "$LOCAL" "$REMOTE" 2>/dev/null'
   # Merge
   git config --global --unset-all merge.tool; git config --unset-all merge.tool
   git config --global merge.tool mymerge
   git config --global merge.conflictstyle diff3
   git config --global mergetool.mymerge.cmd \
-    'meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE"'
+    'meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" 2>/dev/null'
   git config --global mergetool.mymerge.trustExitCode true
   # Misc
   git config --global rerere.enabled true
