@@ -52,13 +52,13 @@ cat <<EOF
   git config --global --unset-all diff.tool; git config --unset-all diff.tool
   git config --global diff.tool mydiff
   git config --global difftool.mydiff.cmd \
-    'meld --diff "$LOCAL" "$REMOTE" 2>/dev/null'
+    'meld --diff "\$LOCAL" "\$REMOTE" 2>/dev/null'
   # Merge
   git config --global --unset-all merge.tool; git config --unset-all merge.tool
   git config --global merge.tool mymerge
   git config --global merge.conflictstyle diff3
   git config --global mergetool.mymerge.cmd \
-    'meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" 2>/dev/null'
+    'meld --diff "\$LOCAL" "\$MERGED" "\$REMOTE" --diff "\$BASE" "\$LOCAL" --diff "\$BASE" "\$REMOTE" 2>/dev/null'
   git config --global mergetool.mymerge.trustExitCode true
   # Misc
   git config --global rerere.enabled true
@@ -481,7 +481,7 @@ git_pull_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
-  local BRANCH="${2:-HEAD}"
+  local BRANCH="${2:-$(git_branch)}"
   for REMOTE in $REMOTES; do
     if git_remote_valid "$REMOTE"; then
       echo -n "Pull from $REMOTE: "
@@ -500,7 +500,7 @@ git_push_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
-  local BRANCH="${2:-HEAD}"
+  local BRANCH="${2:-$(git_branch)}"
   shift $(($# > 2 ? 2 : $#))
   for REMOTE in $REMOTES; do
     if git_remote_valid "$REMOTE"; then
