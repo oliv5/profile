@@ -947,26 +947,24 @@ alias annex_existing='git annex find --in'
 alias annex_existing0='git annex find --print0 --in'
 alias annex_missing='git annex find --not --in'
 alias annex_missing0='git annex find --print0 --not --in'
-alias annex_wantget='git annex find --want-get --not --in'
-alias annex_wantget0='git annex find --print0 --want-get --not --in'
-alias annex_wantdrop='git annex find --want-drop --in'
-alias annex_wantdrop0='git annex find --print0 --want-drop --in'
 annex_existingc() { annex_existing "$@" | wc -l; }
 annex_missingc()  { annex_missing "$@" | wc -l; }
-annex_wantgetc()  { annex_wantget "$@" | wc -l; }
-annex_wantdropc() { annex_wantdrop "$@" | wc -l; }
 annex_lost()  { git annex list "$@" | grep -E "^_+ "; }
 annex_lostc() { git annex list "$@" | grep -E "^_+ " | wc -l; }
 
 # Grouped find aliases
 annex_existingn() { for UUID in $(annex_notdead "$@"); do echo "*** Existing in $(annex_remotes $UUID) ($UUID) ***"; annex_existing "$UUID"; done; }
 annex_missingn()  { for UUID in $(annex_notdead "$@"); do echo "*** Missing in $(annex_remotes $UUID) ($UUID) ***"; annex_missing "$UUID"; done; }
-annex_wantgetn()  { for UUID in $(annex_notdead "$@"); do echo "*** Want-get in $(annex_remotes $UUID) ($UUID) ***"; annex_wantget "$UUID"; done; }
-annex_wantdropn() { for UUID in $(annex_notdead "$@"); do echo "*** Want-drop in $(annex_remotes $UUID) ($UUID) ***"; annex_wantdrop "$UUID"; done; }
 annex_existingnc() { for UUID in $(annex_notdead "$@"); do echo -n "Num existing in $(annex_remotes $UUID) ($UUID) : "; annex_existing "$UUID" | wc -l; done; }
 annex_missingnc()  { for UUID in $(annex_notdead "$@"); do echo -n "Num missing in $(annex_remotes $UUID) ($UUID) : "; annex_missing "$UUID" | wc -l; done; }
-annex_wantgetnc()  { for UUID in $(annex_notdead "$@"); do echo -n "Num want-get in $(annex_remotes $UUID) ($UUID) : "; annex_wantget "$UUID" | wc -l; done; }
-annex_wantdropnc() { for UUID in $(annex_notdead "$@"); do echo -n "Num want-drop in $(annex_remotes $UUID) ($UUID) : "; annex_wantdrop "$UUID" | wc -l; done; }
+
+# Want-get/want-drop are for local repo only
+alias annex_wantget='git annex find --want-get --not --in .'
+alias annex_wantget0='git annex find --print0 --want-get --not --in .'
+alias annex_wantdrop='git annex find --want-drop --in .'
+alias annex_wantdrop0='git annex find --print0 --want-drop --in .'
+alias annex_wantgetc='annex_wantget | wc -l'
+alias annex_wantdropc='annex_wantdrop | wc -l'
 
 # Is file in annex ?
 annex_isin() {
