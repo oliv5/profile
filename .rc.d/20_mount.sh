@@ -73,7 +73,7 @@ mount_ecryptfs_root() {
   local KEY2="${4:-$KEY1}"
   local CIPHER="${5:-aes}"
   local KEYLEN="${6:-32}"
-  shift $(min 6 $#)
+  shift $(($# < 6 ? $# : 6))
   local OPT="$@"
   local VERSION="$(ecryptfsd -V | awk '{print $3;exit}' | bc)"
   if [ $VERSION -lt 111 ]; then
@@ -139,7 +139,7 @@ mount_ecryptfs_simple() {
   local KEY2="${4:-$KEY1}"
   local CIPHER="${5:-aes}"
   local KEYLEN="${6:-32}"
-  shift $(min 6 $#)
+  shift $(($# < 6 ? $# : 6))
   local OPT="ecryptfs_cipher=$CIPHER,ecryptfs_key_bytes=$KEYLEN,ecryptfs_sig=$KEY1,ecryptfs_fnek_sig=$KEY2,ecryptfs_unlink_sigs${@:+,$@}"
   if [ "$SRC" = "$DST" ]; then
     echo "ERROR: same source and destination directories."
@@ -186,7 +186,7 @@ mount_encfs() {
   local DST="${2:?Missing dest directory...}"
   local KEY="${3:?Missing encfs key...}"
   local PASSFILE="${4}"
-  shift $(min 4 $#)
+  shift $(($# < 4 ? $# : 4))
   ENCFS6_CONFIG="$(readlink -f "$KEY")" sudo -E encfs -o nonempty ${PASSFILE:+--extpass='cat "$PASSFILE"'} "$@" "$SRC" "$DST"
 }
 umount_encfs() {
@@ -213,7 +213,7 @@ conv_bin2iso() {
   local BIN="${1:?Missing BIN file...}"
   local CUE="${2:-${BIN%.*}.cue}"
   local ISO="${3:-${BIN%.*}.iso}"
-  shift $(($#>=3?3:$#))
+  shift $(($# < 3 ? $# : 3))
   if [ ! -e "$CUE" ]; then
     # MODE1 is the track mode when it is a computer CD
     # MODE2 if it is a PlayStation CD.
