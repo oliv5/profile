@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Mount private folder
-Exec=\$HOME/bin/profile/mount-private.sh
+Exec=/bin/sh -c '$HOME/bin/profile/mount-private.sh'
 Icon=/usr/share/icons/gnome/256x256/status/dialog-password.png
 Terminal=true
 Type=Application
