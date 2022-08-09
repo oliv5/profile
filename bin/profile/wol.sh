@@ -1,23 +1,12 @@
 #!/bin/sh
-MAC="${1?Error: please specify a MAC address}"
-IP="${2:-255.255.255.255}"
-PORT="${3:-9}"
-ITF="${4:-eth0}"
-METHOD="$5"
-SSHCRED="$6"
-
-# Convert MAC address '-' into ':'
-MAC="$(echo "$MAC" | tr '-' ':')"
+PROFILE="$(echo $1 | tr '[:lower:]' '[:upper:]')"
+METHOD="$2"
+shift $(($# < 2 ? $# : 2))
 
 # Returns true when a given method exists and is selected
 _exists() {
-  [ -z "$2" ] || [ "$2" = "$1" ] && command -v "$1" >/dev/null 2>&1
-}
-
-# Define usable wol URLs
-_urls() {
-  echo "https://www.depicus.com/wake-on-lan/woli?m=${MAC}&i=${IP}&s=255.255.255.255&p=${PORT}"
-  echo "http://www.wakeonlan.me/?mobile=0&ip=${IP}:${PORT}&mac=${MAC}&pass=&schedule=&timezone=0"
+  command -v "$1" >/dev/null 2>&1 &&
+    { [ -z "$2" ] || [ "$2" = "$1" ]; }
 }
 
 # Log and run
@@ -25,33 +14,58 @@ _run() {
   echo >&2 "$@"; "$@"
 }
 
+# Extract some parameters
+_get_wol_params() {
+  if [ -n "$(eval echo \${${PROFILE}_MAC})" ]; then
+    eval MAC="\${${PROFILE}_MAC}"
+    eval IP="\${${PROFILE}_IP}"
+    eval PORT="\${${PROFILE}_PORT}"
+  else
+    # Convert '-' into ':'
+    MAC="$(echo ${1:?No MAC address defined...} | tr '-' ':' | tr '[:lower:]' '[:upper:]')"
+    IP="${2:-255.255.255.255}"
+    PORT="${3:-9}"
+  fi
+  ITF="${4:-eth0}"
+}
+_get_ssh_params() {
+  SSH_CREDS="${1:?No SSH host/credentials specified...}"
+  SSH_PARAMS="$2"
+}
+
+# Print known wol URLs
+_urls() {
+  echo "https://www.depicus.com/wake-on-lan/woli?m=${MAC}&i=${IP}&s=255.255.255.255&p=${PORT}"
+}
+
 # Execute the WOL command
 if _exists wakeonlan "$METHOD"; then
+  _get_wol_params "$@"
   _run wakeonlan -i "${IP}" -p "${PORT}" "${MAC}";
 elif _exists wol "$METHOD"; then
+  _get_wol_params "$@"
   _run wol -i "${IP}" -p "${PORT}" "${MAC}"
 elif _exists etherwake "$METHOD"; then
+  _get_wol_params "$@"
   _run etherwake -i "${ITF}" -b "${MAC}"
 elif _exists ether-wake "$METHOD"; then
+  _get_wol_params "$@"
   _run ether-wake -i "${ITF}" -b "${MAC}"
 elif _exists curl "$METHOD"; then
+  _get_wol_params "$@"
   for URL in $(_urls); do
     _run curl -qs "${URL}" >/dev/null && break
   done
 elif _exists wget "$METHOD"; then
+  _get_wol_params "$@"
   for URL in $(_urls); do
-    _run wget "${URL}" -q -O /dev/null && break
+    _run wget --timeout=10 -q -O /dev/null "${URL}" && break
   done
 elif _exists ssh "$METHOD"; then
-  true ${SSHCRED:?No ssh credentials specified...}
-  # Unset parameters 5-6 (especially METHOD to avoid recursion)
-  set -- "$1" "$2" "$3" "$4"
-  # Execute local script in remote
-  ssh "$SSHCRED" <<EOF
-set -- "$1" "$2" "$3" "$4"; $(cat "${RC_DIR:-$HOME}/bin/profile/wol.sh")
-EOF
-  # Execute remote script
-  #ssh -t "$SSHCRED" -- '${RC_DIR:-$HOME}/bin/profile/wol.sh' "$@"
+  SSH_CREDS="${1:?No SSH host/credentials specified...}"
+  METHOD="$2"; [ "$METHOD" = "ssh" ] && METHOD=""
+  shift $(($# < 2 ? $# : 2))
+  ssh "$SSH_CREDS" -- sh -c ':; . "$HOME/bin/profile/wol.sh" "$@"' "$PROFILE" "$METHOD" "$@"
 else
   echo >&2 "No appropriate WOL method available..."
   false
