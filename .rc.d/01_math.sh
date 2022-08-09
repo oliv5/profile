@@ -131,3 +131,28 @@ urandint() {
 randint() {
   od -An -N2 -i /dev/random | tr -d ' '
 }
+urandbyte() {
+  od -A n -N1 -t d2 /dev/random | tr -d ' '
+}
+randbyte() {
+  od -A n -N1 -t d1 /dev/random | tr -d ' '
+}
+
+################################
+# Convert HH:mm:ss.ms into seconds
+tosec(){
+  for INPUT; do
+    echo "$INPUT" | awk -F'[:.]' '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }'
+  done
+}
+tosecms(){
+  for INPUT; do
+    echo "$INPUT" | awk -F: '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }'
+  done
+}
+toms(){
+  for INPUT; do
+    echo "$INPUT" | awk -F: '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print (($1 * 3600) + ($2 * 60) + $3) * 1000 }'
+  done
+}
+

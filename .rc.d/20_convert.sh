@@ -1,24 +1,6 @@
 #!/bin/sh
 
 ################################
-# Convert HH:mm:ss.ms into seconds
-toSec(){
-  for INPUT; do
-    echo "$INPUT" | awk -F'[:.]' '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }'
-  done
-}
-toSecMs(){
-  for INPUT; do
-    echo "$INPUT" | awk -F: '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }'
-  done
-}
-toMs(){
-  for INPUT; do
-    echo "$INPUT" | awk -F: '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print (($1 * 3600) + ($2 * 60) + $3) * 1000 }'
-  done
-}
-
-################################
 # Convert to openoffice/libreoffice formats
 conv_lo() {
   local FORMAT="${1:-?No output format specified}" && shift
