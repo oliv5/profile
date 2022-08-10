@@ -1,9 +1,18 @@
 #!/bin/sh
 
-# One realpath like implementation
-command -v realpath >/dev/null ||
-realpath() {
-    python -c "import os.path; print os.path.relpath('$1', '${2:-$PWD}')"
+# Some general-purpose fcts
+command -v relpath >/dev/null ||
+relpath() {
+  { command -v realpath && realpath -m --relative-to="${2:-$PWD}" "$1"; } ||
+  { command -v python && python -c "import os.path; print(os.path.relpath('$1', '${2:-$PWD}'))"; } ||
+  echo "$1"
+}
+command -v abspath >/dev/null ||
+abspath() {
+  { command -v realpath && realpath -m "$1"; } ||
+  { command -v readlink && readlink -f -- "$1"; } ||
+  { command -v python && python -c "import os.path; print(os.path.abspath('$1'))"; } ||
+  echo "$1"
 }
 
 # Timeout wrapper
@@ -16,13 +25,13 @@ _path_prepend() {
   local VAR="${1:-PATH}"
   shift
   local DIR
+  local RES=""
   for DIR; do
     if _path_timeout [ -d "$DIR" ]; then
-      eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
-      eval export $VAR="${DIR}\${$VAR:+:\$$VAR}"
+      RES="${RES:+$RES:}${DIR}"
     fi
   done
-  trap - EXIT
+  eval export $VAR="${RES:+$RES:}\${$VAR}"
 }
 
 # Append to path
@@ -30,13 +39,13 @@ _path_append() {
   local VAR="${1:-PATH}"
   shift
   local DIR
+  local RES=""
   for DIR; do
     if _path_timeout [ -d "$DIR" ]; then
-      eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
-      eval export $VAR="\${$VAR:+\$$VAR:}${DIR}"
+      RES="${RES:+$RES:}${DIR}"
     fi
   done
-  trap - EXIT
+  eval export $VAR="\${$VAR}${RES:+:$RES}"
 }
 
 # Remove from path
@@ -45,11 +54,11 @@ _path_remove() {
   local VAR="${1:-PATH}"
   shift
   local DIR
+  eval local RES="\$$VAR"
   for DIR; do
-    eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
-    eval export $VAR="$(eval echo "\$$VAR" | sed -r "s;${DIR}:?;;g")"
+    RES="$(echo $RES | sed -r "s;${DIR}:;;g")"
   done
-  trap - EXIT
+  eval export $VAR="$RES"
 }
 
 # Remove given fs from path, as well as absent paths
@@ -111,9 +120,7 @@ _path_find() {
   local DIR="${2:-.}"
   local NAME="${3}"
   local RES="$(find "$DIR" ${NAME:+-name "$NAME"} -type d -print0 | xargs -r0 printf '%s')"
-  eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
   export $VAR="$(eval echo "\$$VAR")${RES:+:$RES}"
-  trap - EXIT
 }
 
 # PATH aliases
@@ -124,7 +131,6 @@ path_remove_fs() { _path_remove_fs PATH "$@"; }
 path_remove_absent() { _path_remove_absent PATH "$@"; }
 path_cleanup() { _path_cleanup PATH "$@"; }
 path_find() { _path_find PATH "$@"; }
-path_abs() { readlink -f -- "$@"; }
 path_reset() { export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"; }
 
 # LD_LIBRARY_PATH aliases
