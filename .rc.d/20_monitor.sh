@@ -173,22 +173,26 @@ mem_listshort() {
   mem_list "$1" ax -o comm,pid,pmem,rss,vsz
 }
 
-kill_cpu() {
-  local NUM=$((${1:-1} + 1))
-  shift $(min 1 $#)
-  ps a --sort -%cpu | awk 'NR>1 && NR<=$NUM {print $1;}' | xargs -r kill "$@"
+# Aggregated top cpu hungry processes
+cpu_top() {
+  printf "%-20s\t%%CPU\n" "COMMAND"
+  ps -A -o comm,pcpu | awk '
+  NR == 1 { next }
+  { a[$1] += $2 }
+  END {
+    for (i in a) {
+      printf "%-20s\t%.2f\n", i, a[i]
+    }
+  }
+' | LC_ALL=C sort -rnk2 | less
 }
 
-kill_mem() {
-  local NUM=$((${1:-1} + 1))
-  shift $(min 1 $#)
-  ps a --sort -rss | awk 'NR>1 && NR<=$NUM {print $1;}' | xargs -r kill "$@"
-}
-
+# Aggregated top mem hungry processes
 # http://www.zyxware.com/articles/4446/show-total-memory-usage-by-each-application-in-your-ubuntu-or-any-gnu-linux-system
 mem_top() {
+  printf "%-20s\t%%MEM\tSIZE\n", "COMMAND"
   ps -A --sort -rss -o comm,pmem,rss | awk '
-  NR == 1 { print; next }
+  NR == 1 { next }
   { a[$1] += $2; b[$1] += $3; }
   END {
     for (i in a) {
@@ -203,15 +207,24 @@ mem_top() {
         for (j = 5; human_readable < 1; j--)
           human_readable = size_in_bytes / (2^(10*j))
       }
-      printf "%-20s\t%s\t%.2f%s\t%s\n", i, a[i], human_readable, unit[j+2], b[i]
+      printf "%-20s\t%s\t%.2f%s\n", i, a[i], human_readable, unit[j+2]
     }
   }
-' | awk 'NR>1' | sort -rnk4 | awk '
-  BEGIN {printf "%-20s\t%%MEM\tSIZE\n", "COMMAND"} 
-  {
-    printf "%-20s\t%s\t%s\n", $1, $2, $3
-  }
-' | less
+' | LC_ALL=C sort -rbhk3 | less
+}
+
+################################
+# Kill top cpu/mem hungry processes
+kill_top_cpu() {
+  local NUM=$((${1:-1} + 1))
+  shift $(min 1 $#)
+  ps a --sort -%cpu | awk 'NR>1 && NR<=$NUM {print $1;}' | xargs -r kill "$@"
+}
+
+kill_top_mem() {
+  local NUM=$((${1:-1} + 1))
+  shift $(min 1 $#)
+  ps a --sort -rss | awk 'NR>1 && NR<=$NUM {print $1;}' | xargs -r kill "$@"
 }
 
 ################################
