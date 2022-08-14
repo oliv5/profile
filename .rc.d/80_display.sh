@@ -96,11 +96,13 @@ backlight() {
 optirun() { primusrun "$@"; }
 primusrun() {
   sudo sh -c '
+    USER="$1"; shift
     CONF=/usr/lib/modprobe.d/blacklist-nvidia.conf
     trap "if [ -f "${CONF}.tmp" ]; then mv -v \"${CONF}.tmp\" \"$CONF\"; fi; trap - INT TERM EXIT" INT TERM EXIT
     if [ -f "$CONF" ]; then mv -v "$CONF" "${CONF}.tmp"; fi
-    modprobe nvidia
-    vblank_mode=0 command primusrun "$@"
+    #modprobe nvidia
+    #vblank_mode=0 command primusrun "$@"
     #rmmod nvidia nvidia_modeset nvidia_drm
-  ' _ "$@"
+    sudo -u "$USER" vblank_mode=0 primusrun "$@"
+  ' _ "$(whoami)" "$@"
 }
