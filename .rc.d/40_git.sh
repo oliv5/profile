@@ -568,12 +568,13 @@ git_bundle() {
   chown "$OWNER" "$OUT"
   if [ -n "$GPG_RECIPIENT" ]; then
     echo "Encrypt bundle into '${OUT}.gpg'"
-    gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${OUT}" &&
+    gpg -v --output "${OUT}.gpg" --encrypt --trust-model always --recipient "$GPG_RECIPIENT" "${OUT}" &&
       _git_secure_delete "${OUT}"
     OUT="${OUT}.gpg"
     chown "$OWNER" "$OUT"
   fi
   if [ -n "$PAR2_RECOVERY" ]; then
+    PAR2_RECOVERY="$(expr 1 "*" "$PAR2_RECOVERY" 2>/dev/null || echo 0)"
     PAR2_RECOVERY="$(($PAR2_RECOVERY < 5 ? 5 : $PAR2_RECOVERY))"
     echo "Create PAR2 files for '$OUT' (${PAR2_RECOVERY}% recovery)"
     par2 create -r${PAR2_RECOVERY} "$OUT"
