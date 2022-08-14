@@ -485,7 +485,7 @@ _annex_archive() {
     local NAME="$(git_repo).$(uname -n).$(date +%Y%m%d-%H%M%S).$(git_shorthash)"
     OUT="$DIR/${NAME}.${OUT%%.*}.${OUT#*.}"
     local GPG_RECIPIENT="$3"
-    local GPG_TRUST="${4:+--trust-model always}"
+    # $4 is unused as of now
     shift 4
     mkdir -p "$(dirname "$OUT")"
     if [ $? -ne 0 ]; then
@@ -499,7 +499,7 @@ _annex_archive() {
       return 1
     fi
     if [ ! -z "$GPG_RECIPIENT" ]; then
-      gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
+      gpg -v --output "${OUT}.gpg" --encrypt --trust-model always --recipient "$GPG_RECIPIENT" "${OUT}" &&
         _git_secure_delete "${OUT}"
     fi
     ls -l "${OUT}"*
