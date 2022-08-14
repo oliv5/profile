@@ -4,8 +4,9 @@
 # Computations
 min() { echo $((${1:-0}<${2:-0}?${1:-0}:${2:-0})); }
 max() { echo $((${1:-0}>${2:-0}?${1:-0}:${2:-0})); }
-lim() { max $(min $1 $3) $2; }
-isint() { expr 2 "*" "$1" + 1 >/dev/null 2>&1; }
+bound() { max $(min $1 $3) $2; }
+isint() { expr 1 "*" "$1" + 1 >/dev/null 2>&1; }
+toint() { expr 1 "*" "$1" 2>/dev/null || echo 0; }
 alias avg="awk '{a+=\$1} END{print a/NR}'"
 
 # Conversion to (unsigned) integer
