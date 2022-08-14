@@ -549,11 +549,10 @@ git_bundle() {
   fi
   local OUTBASE="$OUT"
   local GPG_RECIPIENT="$2"
-  local GPG_TRUST="${3:+--trust-model always}"
+  local PAR2_RECOVERY="$3"
   local OWNER="${4:-$USER}"
   local XZOPTS="$5"
-  local PAR2="$8"
-  shift $(($# > 8 ? 8 : $#))
+  shift $(($# > 7 ? 7 : $#))
   echo "Bundle into $OUT"
   git fetch --all || true
   # --all should be equivalent to --branches --tags --remotes
@@ -569,14 +568,15 @@ git_bundle() {
   chown "$OWNER" "$OUT"
   if [ -n "$GPG_RECIPIENT" ]; then
     echo "Encrypt bundle into '${OUT}.gpg'"
-    gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
+    gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${OUT}" &&
       _git_secure_delete "${OUT}"
     OUT="${OUT}.gpg"
     chown "$OWNER" "$OUT"
   fi
-  if [ -n "$PAR2" ]; then
-    echo "Create PAR2 files for '$OUT'"
-    par2 create -r8 "$OUT"
+  if [ -n "$PAR2_RECOVERY" ]; then
+    PAR2_RECOVERY="$(($PAR2_RECOVERY < 5 ? 5 : $PAR2_RECOVERY))"
+    echo "Create PAR2 files for '$OUT' (${PAR2_RECOVERY}% recovery)"
+    par2 create -r${PAR2_RECOVERY} "$OUT"
   fi
   ls -l "${OUTBASE}"*
   )
@@ -597,13 +597,13 @@ git_incbundle() {
     else
       echo "Make incremental bundle from ${TAGNAME}_last ($PREV) to HEAD ($NEXT)"
       local NAME="${PREV}.${NEXT}.bundle.inc"
-      git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" "$8" --branches --tags "${TAGNAME}_last~1.." ||
+      git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags "${TAGNAME}_last~1.." ||
         return $?
     fi
   else
     echo "Make initial full bundle up to HEAD ($NEXT)"
     local NAME="${NEXT}.bundle.full"
-    git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" "$8" --branches --tags ||
+    git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags ||
       return $?
   fi
   # Set tags
