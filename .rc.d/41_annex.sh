@@ -100,8 +100,9 @@ annex_init_hubic() {
   local ENCRYPTION="${3:-none}"
   local KEYID="$4"
   local CHUNKS="$5"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
+  _run() { echo "$@"; "$@"; }
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init gdrive annex
@@ -111,8 +112,9 @@ annex_init_gdrive() {
   local ENCRYPTION="${3:-none}"
   local KEYID="$4"
   local CHUNKS="$5"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
+  _run() { echo "$@"; "$@"; }
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init bup annex
@@ -122,8 +124,9 @@ annex_init_bup() {
   local ENCRYPTION="${3:-none}"
   local KEYID="$4"
   local CHUNKS="$5"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
+  _run() { echo "$@"; "$@"; }
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init rsync annex
@@ -133,9 +136,9 @@ annex_init_rsync() {
   local ENCRYPTION="${3:-none}"
   local KEYID="$4"
   local CHUNKS="$5"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
-  git config --add annex.sshcaching false
+  _run() { echo "$@"; "$@"; }
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init directory annex
@@ -146,9 +149,10 @@ annex_init_directory() {
   local KEYID="$4"
   local CHUNKS="$5"
   local EXPORTTREE="$6"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ${EXPORTTREE:+exporttree=yes} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ${EXPORTTREE:+exporttree=yes}
-  git config --add annex.sshcaching false
+  local IMPORTTREE="$7"
+  _run() { echo "$@"; "$@"; }
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ${EXPORTTREE:+exporttree=yes} ${IMPORTTREE:+importtree=yes} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ${EXPORTTREE:+exporttree=yes} ${IMPORTTREE:+importtree=yes}
 }
 
 # Init gcrypt annex
@@ -158,9 +162,9 @@ annex_init_gcrypt() {
   local ENCRYPTION="${3:-none}"
   local KEYID="$4"
   local CHUNKS="$5"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
-  git config --add annex.sshcaching false
+  _run() { echo "$@"; "$@"; }
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
 }
 
 # Clone gcrypt annex
@@ -168,8 +172,9 @@ annex_clone_gcrypt() {
   local NAME="${1:?No remote name specified...}"
   local REMOTEPATH="${2:-$(git_repo)}"
   ! git-remote-gcrypt --check "$REMOTEPATH" && return 1
-  git clone "gcrypt::$REMOTEPATH" "$NAME" &&
-    git annex enableremote "$NAME" type=gcrypt gitrepo="$REMOTEPATH"
+  _run() { echo "$@"; "$@"; }
+  _run git clone "gcrypt::$REMOTEPATH" "$NAME" &&
+    _run git annex enableremote "$NAME" type=gcrypt gitrepo="$REMOTEPATH"
 }
 
 # Init rclone annex
@@ -182,8 +187,9 @@ annex_init_rclone() {
   local PROFILE="${6:-$NAME}"
   local MAC="${7:-HMACSHA512}"
   local LAYOUT="${8:-lower}"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=rclone target="$PROFILE" prefix="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} mac="${MAC}" rclone_layout="$LAYOUT" ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=rclone target="$PROFILE" prefix="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} mac="${MAC}" rclone_layout="$LAYOUT" ${KEYID:+keyid="$KEYID"}
+  _run() { echo "$@"; "$@"; }
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=rclone target="$PROFILE" prefix="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} mac="${MAC}" rclone_layout="$LAYOUT" ${KEYID:+keyid="$KEYID"} ||
+  _run git annex initremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=rclone target="$PROFILE" prefix="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} mac="${MAC}" rclone_layout="$LAYOUT" ${KEYID:+keyid="$KEYID"}
 }
 
 ########################################
@@ -623,7 +629,7 @@ annex_upload() {
 # $FROM is used to selected the origin repo
 # $DBG is used to print the command on stderr (when not empty)
 # $ALL is used to select all files (when not empty)
-alias annex_transfer='DBG= FROM= ALL= _annex_transfer'
+alias annex_transfer='FROM= ALL= _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
   local REPOS="${1:-$(annex_enabled)}"
@@ -641,7 +647,8 @@ _annex_transfer() {
     # 1) copy the local files
     for REPO in $REPOS; do
       if annex_isexported "$REPO"; then
-        $DBG git annex export HEAD --to "$REPO" | grep -v "export $REPO"
+        $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
+        $DBG git annex fsck --fast --from "$REPO"
       else
         while ! $DBG git annex copy --to "$REPO" --fast "$@"; do sleep 1; done
       fi
@@ -675,7 +682,8 @@ _annex_transfer() {
             while ! $DBG git annex get ${FROM:+--from "$FROM"} "$@"; do sleep 1; done
             for REPO in $REPOS; do
               if annex_isexported "$REPO"; then
-                $DBG git annex export HEAD --to "$REPO" | grep -v "export $REPO"
+                $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
+                $DBG git annex fsck --fast --from "$REPO"
               else
                 while ! $DBG git annex copy --to "$REPO" "$@"; do sleep 1; done
               fi
@@ -690,22 +698,27 @@ _annex_transfer() {
       exit 0
     ' _ "$DBG" "$REPOS" "$MAXSIZE" "$FROM"
   fi
+  # 3) quick fsck for file location
+  for REPO in $REPOS; do
+    $DBG git annex fsck --fast --from "$REPO"
+  done
 }
 
-# Rsync files to the specified location by chunk of a given size
-# without downloading the whole repo locally at once
+########################################
+# Rsync files to the specified location by chunk of a given size without downloading the whole repo locally at once
+# Similar to "git annex export" : output files hierarchy is plain / visible.
 # Options make it similar to "git annex copy" and "git annex move"
 # $FROM is used to selected the origin repo
 # $DBG is used to print the command on stderr (when not empty)
 # $SKIP_EXISTING is used to skip existing remote files
 # $DELETE is used to delete the missing existing files (1=dry-run, 2=do-it)
 # $RSYNC_OPT is used to specify rsync options
-alias annex_rsync='DBG= DELETE= SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
-alias annex_rsyncd='DBG= DELETE=2 SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
-alias annex_rsyncds='DBG= DELETE=1 SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
+alias annex_rsync='DELETE= SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
+alias annex_rsyncd='DELETE=2 SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
+alias annex_rsyncds='DELETE=1 SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
 _annex_rsync() {
   annex_exists || return 1
-  local DST="${1:?No destination specified...}"
+  local DST="${1:?No root repo destination specified...}"
   local MAXSIZE="${2:-1073741824}"
   local SRC="${PWD}"
   local DBG="${DBG:+echo [DBG]}"
@@ -723,15 +736,9 @@ _annex_rsync() {
       done
     done
   else
-    # Plain git repositories
-    # 1) copy the local files
-    for FILE; do
-      DST_DIR="$(dirname "${DST##*:}/${FILE}")"
-      while ! $DBG rsync -K -L --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"; do sleep 1; done
-    done
-    # 2) get, copy and drop the remote files
-    git annex find --include='*' --print0 "$@" | xargs -0 -r sh -c '
-      DBG="$1";MAXSIZE="$2";SKIP_EXISTING="$3";RSYNC_OPT="$4";DST="$5"
+    # Plain git repositories, list, get, copy and drop the remote files
+    git annex find --include='*' --print0 "${@:-$SRC}" | xargs -0 -r sh -c '
+      DBG="$1"; MAXSIZE="$2"; SKIP_EXISTING="$3"; RSYNC_OPT="$4"; DST="$5"
       shift 5
       TOTALSIZE=0
       NUMFILES=$#
@@ -795,9 +802,9 @@ _annex_rsync() {
 }
 
 ########################################
-# Populate a special remote directory with files from the input source
-# The current repository is used to find out keys & file names,
-# but is not used directly to copy/move the files from
+# Populate a (directory/rsync) special remote with local files from the input source
+# NOT like "git annex export" : output files hierarchy is NOT plain, but the one of the directory/rsync special remotes
+# The current repository is used to find out keys & file names, but is not used directly to copy/move the files from
 # Note the same backend than the source is used for the destination file names
 # WHERE selects which files & repo to look for
 # MOVE=1 moves files instead of copying them
@@ -807,8 +814,8 @@ _annex_populate() {
   local DST="${1:?No dst directory specified...}"
   local SRC="${2:-$PWD}"
   local WHERE="${3:-${WHERE:---include '*'}}"
-  eval git annex find "$WHERE" --format='\${file}\\000\${hashdirlower}\${key}/\${key}\\000' | xargs -r0 -n2 sh -c '
-    DBG="$1"; MOVE="$2"; SRCDIR="$3; DSTDIR="$4"; SRC="$SRCDIR/$5"; DST="$DSTDIR/$6"
+  eval git annex find "$SRC" "$WHERE" --format='\${file}\\000\${hashdirlower}\${key}/\${key}\\000' | xargs -r0 -n2 sh -c '
+    DBG="$1"; MOVE="$2"; SRCDIR="$3"; DSTDIR="$4"; SRC="$SRCDIR/$5"; DST="$DSTDIR/$6"
     echo "$SRC -> $DST"
     if [ -d "$SRCDIR" -o -d "$DSTDIR" ]; then
       if [ -n "$MOVE" ]; then
@@ -822,7 +829,7 @@ _annex_populate() {
         $DBG rsync -K -L --protect-args "$SRC" "$DST"
       fi
     fi
-  ' _ "${DBG:+echo [DBG]}" "$MOVE" "$SRC" "$DST"
+  ' _ "${DBG:+echo [DBG]}" "$MOVE" "$(git_root)" "$DST"
 }
 
 ########################################
@@ -1077,10 +1084,11 @@ annex_rename_remote() {
 
 # Rename special remotes
 annex_rename_special() {
-	git config remote.$1.fetch "dummy"
-	git remote rename "$1" "$2"
-	git config --unset remote.$2.fetch
-	git annex initremote "$1" name="$2"
+  git annex renameremote "$@"
+  #~ git config remote.$1.fetch "dummy"
+  #~ git remote rename "$1" "$2"
+  #~ git config --unset remote.$2.fetch
+  #~ git annex initremote "$1" name="$2"
 }
 
 # Revert changes in all modes (indirect/direct)
