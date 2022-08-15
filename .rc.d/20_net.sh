@@ -265,7 +265,7 @@ ssh_fct() {
 
 ############################
 # Ssh running sudo and pipe
-# Use full for piping ssh sudo output
+# Useful for piping ssh sudo output
 # Ex: (ask_passwd; echo) | ssh -tt user@server "sudo -k -S 2>/dev/null dd if=/dev/mmcblk0" | dd of=image.dat status=progress
 ssh_sudo_askpass() {
   local SSH_OPTS="${1:?No ssh server/opts specified...}"
@@ -279,6 +279,7 @@ ssh_ping()        { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh
 ssh_sudo()        { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSH_OPTS -- sudo "$@"; }
 ssh_aria2()       { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSH_OPTS -- sh -c "cd \"$DIR\"; aria2c \"$@\""; }
 ssh_youtubedl()   { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSH_OPTS -- sh -c "cd \"$DIR\"; youtubedl \"$@\""; }
+sshfs_mount()     { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; shift; sshfs -orw,users,noauto,noexec,nosuid,nodev,noatime,uid=$(id -u),gid=$(id -g),allow_other $SSH_OPTS; }
 
 ##############################
 # Home SSH aliases examples (to be defined in .rc.local)
@@ -300,9 +301,10 @@ sshh_proxify_ff()  { ssh(){ sshh "$@"; }; ssh_proxify_ff "$@"; }
 sshh_torify()      { ssh(){ sshh "$@"; }; ssh_torify "$@"; }
 sshh_torify_ff()   { ssh(){ sshh "$@"; }; ssh_torify_ff "$@"; }
 sshh_socat_vpn_p2p() { ssh(){ sshh "$@"; }; ssh_socat_vpn_p2p "$@"; }
-sshh_socat_vpn()     { ssh(){ sshh "$@"; }; ssh_socat_vpn "$@"; }
+sshh_socat_vpn()   { ssh(){ sshh "$@"; }; ssh_socat_vpn "$@"; }
 sshh_vpn()         { ssh(){ sshh "$@"; }; ssh_vpn "$@"; }
 sshh_shuttle()     { ssh(){ sshh "$@"; }; ssh_shuttle "$@"; }
+sshhfs_mount()     { ssh(){ sshh "$@"; }; sshfs_mount "$@"; }
 
 ##############################
 # SSH tunnel shortcuts
