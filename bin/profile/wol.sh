@@ -34,20 +34,20 @@ _urls() {
 _execute_wol() {
   local PROFILE="$(echo $1 | tr '[:lower:]' '[:upper:]')"
   local METHOD="$2"
+  local MAC
+  local IP
+  local PORT
+  local ITF
+  local SSH_CREDS
+  local SSH_PARAMS
   shift $(($# < 2 ? $# : 2))
 
   if _exists wakeonlan "$METHOD"; then
     _get_wol_params "$@"
     _run wakeonlan -i "${IP}" -p "${PORT}" "${MAC}";
-  elif _exists wol "$METHOD"; then
-    _get_wol_params "$@"
-    _run wol -i "${IP}" -p "${PORT}" "${MAC}"
   elif _exists etherwake "$METHOD"; then
     _get_wol_params "$@"
     _run etherwake -i "${ITF}" -b "${MAC}"
-  elif _exists ether-wake "$METHOD"; then
-    _get_wol_params "$@"
-    _run ether-wake -i "${ITF}" -b "${MAC}"
   elif _exists curl "$METHOD"; then
     _get_wol_params "$@"
     for URL in $(_urls); do
