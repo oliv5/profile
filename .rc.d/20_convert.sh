@@ -83,3 +83,13 @@ docx_search() {
   shift
   ff0 "${@:-.}/*.docx"  -exec sh -c 'docx2txt "{}" - | grep -i --with-filename --label="{}" --color=always --line-number  '"$PATTERN" \;
 }
+
+################################
+# qrcode conversions
+qrcode_txt2img() {
+  cat "$@" | qrencode -t ANSI
+}
+
+qrcode_img2txt() {
+  zbarimg --raw --oneshot "$@"
+}
