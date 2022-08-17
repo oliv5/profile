@@ -1069,7 +1069,10 @@ git_purge_author() {
 }
 
 # Various cleanup fcts
-git_gc_all() { git_find0 | xargs -r0 -I {} -n 1 sh -c "echo Process \"{}\"; git --git-dir=\"{}\" gc --prune=now"; }
+# https://stackoverflow.com/questions/3797907/how-to-remove-unused-objects-from-a-git-repository/14729486#14729486
+git_gc() {
+  git -c gc.reflogExpire=0 -c gc.reflogExpireUnreachable=0 -c gc.rerereresolved=0 -c gc.rerereunresolved=0 -c gc.pruneExpire=now gc "$@"
+}
 
 # Forced garbage-collector (use after git_purge_file) 
 git_gc_purge() {
@@ -1256,14 +1259,15 @@ git_findb() {
   git_findb0 "$@" | xargs -r0
 }
 
-# Find binary files in repo
+# Find binary files in repo, from HEAD only
 git_find_bin() {
-  # Need gnu-sed with -r
-  git ${1:+--git-dir="$1"} log --all --numstat \
-    | grep '^-' \
-    | cut -f3 \
-    | sed -r 's|(.*)\{(.*) => (.*)\}(.*)|\1\2\4\n\1\3\4|g' \
-    | sort -u
+  comm -13 <(git grep -Il '' | sort -u) <(git grep -al '' | sort -u) | xargs -r du -hc | sort -hr
+}
+
+# Find binary files in repo everywhere
+git_find_all_bin() {
+  local REVLIST="$(git rev-list --all)"
+  comm -13 <(git grep -Il '' $REVLIST | sort -u) <(git grep -al '' $REVLIST | sort -u)
 }
 
 ########################################
