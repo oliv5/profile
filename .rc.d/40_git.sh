@@ -1261,13 +1261,11 @@ git_findb() {
 
 # Find binary files in repo, from HEAD only
 git_find_bin() {
-  comm -13 <(git grep -Il '' | sort -u) <(git grep -al '' | sort -u) | xargs -r du -hc | sort -hr
-}
-
-# Find binary files in repo everywhere
-git_find_all_bin() {
-  local REVLIST="$(git rev-list --all)"
-  comm -13 <(git grep -Il '' $REVLIST | sort -u) <(git grep -al '' $REVLIST | sort -u)
+  local REVLIST="$1"
+  [ "$REVLIST" = "all" ] && REVLIST="$(git rev-list --all | xargs)"
+  [ "$REVLIST" = "branches" ] && REVLIST="$(git rev-list --branches | xargs)"
+  [ "$REVLIST" = "tags" ] && REVLIST="$(git rev-list --tags | xargs)"
+  bash -c 'comm -13 <(git grep -Il "" $1 | sort -u) <(git grep -al "" $1 | sort -u) | xargs -r du -hc | sort -hr' _ "$REVLIST"
 }
 
 ########################################
