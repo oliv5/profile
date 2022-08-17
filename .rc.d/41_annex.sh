@@ -8,6 +8,9 @@ annex_version() {
     git annex version | awk -F'[ .]' '/git-annex version:/ {printf "%.d%.8d\n",$3,$4}'
   fi
 }
+annex_repo_version() {
+  git config --get annex.version 2>/dev/null || echo 0
+}
 
 # Check annex exists
 annex_exists() {
