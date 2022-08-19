@@ -77,9 +77,9 @@ mount_ecryptfs_root() {
   local OPT="$@"
   local VERSION="$(ecryptfsd -V | awk '{print $3;exit}' | bc)"
   if [ $VERSION -lt 111 ]; then
-    local OPT="key=passphrase,ecryptfs_enable_filename_crypto=yes,no_sig_cache=yes,ecryptfs_passthrough=no${@:+,$@}"
+    local OPT="key=passphrase,ecryptfs_enable_filename_crypto=yes,no_sig_cache=yes${@:+,$@}"
   fi
-  OPT="ecryptfs_cipher=$CIPHER,ecryptfs_key_bytes=$KEYLEN,ecryptfs_sig=$KEY1,ecryptfs_fnek_sig=$KEY2,ecryptfs_unlink_sigs${OPT:+,$OPT}"
+  OPT="ecryptfs_cipher=$CIPHER,ecryptfs_key_bytes=$KEYLEN,ecryptfs_sig=$KEY1,ecryptfs_fnek_sig=$KEY2,ecryptfs_unlink_sigs,ecryptfs_passthrough=no${OPT:+,$OPT}"
   if [ "$SRC" = "$DST" ]; then
     echo "ERROR: same source and destination directories."
     return 1
@@ -140,7 +140,7 @@ mount_ecryptfs_simple() {
   local CIPHER="${5:-aes}"
   local KEYLEN="${6:-32}"
   shift $(($# < 6 ? $# : 6))
-  local OPT="ecryptfs_cipher=$CIPHER,ecryptfs_key_bytes=$KEYLEN,ecryptfs_sig=$KEY1,ecryptfs_fnek_sig=$KEY2,ecryptfs_unlink_sigs${@:+,$@}"
+  local OPT="ecryptfs_cipher=$CIPHER,ecryptfs_key_bytes=$KEYLEN,ecryptfs_sig=$KEY1,ecryptfs_fnek_sig=$KEY2,ecryptfs_unlink_sigs,ecryptfs_passthrough=no${@:+,$@}"
   if [ "$SRC" = "$DST" ]; then
     echo "ERROR: same source and destination directories."
     return 1
