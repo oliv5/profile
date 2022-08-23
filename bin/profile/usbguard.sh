@@ -9,6 +9,14 @@ usbguarg_allow() {
     sudo usbguard set-parameter ImplicitPolicyTarget allow
 }
 
+usbguarg_show() {
+    cat /etc/usbguard/rules.conf
+}
+
+usbguarg_list() {
+    sudo sh -c 'usbguard generate-policy'
+}
+
 usbguarg_record() {
     sudo sh -c 'usbguard generate-policy > /etc/usbguard/rules.conf'
 }
@@ -31,6 +39,10 @@ usbguard_disable() {
 usbguard_enable() {
     sudo systemctl enable usbguard
     sudo systemctl enable usbguard-dbus
+}
+
+usbguard_help() {
+    echo >&2 "usbguard.sh <block|allow|record|show|list|status|disable|enable|help>"
 }
 
 # Main
