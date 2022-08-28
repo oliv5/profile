@@ -263,6 +263,23 @@ ssh_fct() {
   ssh $SSH_OPTS -- "$(fct_def $FCT); ${FCT%% *} $(arg_quote "$@")"
 }
 
+# Execute a script remotely via ssh
+ssh_exec() {
+    local SSH_OPTS="${1:-localhost} "
+    local SCRIPT="${2:?No local script specified...}"
+    shift 2
+    local FILE="$(ssh $SSH_OPTS -- 'umask 077; mktemp -p "$HOME"')"
+    test $? -eq 0 || return 1
+    scp -q ${SSH_OPTS#* } "$SCRIPT" "${SSH_OPTS%% *}:/$FILE"
+    if test $? -eq 0; then 
+      ssh $SSH_OPTS -- "chmod +x '$FILE'; set +e; '$FILE' $(arg_quote "$@"); RET=$?; rm '$FILE'; exit $RET"
+      return $?
+    else
+      ssh $SSH_OPTS -- "rm '$FILE'"
+      return 2
+    fi
+}
+
 ############################
 # Ssh running sudo and pipe
 # Useful for piping ssh sudo output
@@ -616,15 +633,15 @@ quvi_get() {
   quvi "$@" --exec 'wget %u -O %t.%e'
 }
 # youtube-dl download
-youtube() {
+youtube_dl() {
   youtube-dl --geo-bypass --hls-prefer-native -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
 }
-youtube_best_mp4() {
+youtube_dl_best_mp4() {
   # see https://askubuntu.com/questions/486297/how-to-select-video-quality-from-youtube-dl/1097056#1097056
   #youtube-dl --geo-bypass -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio' --merge-output-format mp4 -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
   youtube-dl --geo-bypass -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best' --merge-output-format mp4 -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
 }
-youtube_best_not_webm() {
+youtube_dl_best_not_webm() {
   youtube-dl --geo-bypass -f 'bestvideo[ext!=webm]‌​+bestaudio[ext!=webm]‌​/best[ext!=webm]' -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
 }
 
