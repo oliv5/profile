@@ -125,12 +125,13 @@ rc_source() {
   # Main scripts
   set +f # Enable glob expansion
   local PATTERN
-  for PATTERN in "${RC_ALL:-${@:-*}}"; do
+  for PATTERN in "${RC_ALL:-$@}"; do
     if [ -d "$PATTERN" ]; then # Load explicit directories (absolute path needed)
       rc_sourcemod "$PATTERN/*.sh"
     elif [ -f "$PATTERN" ] && echo "$PATTERN" | grep -e '\.sh$' >/dev/null; then # Load explicit files (absolute path needed)
       rc_sourcefile "$PATTERN"
-    elif [ $# -eq 0 ] && [ -z "$RC_ALL" ] && [ -r "$RC_DIR/.rc.autoload" -o -r "$RC_DIR_LOCAL/.rc.local.autoload" ]; then # Load from list
+    fi
+    if [ $# -eq 0 ] && [ -z "$RC_ALL" ] && [ -r "$RC_DIR/.rc.autoload" -o -r "$RC_DIR_LOCAL/.rc.local.autoload" ]; then # Load from list
       rc_sourcelist "$RC_DIR/.rc.autoload" "$RC_DIR_LOCAL/.rc.local.autoload"
     else # Load scripts by pattern search
       rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
