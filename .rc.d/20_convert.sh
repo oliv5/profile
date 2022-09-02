@@ -93,3 +93,31 @@ qrcode_txt2img() {
 qrcode_img2txt() {
   zbarimg --raw --oneshot "$@"
 }
+
+################################
+# Flac to MP3
+flac2mp3(){
+    # NOTE: see lame -V option for quality meaning
+    local XCODE_MP3_QUALITY=0
+    local F
+    # Check commands
+    if command -v ffmpeg >/dev/null; then
+	  for F in *.flac; do
+	    ffmpeg -i "$F" -qscale:a $XCODE_MP3_QUALITY "${F%*.flac}.mp3"
+	  done
+    elif command -v ffmpeg >/dev/null && command -v ffmpeg >/dev/null; then
+	  for F in *.flac; do
+	    # Get the tags
+	    ARTIST=$(metaflac "$F" --show-tag=ARTIST | sed s/.*=//g)
+	    TITLE=$(metaflac "$F" --show-tag=TITLE | sed s/.*=//g)
+	    ALBUM=$(metaflac "$F" --show-tag=ALBUM | sed s/.*=//g)
+	    GENRE=$(metaflac "$F" --show-tag=GENRE | sed s/.*=//g)
+	    TRACKNUMBER=$(metaflac "$F" --show-tag=TRACKNUMBER | sed s/.*=//g)
+	    DATE=$(metaflac "$F" --show-tag=DATE | sed s/.*=//g)
+	    # Stream flac into the lame encoder
+	    flac -c -d "$F" | lame -V $XCODE_MP3_QUALITY --add-id3v2 --pad-id3v2 --ignore-tag-errors \
+	    --ta "$ARTIST" --tt "$TITLE" --tl "$ALBUM"  --tg "${GENRE:-12}" \
+	    --tn "${TRACKNUMBER:-0}" --ty "$DATE" - "${F%*.flac}.mp3"
+	  done
+    fi
+}
