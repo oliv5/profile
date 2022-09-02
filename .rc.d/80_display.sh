@@ -68,6 +68,15 @@ xrandr_pos() {
   xrandr --output "${SCREEN2}" --${POS}-of "${SCREEN1}" "$@"
 }
 
+# Run a command and restore xrandr config afterwards
+xrandr_safe() {
+  local RET
+  local RES="$(xrandr --current | grep \* | cut -d' ' -f4)"
+  "$@"; RET=$?
+  ${RES:+xrandr -s "$RES"}
+  return $RET
+}
+
 ###############
 # Backlight
 
