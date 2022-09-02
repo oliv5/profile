@@ -84,13 +84,14 @@ mount_ecryptfs_root() {
     echo "ERROR: same source and destination directories."
     return 1
   fi
-  chmod 500 "$SRC"
+  chmod 700 "$SRC"
   if [ $VERSION -lt 111 ]; then
     sudo ecryptfs-add-passphrase --fnek
     sudo mount -i -t ecryptfs -o "$OPT" "$SRC" "$DST"
   else
     sudo mount -t ecryptfs -o "$OPT" "$SRC" "$DST"
   fi
+  chmod 500 "$SRC"
   chmod 700 "$DST"
 }
 umount_ecryptfs_root() {
@@ -120,6 +121,7 @@ mount_ecryptfs_user() {
   echo "$KEY2" >> "$SIG"
   mount.ecryptfs_private "$CONFNAME"
   chmod 500 "$HOME/.ecryptfs"
+  chmod 700 "$DST"
 }
 umount_ecryptfs_user() {
   local CONFNAME="${1:-private}"
@@ -147,10 +149,10 @@ mount_ecryptfs_simple() {
   fi
   chmod 700 "$SRC"
   ecryptfs-simple -o "$OPT" "$SRC" "$DST"
+  chmod 500 "$SRC"
   chmod 700 "$DST"
 }
 umount_ecryptfs_simple() {
-  chmod 770 "${1:?Missing mounted directory...}"
   ecryptfs-simple -uk "${1:?Missing mounted directory...}"
 }
 
