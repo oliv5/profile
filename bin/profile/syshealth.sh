@@ -90,8 +90,10 @@ $(if cmd_exists lspci; then lspci; else echo "Not available..."; fi)
 SCSI information
 $(if cmd_exists lsscsi; then lsscsi -s; else echo "Not available..."; fi)
 
+
 Disk information
 $(if cmd_exists hdparm; then sudo hdparm /dev/sd*; else echo "Not available..."; fi)
+
 
 Disk information (2)
 $(if cmd_exists fdisk; then sudo fdisk -l; else echo "Not available..."; fi)
