@@ -172,7 +172,7 @@ Decrypt(){
   fi
 
   # Decrypt
-  echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE ${PASSPHRASE:+--passphrase-fd 0} --decrypt -o "$OUTPUT" "$INPUT"
+  echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE ${PASSPHRASE:+--passphrase-fd} ${PASSPHRASE:+0} --decrypt -o "$OUTPUT" "$INPUT"
 
   # One more file!
   if [ -f "$OUTPUT" ]; then
@@ -214,7 +214,7 @@ Encrypt() {
       PASSPHRASE="$PASSPHRASE1"
     fi
 
-    echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE ${PASSPHRASE:+--passphrase-fd 0} --symmetric -o "$OUTPUT" "$INPUT"
+    echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE ${PASSPHRASE:+--passphrase-fd} ${PASSPHRASE:+0} --symmetric -o "$OUTPUT" "$INPUT"
 
   else
 
@@ -231,7 +231,7 @@ Encrypt() {
     fi
 
     $VERBOSE echo "Recipient $RECIPIENT"
-    $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient ${RECIPIENT:+--recipient "$RECIPIENT"} --trust-model always --encrypt ${EN_SIGN:+--sign} -o "$OUTPUT" "$INPUT"
+    $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient ${RECIPIENT:+--recipient} ${RECIPIENT:+"$RECIPIENT"} --trust-model always --encrypt ${EN_SIGN:+--sign} -o "$OUTPUT" "$INPUT"
   fi
 
   # One more file!
