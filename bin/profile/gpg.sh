@@ -23,6 +23,7 @@ EN_DECRYPT=1
 EN_AUTODETECT=1
 EN_SIGN=""
 EN_SYMMETRIC=""
+EN_BATCH_RUN=1
 PUB_KEYS=""
 DELETE=1
 SIMULATE=""
@@ -37,7 +38,7 @@ xhost +si:localuser:$(whoami) >/dev/null 2>&1 && {
 }
 
 # Get command line options
-while getopts egdhk:pfsovz OPTNAME
+while getopts egdhk:pfsouvz OPTNAME
 do case "$OPTNAME" in
   e)  EN_DECRYPT=""; EN_AUTODETECT="";;
   d)  EN_ENCRYPT=""; EN_AUTODETECT="";;
@@ -48,20 +49,22 @@ do case "$OPTNAME" in
   f)  DELETE=""; echo "Keeping input files." >"$STDOUT";;
   s)  SIMULATE="true"; echo "Performing a dry-run with no file changed." >"$STDOUT";;
   o)  OVERWRITE="--yes";;
+  u)  EN_BATCH_RUN="";;
   v)  VERBOSE=""; STDOUT="/dev/stdout";;
   z)  ZENITY="";;
   [?]) echo >&2 "Usage: $(basename $0) v$VERSION [-e] [-g] [-d] [-k key] [-p] [-f] [-s] [-v] [-z]  ... directories/files"
-       echo >&2 "-e    encrypt only"
-       echo >&2 "-g    sign (with -e only)"
-       echo >&2 "-d    decrypt only"
-       echo >&2 "-k    select recipent key"
-       echo >&2 "-p    list public keys instead of secret keys"
+       echo >&2 "-e    (e)ncrypt only"
+       echo >&2 "-g    si(g)n (with -e only)"
+       echo >&2 "-d    (d)ecrypt only"
+       echo >&2 "-k    select recipent (k)ey"
+       echo >&2 "-p    list (p)ublic keys instead of secret keys"
        echo >&2 "-h    symmetric operation (passphrase only)"
-       echo >&2 "-f    do not delete input files"
-       echo >&2 "-s    simulate"
-       echo >&2 "-o    overwrite output file"
-       echo >&2 "-v    verbose"
-       echo >&2 "-z    no zenity"
+       echo >&2 "-f    do not delete input (f)iles"
+       echo >&2 "-s    (s)imulate"
+       echo >&2 "-o    (o)verwrite output file"
+       echo >&2 "-v    (v)erbose"
+       echo >&2 "-u    disable batch r(u)n; different recipients/passphrases for all files"
+       echo >&2 "-z    no (z)enity"
        exit 1;;
   esac
 done
@@ -152,24 +155,24 @@ DeleteFiles() {
 # Decrypt file
 Decrypt(){
   local INPUT="$1"
-  local OUTPUT="${INPUT%.*}"
+  local OUTPUT="${INPUT%.gpg}"
   if [ "$OUTPUT" = "$INPUT" ]; then
     OUTPUT="${OUTPUT}.out"
   fi
   echo "Decrypting file '$INPUT' into '$OUTPUT'"
 
-  # Collect GnuPG passphrase
-  if [ -z "$PASSPHRASE" ]; then
-    PASSPHRASE="$(DisplayQuestion "Decryption" "Enter your key GnuPG passphrase:")"
+  # Collect passphrase
+  if [ -n "$EN_BATCH_RUN" ] && [ -z "$PASSPHRASE" ]; then
+    PASSPHRASE="$(DisplayQuestion "Decryption" "Enter your decryption passphrase:")"
     if [ -z "$PASSPHRASE" ]; then
       $VERBOSE DisplayWarning "No passphrase" "Decryption is disabled!"
       unset EN_DECRYPT
-      continue
+      return
     fi
   fi
 
   # Decrypt
-  echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --passphrase-fd 0 --decrypt -o "$OUTPUT" "$INPUT"
+  echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE ${PASSPHRASE:+--passphrase-fd 0} --decrypt -o "$OUTPUT" "$INPUT"
 
   # One more file!
   if [ -f "$OUTPUT" ]; then
@@ -190,35 +193,45 @@ Encrypt() {
   local OUTPUT="${INPUT}.gpg"
   echo "Encrypting file '$INPUT' into '$OUTPUT'"
 
-  if [ -z "$EN_SYMMETRIC" -a -z "$RECIPIENT" ]; then
-    # Select the key
-    RECIPIENT="$(GetRecipient)"
-    if [ -z "$RECIPIENT" ]; then
-      $VERBOSE DisplayWarning "No key" "Encryption is disabled!"
-      unset EN_ENCRYPT
-      continue
-    fi
-  fi
-
-  if [ -z "$EN_SYMMETRIC" -a -z "$PASSPHRASE" ]; then
-    if [ ! -z "$EN_SIGN" ]; then
-      PASSPHRASE="$(DisplayQuestion "Signature" "Enter your key GnuPG passphrase:")"
-      if [ -z "$PASSPHRASE" ]; then
-        $VERBOSE DisplayWarning "No passphrase" "Signing is disabled!"
-        unset EN_SIGN
-      fi
-    fi
-  fi
-
   # Encrypt
   if [ -n "$EN_SYMMETRIC" ]; then
-    echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --symmetric -o "$OUTPUT" "$INPUT"
-  elif [ ! -z "$EN_SIGN" ]; then
-    $VERBOSE echo "Recipient $RECIPIENT"
-    echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient --recipient "$RECIPIENT" --trust-model always --encrypt --sign -o "$OUTPUT" "$INPUT"
+
+    $VERBOSE echo "Symmetric encryption"
+
+    if [ -n "$EN_BATCH_RUN" ] && [ -z "$PASSPHRASE" ]; then
+      local PASSPHRASE1="---"
+      local PASSPHRASE2="N/A"
+      while [ "$PASSPHRASE1" != "$PASSPHRASE2" ]; do
+        PASSPHRASE1="$(DisplayQuestion "Signature" "Enter your encryption passphrase (1/2)")"
+        if [ -z "$PASSPHRASE1" ]; then
+          $VERBOSE DisplayWarning "Empty passphrase" "Abort encryption!"
+          unset EN_AUTODETECT
+          unset EN_ENCRYPT
+          return
+        fi
+        PASSPHRASE2="$(DisplayQuestion "Signature" "Repeat your encryption passphrase (2/2)")"
+      done
+      PASSPHRASE="$PASSPHRASE1"
+    fi
+
+    echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE ${PASSPHRASE:+--passphrase-fd 0} --symmetric -o "$OUTPUT" "$INPUT"
+
   else
+
+    $VERBOSE echo "Asymmetric encryption"
+
+    if [ -n "$EN_BATCH_RUN" ] && [ -z "$RECIPIENT" ]; then
+      RECIPIENT="$(GetRecipient)"
+      if [ -z "$RECIPIENT" ]; then
+        $VERBOSE DisplayWarning "No key" "Abort encryption!"
+        unset EN_AUTODETECT
+        unset EN_ENCRYPT
+        return
+      fi
+    fi
+
     $VERBOSE echo "Recipient $RECIPIENT"
-    $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient --recipient "$RECIPIENT" --trust-model always --encrypt -o "$OUTPUT" "$INPUT"
+    $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient ${RECIPIENT:+--recipient "$RECIPIENT"} --trust-model always --encrypt ${EN_SIGN:+--sign} -o "$OUTPUT" "$INPUT"
   fi
 
   # One more file!
@@ -245,20 +258,15 @@ for SRC; do
   for FILE in $(find "$SRC" ! -type d); do
     if [ -n "$EN_AUTODETECT" ]; then
       if echo "$FILE" | grep -E "\.(gpg|pgp)$" >/dev/null 2>&1; then
-        if [ -n "$EN_DECRYPT" ]; then
-          Decrypt "$FILE" >"$STDOUT" 2>&1
-        fi
+        unset EN_ENCRYPT # cancel encryption
       else
-        if [ -n "$EN_ENCRYPT" ]; then
-          Encrypt "$FILE" >"$STDOUT" 2>&1
-        fi
+        unset EN_DECRYPT # cancel decryption
       fi
-    else
-      if [ -n "$EN_DECRYPT" ]; then
-        Decrypt "$FILE" >"$STDOUT" 2>&1
-      elif [ -n "$EN_ENCRYPT" ]; then
-        Encrypt "$FILE" >"$STDOUT" 2>&1
-      fi
+    fi
+    if [ -n "$EN_DECRYPT" ]; then
+      Decrypt "$FILE" >"$STDOUT" 2>&1
+    elif [ -n "$EN_ENCRYPT" ]; then
+      Encrypt "$FILE" >"$STDOUT" 2>&1
     fi
   done
 done
