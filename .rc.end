@@ -38,6 +38,9 @@ test_locales() {
 path_append /usr/local/bin /usr/local/sbin /usr/bin /usr/sbin /bin /sbin
 path_cleanup
 
+# Remove some aliases/fct shortcuts
+cmd_unset which find grep awk sed xargs cut
+
 ################################
 # Load plugins
 # https://github.com/junegunn/fzf
@@ -57,16 +60,12 @@ fi
 # https://github.com/BurntSushi/ripgrep
 
 ################################
-# Remove some aliases/fct shortcuts
-cmd_unset which find grep awk sed xargs cut
-
-# Renew shell hashes
-hash -r
-
-################################
 # Disable TTY Software Flow Control (XON/XOFF flow control)
 # https://unix.stackexchange.com/questions/72086/ctrl-s-hangs-the-terminal-emulator
 stty -ixon
+
+# Renew shell hashes
+hash -r
 
 # Default prompt
 if [ ${#PS1} -lt 5 ]; then
@@ -77,8 +76,19 @@ fi
 export vblank_mode=0
 export __GL_SYNC_TO_VBLANK=0
 
-################################
+# Disable console beep
+#command -v xset >/dev/null 2>&1 && pidof X >/dev/null && timeout 2s xset b off 2>/dev/null # From X11 window system
+command -v xset >/dev/null 2>&1 && timeout 2s xset b off 2>/dev/null # From X11 window system
+command -v setterm >/dev/null 2>&1 && setterm -blength 0 2>/dev/null # From the system console
 
+# Bash special settings
+if [ -n "$BASH_VERSION" ]; then
+  # Do not quote $XXX during tab-completion
+  # https://askubuntu.com/questions/70750/how-to-get-bash-to-stop-escaping-during-tab-completion
+  shopt -s direxpand
+fi
+
+################################
 # User anacron
 if command -v anacron >/dev/null 2>&1; then
   if [ -r "${HOME}/.anacron/etc/anacrontab" ]; then
@@ -89,11 +99,6 @@ fi
 
 # Gnome keyring/GPG/SSH agents
 #command -v start_agent >/dev/null 2>&1 && start_agent && ssh_agent_no_forward
-
-# Disable console beep
-#command -v xset >/dev/null 2>&1 && pidof X >/dev/null && timeout 2s xset b off 2>/dev/null # From X11 window system
-command -v xset >/dev/null 2>&1 && timeout 2s xset b off 2>/dev/null # From X11 window system
-command -v setterm >/dev/null 2>&1 && setterm -blength 0 2>/dev/null # From the system console
 
 # Protect private directories
 [ -e "$HOME/private" ] && chmod 700 "$HOME/private"
