@@ -243,7 +243,7 @@ annex_remotes() {
 annex_dead() {
   local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
   git show git-annex:trust.log 2>/dev/null |
-    awk -v uuids="${UUIDS:-^$}" '$1 ~ uuids && $2 ~ /X/ {print $1}' |
+    awk -v uuids="${UUIDS:-^$}" '$1 ~ uuids && done[$1] == "" { if ($2 ~ /X/) {print $1}; done[$1]=1 }' |
     xargs -rn1 | sort -u | xargs -r
 }
 annex_notdead() {
@@ -350,10 +350,11 @@ annex_getinfo() {
 
 # Lookup keys of a single special remote
 annex_lookup_special_remote() {
+  local UUID="${1:?No UUID specified...}"
+  shift 1
   # Preambles
   git_exists || return 1
   annex_std || return 2
-  local UUID="${1:?No UUID specified...}"
   annex_isuuid "$UUID" || return 3
   annex_isspecial "$UUID" || return 4
   # Bash lookup_key
@@ -451,7 +452,6 @@ annex_lookup_special_remote() {
   [ -z "$CIPHER" -a "$ENCRYPTION" != "none" ] && { echo >&2 "UUID '$UUID' cipher not found..."; return 10; }
   [ -z "$REMOTE" ] && { echo >&2 "UUID '$UUID' remote name not found..."; return 10; }
   [ -z "$MAC" ] && MAC=HMACSHA1
-  shift 1
   # Main processing
   echo "## Uuid $UUID"
   echo "## Remote $REMOTE"
@@ -473,7 +473,7 @@ annex_lookup_special_remote() {
 annex_lookup_special_remotes() {
   local RET=0
   for UUID in $(annex_notdead $(annex_special "$@")); do
-    annex_lookup_special_remote "$UUID" 2>&1 || RET=2
+    annex_lookup_special_remote "$UUID" $(eval echo $FINDOPTS) 2>&1 || RET=2
   done
   return $RET
 }
@@ -503,7 +503,7 @@ _annex_archive() {
     fi
     if [ ! -z "$GPG_RECIPIENT" ]; then
       gpg -v --output "${OUT}.gpg" --encrypt --trust-model always --recipient "$GPG_RECIPIENT" "${OUT}" &&
-        _git_secure_delete "${OUT}"
+        git_secure_delete "${OUT}"
     fi
     ls -l "${OUT}"*
   )
@@ -513,8 +513,9 @@ _annex_archive() {
 _annex_bundle() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.tar}.tar.xz"
-  local OWNER="${1:-$USER}"
-  local XZOPTS="${2:--9}"
+  local FINDOPTS="${1:---include='*'}" # Passed as named parameter
+  local OWNER="${2:-$USER}"
+  local XZOPTS="${3:--9}"
   if annex_bare; then
     if [ -d "$(git_dir)/annex" ]; then
       echo "Skip empty bundle..."
@@ -523,11 +524,12 @@ _annex_bundle() {
     tar c -h -O --exclude='*/creds/*' -- "$(git_dir)/annex" |
       xz -z -c --verbose ${XZOPTS} - > "${OUT}"
   else
+    # Skip empty bundle
     if [ $(git annex find 2>/dev/null | wc -l) -eq 0 ]; then
       echo "Skip empty bundle..."
       return 1
     fi
-    git annex find --print0 | 
+    git annex find $(eval echo $FINDOPTS) --print0 | 
       xargs -r0 tar c -h -O --exclude-vcs -- |
         xz -z -c --verbose ${XZOPTS} - > "${OUT}"
   fi
@@ -535,20 +537,21 @@ _annex_bundle() {
   return 0
 }
 annex_bundle() {
-  _annex_archive "annex.bundle.tar.xz" "$1" "$2" "$3" "_annex_bundle" "$4" "$5"
+  _annex_archive "annex.bundle.tar.xz" "$1" "$2" "$3" "_annex_bundle" "$4" "$5" "$6"
 }
 
 # Annex enumeration
 _annex_enum() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
-  local OWNER="${1:-$USER}"
-  local XZOPTS="${2:--9}"
+  local FINDOPTS="${1:---include='*'}" # Passed as named parameter
+  local OWNER="${2:-$USER}"
+  local XZOPTS="${3:--9}"
   if annex_bare; then
     echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
     return 2
   else
-    git annex find --include '*' --print0 | xargs -r0 -n1 sh -c '
+    git annex find $(eval echo $FINDOPTS) --print0 | xargs -r0 -n1 sh -c '
       FILE="$1"
       #printf "\"%s\" \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex"
       readlink -- "$FILE" | base64 -w 0
@@ -556,44 +559,61 @@ _annex_enum() {
       echo "$FILE" | base64 -w 0
       echo
     ' _ > "${OUT%%.txt.xz}.txt"
-    test -s "${OUT%%.txt.xz}.txt" || { rm "${OUT%%.txt.xz}.txt" 2>/dev/null; return 2; }
+    # Skip empty bundle
+    if ! test -s "${OUT%%.txt.xz}.txt"; then
+      echo "Skip empty bundle..."
+      rm "${OUT%%.txt.xz}.txt" 2>/dev/null
+      return 2
+    fi
     xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.txt.xz}.txt" &&
-      _git_secure_delete "${OUT%%.txt.xz}.txt"
+      git_secure_delete "${OUT%%.txt.xz}.txt"
   fi
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
   return 0
 }
 annex_enum() {
-  _annex_archive "annex.enum_local.txt.xz" "$1" "$2" "$3" "_annex_enum" "$4" "$5"
+  _annex_archive "annex.enum_local.txt.xz" "$1" "$2" "$3" "_annex_enum" "$4" "$5" "$6"
 }
 
 # Store annex infos
 _annex_info() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
-  local OWNER="${1:-$USER}"
-  local XZOPTS="${2:--9}"
+  local FINDOPTS="${1:---include='*'}" # Passed as named parameter
+  local OWNER="${2:-$USER}"
+  local XZOPTS="${3:--9}"
   annex_getinfo > "${OUT%%.xz}"
-  test -s "${OUT%%.xz}" || { rm "${OUT%%.xz}" 2>/dev/null; return 2; }
+  # Skip empty bundle
+  if ! test -s "${OUT%%.txt.xz}.txt"; then
+    echo "Skip empty bundle..."
+    rm "${OUT%%.txt.xz}.txt" 2>/dev/null
+    return 2
+  fi
   xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.xz}" &&
-    _git_secure_delete "${OUT%%.xz}"
+    git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
   return 0
 }
 annex_info(){
-  _annex_archive "annex.info.txt.xz" "$1" "$2" "$3" "_annex_info" "$4" "$5"
+  _annex_archive "annex.info.txt.xz" "$1" "$2" "$3" "_annex_info" "$4" "$5" "$6"
 }
 
 # Enum special remotes
 _annex_enum_special_remotes() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
-  local OWNER="${1:-$USER}"
-  local XZOPTS="${2:--9}"
+  local FINDOPTS="${1:---include='*'}" # Passed as named parameter
+  local OWNER="${2:-$USER}"
+  local XZOPTS="${3:--9}"
   annex_lookup_special_remotes > "${OUT%%.xz}"
-  test -s "${OUT%%.xz}" || { rm "${OUT%%.xz}" 2>/dev/null; return 2; }
+  # Skip empty bundle
+  if ! test -s "${OUT%%.txt.xz}.txt"; then
+    echo "Skip empty bundle..."
+    rm "${OUT%%.txt.xz}.txt" 2>/dev/null
+    return 2
+  fi
   xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.xz}" &&
-    _git_secure_delete "${OUT%%.xz}"
+    git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
   return 0
 }
@@ -602,7 +622,7 @@ annex_enum_special_remotes() {
     echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
     return 1
   else
-    _annex_archive "annex.enum_special_remotes.txt.xz" "$1" "$2" "$3" "_annex_enum_special_remotes" "$4" "$5"
+    _annex_archive "annex.enum_special_remotes.txt.xz" "$1" "$2" "$3" "_annex_enum_special_remotes" "$4" "$5" "$6"
   fi
 }
 

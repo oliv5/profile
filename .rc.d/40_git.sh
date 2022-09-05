@@ -524,15 +524,16 @@ git_push_enable() {
 
 ########################################
 
+# Secure file deletion
+git_secure_delete() {
+  echo "Remove file '$1'"
+  { command -v shred >/dev/null && shred -fu "$1"; } ||
+  { command -v wipe >/dev/null && wipe -f -- "$1"; } ||
+  rm -- "$1"
+}
+
 # Create a bundle
 git_bundle() {
-  # Secure file deletion
-  _git_secure_delete() {
-    echo "Remove file '$1'"
-    { command -v shred >/dev/null && shred -fu "$1"; } ||
-    { command -v wipe >/dev/null && wipe -f -- "$1"; } ||
-    rm -- "$1"
-  }
   # Main
   (
   local -; set -e
@@ -563,13 +564,13 @@ git_bundle() {
   fi
   echo "Compress into $OUT"
   xz -k -z -S .xz --verbose $XZOPTS "$OUT" &&
-    _git_secure_delete "$OUT"
+    git_secure_delete "$OUT"
   OUT="${OUT}.xz"
   chown "$OWNER" "$OUT"
   if [ -n "$GPG_RECIPIENT" ]; then
     echo "Encrypt bundle into '${OUT}.gpg'"
     gpg -v --output "${OUT}.gpg" --encrypt --trust-model always --recipient "$GPG_RECIPIENT" "${OUT}" &&
-      _git_secure_delete "${OUT}"
+      git_secure_delete "${OUT}"
     OUT="${OUT}.gpg"
     chown "$OWNER" "$OUT"
   fi
