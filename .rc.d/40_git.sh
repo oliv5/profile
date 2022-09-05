@@ -544,16 +544,16 @@ git_bundle() {
   local OUT="${1:-$(git_user_dir)/bundle/${NAME}}"
   [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/${NAME}"
   OUT="${OUT%%.xz}"; OUT="${OUT%%.git}.git"
-  if ! mkdir -p "$(dirname "$OUT")"; then
-    echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
-    return 2
-  fi
   local OUTBASE="$OUT"
   local GPG_RECIPIENT="$2"
   local PAR2_RECOVERY="$3"
   local OWNER="${4:-$USER}"
   local XZOPTS="$5"
   shift $(($# > 7 ? 7 : $#))
+  if ! mkdir -p "$(dirname "$OUT")"; then
+    echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
+    return 2
+  fi
   echo "Bundle into $OUT"
   git fetch --all || true
   # --all should be equivalent to --branches --tags --remotes

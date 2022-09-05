@@ -1,4 +1,5 @@
 #!/bin/sh
+# For reference: bash madness https://unix.stackexchange.com/questions/210158/how-can-i-list-bashs-options-for-the-current-shell#210161
 
 # Quote all shell parameters
 arg_quote() {
