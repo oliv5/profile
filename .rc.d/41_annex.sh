@@ -489,9 +489,10 @@ _annex_archive() {
     OUT="$DIR/${NAME}.${OUT%%.*}.${OUT#*.}"
     local OUTBASE="$OUT"
     local GPG_RECIPIENT="$3"
-    local OWNER="${4:-$USER}"
-    local XZOPTS="${5:--9}"
-    shift 5
+    local FINDOPTS="${4:---include='*'}" # Passed as named parameter
+    local OWNER="${5:-$USER}"
+    local XZOPTS="${6:--9}"
+    shift 6
     if ! mkdir -p "$(dirname "$OUT")"; then
       echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
       return 2
@@ -522,7 +523,6 @@ _annex_archive() {
 _annex_bundle() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.tar}.tar"
-  local FINDOPTS="${1:---include='*'}" # Passed as named parameter
   if annex_bare; then
     if [ -d "$(git_dir)/annex" ]; then
       echo "Skip empty bundle..."
@@ -542,14 +542,13 @@ _annex_bundle() {
   return 0
 }
 annex_bundle() {
-  _annex_archive "annex.bundle.tar" "$1" "$2" "$3" "$4" "_annex_bundle" "$5" "$6"
+  _annex_archive "annex.bundle.tar" "$1" "$2" "$3" "$4" "$5" "_annex_bundle"
 }
 
 # Annex enumeration
 _annex_enum() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.txt}.txt"
-  local FINDOPTS="${1:---include='*'}" # Passed as named parameter
   if annex_bare; then
     echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
     return 2
@@ -572,14 +571,13 @@ _annex_enum() {
   return 0
 }
 annex_enum() {
-  _annex_archive "annex.enum_local.txt" "$1" "$2" "$3" "$4" "_annex_enum" "$5" "$6"
+  _annex_archive "annex.enum_local.txt" "$1" "$2" "$3" "$4" "$5" "_annex_enum"
 }
 
 # Store annex infos
 _annex_info() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.txt}.txt"
-  local FINDOPTS="${1:---include='*'}" # Passed as named parameter
   annex_getinfo > "$OUT"
   # Skip empty bundle
   if ! test -s "$OUT"; then
@@ -590,14 +588,13 @@ _annex_info() {
   return 0
 }
 annex_info(){
-  _annex_archive "annex.info.txt" "$1" "$2" "$3" "$4" "_annex_info" "$5" "$6"
+  _annex_archive "annex.info.txt" "$1" "$2" "$3" "$4" "$5" "_annex_info"
 }
 
 # Enum special remotes
 _annex_enum_special_remotes() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.txt}.txt"
-  local FINDOPTS="${1:---include='*'}" # Passed as named parameter
   annex_lookup_special_remotes > "$OUT"
   # Skip empty bundle
   if ! test -s "$OUT"; then
@@ -612,7 +609,7 @@ annex_enum_special_remotes() {
     echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
     return 1
   else
-    _annex_archive "annex.enum_special_remotes.txt" "$1" "$2" "$3" "$4" "_annex_enum_special_remotes" "$5" "$6"
+    _annex_archive "annex.enum_special_remotes.txt" "$1" "$2" "$3" "$4" "$5" "_annex_enum_special_remotes"
   fi
 }
 
