@@ -142,7 +142,7 @@ mount_ecryptfs_simple() {
   local CIPHER="${5:-aes}"
   local KEYLEN="${6:-32}"
   shift $(($# < 6 ? $# : 6))
-  local OPT="ecryptfs_cipher=$CIPHER,ecryptfs_key_bytes=$KEYLEN,ecryptfs_sig=$KEY1,ecryptfs_fnek_sig=$KEY2,ecryptfs_unlink_sigs,ecryptfs_passthrough=no${@:+,$@}"
+  local OPT="ecryptfs_cipher=$CIPHER,ecryptfs_key_bytes=$KEYLEN,ecryptfs_sig=$KEY1,ecryptfs_fnek_sig=$KEY2,ecryptfs_unlink_sigs,ecryptfs_passthrough=no,key=passphrase${@:+,$@}"
   if [ "$SRC" = "$DST" ]; then
     echo "ERROR: same source and destination directories."
     return 1
