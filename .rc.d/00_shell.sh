@@ -223,8 +223,12 @@ var_has() {
 # Create a named fifo/pipe
 crpipe() {
   local PIPE="${1:-$(mktemp -u)}"
-  mkfifo -m 600 "$PIPE" &&
+  if [ -p "$PIPE" ]; then
     echo "$PIPE"
+  else
+    mkfifo -m 600 "$PIPE" &&
+      echo "$PIPE"
+  fi
 }
 
 # Wait data from pipe and discard it
@@ -344,7 +348,7 @@ msg_send() {
   local MSG="$1"
   local TIMEOUT="${2:-0}"
   local PIPE="${3:-$(dirname $(mktemp -u))/msg}"
-  crpipe "$PIPE" >/dev/null 2>&1
+  crpipe "$PIPE" >/dev/null 2>&1 || return 1
   timeout "$TIMEOUT" sh -c '
     echo "$1" > "$2"
   ' _ "$MSG" "$PIPE"
@@ -357,10 +361,10 @@ msg_wait() {
   local TIMEOUT="${2:-0}"
   local PIPE="${3:-$(dirname $(mktemp -u))/msg}"
   local KEEP="$4"
-  crpipe "$PIPE" >/dev/null 2>&1
+  crpipe "$PIPE" >/dev/null 2>&1 || return 1
   timeout "$TIMEOUT" sh -c '
     while read M < "$2"; do
-      [ -z "$1" ] || [ "$1" = "$M" ] && break
+      [ -z "$1" ] || [ "$1" = "$M" ] && exit 0
     done
   ' _ "$MSG" "$PIPE"
   local RET=$?
@@ -368,10 +372,50 @@ msg_wait() {
   return $RET
 }
 
-# Handshake
+################################
+# Handshake procedures
+
+# Handshake between 2 peers
 handshake() {
-  msg_wait "$1" 1 "$3" 1 ||
-    msg_send "$@"
+  local PIPE="$(crpipe "${1:-$(dirname $(mktemp -u))/pipe}")" || return 1
+  local TIMEOUT="${2:-0}"
+  timeout 0.1 sh -c "cat </dev/null >\"$PIPE\""
+  timeout --foreground "$TIMEOUT" sh -c "cat >/dev/null <\"$PIPE\""
+  timeout 0.1 sh -c "cat </dev/null >\"$PIPE\""
+}
+
+handshakeN() {
+  local MAX="${1:-1}"
+  local PIPE="${2:-$(dirname $(mktemp -u))/pipe}"
+  local TIMEOUT="${3:-0}"
+  local NUM=$(($(ps -e | grep timeout | wc -l) + 1))
+  if [ $NUM -lt $MAX ]; then
+    handshake "${PIPE}${NUM}"
+    handshake "${PIPE}$(($NUM + 1))"
+  else
+    handshake "${PIPE}1"
+    handshake "${PIPE}${MAX}"
+  fi
+}
+
+################################
+# Execute a cmd, block until stdin sees a specified regex, then execute an optional command in the background
+expected() {
+  local REGEX="$1"
+  local CMD1="${2:-:}"
+  local CMD2="${3:-:}"
+  local LOOP="$4"
+  local TIMEOUT="${5:--1}"
+  expect - <<EOF
+    set timeout $TIMEOUT
+    spawn sh -c "$CMD1; read _"
+    expect {
+        -re "$REGEX" {
+          if { "$CMD2" != ":" } { exec sh -c "$CMD2" }
+          if { "$LOOP" != "" } { exp_continue }
+        }
+    }
+EOF
 }
 
 ################################
@@ -515,7 +559,8 @@ shell_flock_release() {
 
 ################################
 # Return shell option string
-# Restore with eval
+# Save: MYVAR="$(shell_getopts)"
+# Restore: eval "$MYVAR" # quotes are important
 shell_getopts() {
   set +o
   shopt -p 2>/dev/null
