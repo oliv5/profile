@@ -43,7 +43,7 @@ rc_source() {
     for FILE; do
       [ -r "$FILE" ] || continue
       local MINIFIED="${FILE%.*}.min"
-      if [ -z "$BASH_VERSION" ] && head -c 40 "$FILE" | grep "bash" >/dev/null 2>&1; then
+      if [ -z "$BASH_VERSION" ] && head -c 40 "$FILE" | grep "/bin/bash" >/dev/null 2>&1; then
         rc_log "Skip bash file $FILE"
         continue
       fi
