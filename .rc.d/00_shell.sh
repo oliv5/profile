@@ -376,6 +376,7 @@ msg_wait() {
 # Handshake procedures
 
 # Handshake between 2 peers
+# Known issue: the timeouts must be large enough for the shell and its scripts to be spawn
 handshake() {
   local PIPE="$(crpipe "${1:-$(dirname $(mktemp -u))/pipe}")" || return 1
   local TIMEOUT="${2:-0}"
@@ -384,6 +385,7 @@ handshake() {
   timeout 0.1 sh -c "cat </dev/null >\"$PIPE\""
 }
 
+# Handshakes between N peers, 1 to 1
 handshakeN() {
   local MAX="${1:-1}"
   local PIPE="${2:-$(dirname $(mktemp -u))/pipe}"
