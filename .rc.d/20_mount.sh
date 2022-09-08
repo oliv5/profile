@@ -91,7 +91,6 @@ mount_ecryptfs_root() {
   else
     sudo mount -t ecryptfs -o "$OPT" "$SRC" "$DST"
   fi
-  chmod 500 "$SRC"
   chmod 700 "$DST"
 }
 umount_ecryptfs_root() {
@@ -120,7 +119,6 @@ mount_ecryptfs_user() {
   echo "$KEY1" > "$SIG"
   echo "$KEY2" >> "$SIG"
   mount.ecryptfs_private "$CONFNAME"
-  chmod 500 "$HOME/.ecryptfs"
   chmod 700 "$DST"
 }
 umount_ecryptfs_user() {
@@ -149,11 +147,12 @@ mount_ecryptfs_simple() {
   fi
   chmod 700 "$SRC"
   ecryptfs-simple -o "$OPT" "$SRC" "$DST"
-  chmod 500 "$SRC"
   chmod 700 "$DST"
 }
 umount_ecryptfs_simple() {
-  ecryptfs-simple -uk "${1:?Missing mounted directory...}"
+  local SRC="${1:?Missing mounted directory...}"
+  chmod 700 "$SRC"
+  ecryptfs-simple -uk "$SRC"
 }
 
 ############
