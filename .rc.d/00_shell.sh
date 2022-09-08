@@ -407,19 +407,29 @@ handshakes() {
 ################################
 # Execute a cmd, block until stdin sees a specified regex, then execute an optional command in the background
 expected() {
-  local REGEX="$1"
-  local CMD1="$2"
-  local CMD2="$3"
-  local LOOP="$4"
-  local TIMEOUT="${5:--1}"
+  local CMD="$1"
+  local REGEX1="$2"
+  local CMD1="$3"
+  local REGEX2="$4"
+  local CMD2="$5"
+  local REGEX3="$6"
+  local CMD3="$7"
+  local REGEX4="$8"
+  local CMD4="$9"
+  local LOOP="${10:-1}"
+  local TIMEOUT="${11:--1}"
+  local NOP1; [ -z "$REGEX1" ] && NOP1="#" || NOP1=""
+  local NOP2; [ -z "$REGEX2" ] && NOP2="#" || NOP2=""
+  local NOP3; [ -z "$REGEX3" ] && NOP3="#" || NOP3=""
+  local NOP4; [ -z "$REGEX4" ] && NOP4="#" || NOP4=""
   expect - <<EOF
     set timeout $TIMEOUT
-    spawn -noecho sh -c ":; $CMD1; read _"
+    spawn -noecho sh -c ":; $CMD; read _"
     expect {
-        -re "$REGEX" {
-          if { [string length "$CMD2"] != 0 } { exec sh -c {:; $CMD2} }
-          if { [string length "$LOOP"] != 0 } { exp_continue }
-        }
+        $NOP1 -re "$REGEX1" { exec sh -c {:; $CMD1}; if { [string length "$LOOP"] != 0 } { exp_continue } }
+        $NOP2 -re "$REGEX2" { exec sh -c {:; $CMD2}; if { [string length "$LOOP"] != 0 } { exp_continue } }
+        $NOP3 -re "$REGEX3" { exec sh -c {:; $CMD3}; if { [string length "$LOOP"] != 0 } { exp_continue } }
+        $NOP4 -re "$REGEX4" { exec sh -c {:; $CMD4}; if { [string length "$LOOP"] != 0 } { exp_continue } }
     }
 EOF
 }
