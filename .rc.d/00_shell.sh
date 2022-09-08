@@ -424,12 +424,12 @@ expected() {
   local NOP4; [ -z "$REGEX4" ] && NOP4="#" || NOP4=""
   expect - <<EOF
     set timeout $TIMEOUT
-    spawn -noecho sh -c ":; $CMD; read _"
+    spawn -noecho sh -c {:; $CMD; read _}
     expect {
-        $NOP1 -re "$REGEX1" { exec sh -c {:; $CMD1}; if { [string length "$LOOP"] != 0 } { exp_continue } }
-        $NOP2 -re "$REGEX2" { exec sh -c {:; $CMD2}; if { [string length "$LOOP"] != 0 } { exp_continue } }
-        $NOP3 -re "$REGEX3" { exec sh -c {:; $CMD3}; if { [string length "$LOOP"] != 0 } { exp_continue } }
-        $NOP4 -re "$REGEX4" { exec sh -c {:; $CMD4}; if { [string length "$LOOP"] != 0 } { exp_continue } }
+        $NOP1 -re {$REGEX1} { exec sh -c {:; $CMD1}; if { [string length {$LOOP}] != 0 } { exp_continue } }
+        $NOP2 -re {$REGEX2} { exec sh -c {:; $CMD2}; if { [string length {$LOOP}] != 0 } { exp_continue } }
+        $NOP3 -re {$REGEX3} { exec sh -c {:; $CMD3}; if { [string length {$LOOP}] != 0 } { exp_continue } }
+        $NOP4 -re {$REGEX4} { exec sh -c {:; $CMD4}; if { [string length {$LOOP}] != 0 } { exp_continue } }
     }
 EOF
 }
