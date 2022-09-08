@@ -383,10 +383,14 @@ handshake() {
   timeout 0.1 sh -c "cat </dev/null >\"$PIPE\""
   timeout --foreground "$TIMEOUT" sh -c "cat >/dev/null <\"$PIPE\""
   timeout 0.1 sh -c "cat </dev/null >\"$PIPE\""
+  return 0
 }
+handshake1() { handshake "$(dirname $(mktemp -u))/pipe1"; }
+handshake2() { handshake "$(dirname $(mktemp -u))/pipe2"; }
+handshake3() { handshake "$(dirname $(mktemp -u))/pipe3"; }
 
 # Handshakes between N peers, 1 to 1
-handshakeN() {
+handshakes() {
   local MAX="${1:-1}"
   local PIPE="${2:-$(dirname $(mktemp -u))/pipe}"
   local TIMEOUT="${3:-0}"
@@ -404,17 +408,17 @@ handshakeN() {
 # Execute a cmd, block until stdin sees a specified regex, then execute an optional command in the background
 expected() {
   local REGEX="$1"
-  local CMD1="${2:-:}"
-  local CMD2="${3:-:}"
+  local CMD1="$2"
+  local CMD2="$3"
   local LOOP="$4"
   local TIMEOUT="${5:--1}"
   expect - <<EOF
     set timeout $TIMEOUT
-    spawn sh -c "$CMD1; read _"
+    spawn -noecho sh -c ":; $CMD1; read _"
     expect {
         -re "$REGEX" {
-          if { "$CMD2" != ":" } { exec sh -c "$CMD2" }
-          if { "$LOOP" != "" } { exp_continue }
+          if { [string length "$CMD2"] != 0 } { exec sh -c {:; $CMD2} }
+          if { [string length "$LOOP"] != 0 } { exp_continue }
         }
     }
 EOF
