@@ -423,13 +423,24 @@ expected() {
   local NOP3; [ -z "$REGEX3" ] && NOP3="#" || NOP3=""
   local NOP4; [ -z "$REGEX4" ] && NOP4="#" || NOP4=""
   expect - <<EOF
+    proc myexec {cmdline cmdid} {
+      global counts
+      set counts(\$cmdid) [expr \$counts(\$cmdid) + 1]
+      if {[regexp "^exec (.*)" \$cmdline all cmd]} {
+        exec sh -c ":; \$cmd"
+      } else {
+        eval "\$cmdline"
+      }
+      return [expr [string length {$LOOP}] != 0 ]
+    }
     set timeout $TIMEOUT
+    array set counts [list cmd0 0 cmd1 0 cmd2 0 cmd3 0]
     spawn -noecho sh -c {:; $CMD}
     expect {
-        $NOP1 -re {$REGEX1} { exec sh -c {:; $CMD1}; if { [string length {$LOOP}] != 0 } { exp_continue } }
-        $NOP2 -re {$REGEX2} { exec sh -c {:; $CMD2}; if { [string length {$LOOP}] != 0 } { exp_continue } }
-        $NOP3 -re {$REGEX3} { exec sh -c {:; $CMD3}; if { [string length {$LOOP}] != 0 } { exp_continue } }
-        $NOP4 -re {$REGEX4} { exec sh -c {:; $CMD4}; if { [string length {$LOOP}] != 0 } { exp_continue } }
+      $NOP1 -re {$REGEX1} { if { [myexec {$CMD1} cmd1] } { exp_continue } }
+      $NOP2 -re {$REGEX2} { if { [myexec {$CMD2} cmd2] } { exp_continue } }
+      $NOP3 -re {$REGEX3} { if { [myexec {$CMD3} cmd3] } { exp_continue } }
+      $NOP4 -re {$REGEX4} { if { [myexec {$CMD4} cmd4] } { exp_continue } }
     }
 EOF
 }
