@@ -1,9 +1,10 @@
 #!/bin/sh
 #https://doc.ubuntu-fr.org/wakeonlan
+#https://www.oueta.com/linux/check-and-enable-wake-on-lan-in-linux/
 
 # List status
 wol_status() {
-    sudo ethtool ${1:-eth0} | egrep "^[[:blank:]]*Wake-on: (g|d)"
+    sudo ethtool ${1:-eth0} | grep "Wake-on:"
 }
 
 # Enable wol
@@ -48,19 +49,38 @@ wol_send() {
     fi
 }
 
-# enable wol persistently
-wol_persistent() {
+# Enable wol persistently
+wol_persistent_init() {
     sudo sh -c 'cat > /etc/init/wol <<EOF
 start on started network
 
 script
-    for interface in \$(cut -d: -f1 /proc/net/dev | tail -n +3); do
+    for ITF; do
         logger -t "wakeonlan init script" enabling wake on lan for \$interface
-        ethtool -s \$interface wol g
+        ethtool -s "\$ITF" wol g
     done
 end script
 EOF
-'
+' _ ${@:-$(cut -d: -f1 /proc/net/dev | tail -n +3 | tr -d ' ')}
+}
+
+wol_persistent_networkmanager() {
+    for CONNECTION; do
+        sudo nmcli connection modify "$CONNECTION" 802-3-ethernet.wake-on-lan magic
+        sudo nmcli connection up "$CONNECTION"
+    done
+}
+
+wol_persistent_rc_local() {
+    for ITF in ${@:-$(cut -d: -f1 /proc/net/dev | tail -n +3 | tr -d ' ')}; do
+        cat >> /etc/rc.local <<EOF
+# Enable wol
+if [ -z "$(ethtool "$ITF" | grep "Wake-on: g")" ]; then
+    ethtool -s "$ITF" wol g
+fi
+true
+EOF
+    done
 }
 
 ########################################
