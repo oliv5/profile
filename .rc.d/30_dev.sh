@@ -143,3 +143,14 @@ uncrust() {
 	local CFG="${XDG_CONFIG_HOME:-$HOME/.config}/uncrustify/${2:-$(uncrustify --version)}.cfg"
 	find "${1:?No source folder specified...}" -type f -regex '.*\.\(c\|h\|cpp\|cc\|hpp\)' -print0 | xargs -r0 -n1 -- uncrustify -c "$CFG" --no-backup -f
 }
+
+# Gcc/clang show definitions
+gcc_show_def() {
+	gcc "$@" -dM -E - < /dev/null
+}
+g++_show_def() {
+	g++ "$@" -dM -E - < /dev/null
+}
+clang__show_def() {
+	clang "$@" -dM -E - < /dev/null
+}
