@@ -184,7 +184,7 @@ git_update_index_all() {
 
 # Find repos and execute commands in them
 git_foreach() {
-  git_find0 | xargs -r0 -- sh -c '
+  git_find0_repo | xargs -r0 -- sh -c '
     CMD="$1"; shift
     for DIR; do
       (export GIT_DIR="$DIR"; echo "$DIR"; eval "${CMD}")
@@ -897,6 +897,20 @@ git_ls_commit() {
   git diff-tree --no-commit-id --name-only -r "${@:-HEAD}"
 }
 
+# List binary files in commit/rev
+# https://stackoverflow.com/questions/30689384/find-all-binary-files-in-git-head
+git_ls_bin() {
+  local REVLIST="$1"
+  [ "$REVLIST" = "all" ] && REVLIST="$(git rev-list --all | xargs)" ||
+  [ "$REVLIST" = "branches" ] && REVLIST="$(git rev-list --branches | xargs)" ||
+  [ "$REVLIST" = "tags" ] && REVLIST="$(git rev-list --tags | xargs)"
+  if [ -z "$REVLIST" ]; then
+    bash -c 'comm -13 <(git grep -Il "" $1 -- | sort -u) <(git grep -al "" $1 -- | sort -u)' _ "$REVLIST" | xargs -r du -hc | sort -h
+  else
+    bash -c 'comm -13 <(git grep -Il "" $1 -- | sort -u) <(git grep -al "" $1 -- | sort -u)' _ "$REVLIST"
+  fi
+}
+
 # Cat a file
 git_cat() {
   #git show ${1:-HEAD}:"$2"
@@ -1095,13 +1109,13 @@ git_gc_purge() {
 # Repack with different memory usage settings
 git_repack_all() {
   if [ -z "$1" ]; then
-    git_find0 | xargs -r0 -I {} -n 1 sh -c "echo \"{}\"; git --git-dir=\"{}\" repack -a -d -l"
+    git ${2:+--git-dir="$2"} repack -a -d -l
   elif [ "$1" = "low" ]; then
-    git_find0 | xargs -r0 -I {} -n 1 sh -c "echo \"{}\"; git --git-dir=\"{}\" repack -a -d -l --threads=1 --window=3 --depth=25 --window-memory=32m --max-pack-size=32m"
+    git ${2:+--git-dir="$2"} repack -a -d -l --threads=1 --window=3 --depth=25 --window-memory=32m --max-pack-size=32m
   elif [ "$1" = "medium" ]; then
-    git_find0 | xargs -r0 -I {} -n 1 sh -c "echo \"{}\"; git --git-dir=\"{}\" repack -a -d -l --threads=2 --window=10 --depth=50 --window-memory=256m --max-pack-size=256m"
+    git ${2:+--git-dir="$2"} repack -a -d -l --threads=2 --window=10 --depth=50 --window-memory=256m --max-pack-size=256m
   elif [ "$1" = "high" ]; then
-    git_find0 | xargs -r0 -I {} -n 1 sh -c "echo \"{}\"; git --git-dir=\"{}\" repack -a -d -l --threads=4 --window=10 --depth=50 --window-memory=1g --max-pack-size=1g"
+    git ${2:+--git-dir="$2"} repack -a -d -l --threads=4 --window=10 --depth=50 --window-memory=1g --max-pack-size=1g
   fi
 }
 
@@ -1224,7 +1238,7 @@ git_log_modified() {
 
 ########################################
 # Find git repo
-git_find0() {
+git_find0_repo() {
   ## Bash only (read -d)
   #ff_git0 "${1:-.}" |
   # while IFS= read -r -d $'\0' DIR; do
@@ -1238,13 +1252,13 @@ git_find0() {
     ' _ {} +
   done
 }
-git_find() {
-  git_find0 "$@" | xargs -r0
+git_find_repo() {
+  git_find0_repo "$@" | xargs -r0
 }
 
 # Find git repo backward
 # Similar to git_worktree but does not stop until it reaches /
-git_findb0() {
+git_findb0_repo() {
   for DIR in "${@:-.}"; do
     DIR="$(readlink -m "$DIR")"
     while [ "$DIR" != "/" ]; do
@@ -1256,17 +1270,15 @@ git_findb0() {
     done
   done
 }
-git_findb() {
-  git_findb0 "$@" | xargs -r0
+git_findb_repo() {
+  git_findb0_repo "$@" | xargs -r0
 }
 
-# Find binary files in repo, from HEAD only
+# Find binary files in history
+# https://stackoverflow.com/questions/27931520/git-find-all-binary-files-in-history
+alias git_history_bin='git_find_bin'
 git_find_bin() {
-  local REVLIST="$1"
-  [ "$REVLIST" = "all" ] && REVLIST="$(git rev-list --all | xargs)"
-  [ "$REVLIST" = "branches" ] && REVLIST="$(git rev-list --branches | xargs)"
-  [ "$REVLIST" = "tags" ] && REVLIST="$(git rev-list --tags | xargs)"
-  bash -c 'comm -13 <(git grep -Il "" $1 | sort -u) <(git grep -al "" $1 | sort -u) | xargs -r du -hc | sort -hr' _ "$REVLIST"
+  git log --all --numstat | grep '^-' | cut -f3 | sed -r 's|(.*)\{(.*) => (.*)\}(.*)|\1\2\4\n\1\3\4|g ; s|(.*) => (.*)|\1\n\2|g ; s|//|/|g' | sort -u
 }
 
 ########################################
