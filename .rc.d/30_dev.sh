@@ -148,7 +148,7 @@ uncrust() {
 gcc_show_def() {
 	gcc "$@" -dM -E - < /dev/null
 }
-g++_show_def() {
+gpp_show_def() {
 	g++ "$@" -dM -E - < /dev/null
 }
 clang__show_def() {
