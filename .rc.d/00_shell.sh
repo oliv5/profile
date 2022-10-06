@@ -436,7 +436,7 @@ expected() {
     }
     set timeout $TIMEOUT
     array set counts [list cmd0 0 cmd1 0 cmd2 0 cmd3 0]
-    trap { exec sh -c ":; $TRAP; true" >/dev/null 2>&1; exit } { SIGINT SIGTERM }
+    trap { exec -keepnewline -ignorestderr -- sh -c ":; $TRAP; true"; exit } { SIGINT SIGTERM }
     spawn -noecho sh -c {:; $CMD}
     expect {
       $NOP1 -re {$REGEX1} { if { [myexec {$CMD1} cmd1] } { exp_continue } }
