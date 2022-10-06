@@ -425,18 +425,24 @@ expected() {
   local NOP4; [ -z "$REGEX4" ] && NOP4="#" || NOP4=""
   expect - <<EOF
     proc myexec {cmdline cmdid} {
+      global pids
       global counts
       set counts(\$cmdid) [expr \$counts(\$cmdid) + 1]
       if {[regexp "^exec (.*)" \$cmdline all cmd]} {
-        exec sh -c ":; \$cmd"
+        append pids [exec -- \$cmd &]
       } else {
         eval "\$cmdline"
       }
       return [expr [string length {$LOOP}] != 0 ]
     }
     set timeout $TIMEOUT
+    set pids {}
     array set counts [list cmd1 0 cmd2 0 cmd3 0 cmd4 0]
-    trap { exec -keepnewline -ignorestderr -- sh -c ":; $TRAP; true"; exit } { SIGINT SIGTERM }
+    trap {
+      exec -keepnewline -ignorestderr -- sh -c ":; set +e; $TRAP; true"
+      foreach pid \$pids { exec -- sh -c ":; set +e; kill -9 \$pid; true" 2>/dev/null }
+      exit
+    } { SIGINT SIGTERM }
     spawn -noecho sh -c {:; $CMD}
     expect {
       $NOP1 -re {$REGEX1} { if { [myexec {$CMD1} cmd1] } { exp_continue } }
