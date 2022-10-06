@@ -435,7 +435,7 @@ expected() {
       return [expr [string length {$LOOP}] != 0 ]
     }
     set timeout $TIMEOUT
-    array set counts [list cmd0 0 cmd1 0 cmd2 0 cmd3 0]
+    array set counts [list cmd1 0 cmd2 0 cmd3 0 cmd4 0]
     trap { exec -keepnewline -ignorestderr -- sh -c ":; $TRAP; true"; exit } { SIGINT SIGTERM }
     spawn -noecho sh -c {:; $CMD}
     expect {
