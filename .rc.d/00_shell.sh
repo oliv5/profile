@@ -408,7 +408,7 @@ handshakes() {
 # Execute a cmd, block until stdin sees a specified regex, then execute an optional command in the background
 expected() {
   local CMD="$1"
-  local TRAP="$2"
+  local TRAP="${2:-true}"
   local REGEX1="$3"
   local CMD1="$4"
   local REGEX2="$5"
