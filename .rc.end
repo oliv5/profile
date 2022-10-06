@@ -158,9 +158,12 @@ if command -v sudo >/dev/null 2>&1; then
 else 
   alias sudo='su root --'
 fi
-if ! command -v gksu >/dev/null && ! command -v gksudo >/dev/null; then
+if ! command -v gksudo >/dev/null; then
   gksudo() { pkexec env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTHORITY" "$@" & }
-  alias gksu='gksudo'
+fi
+if ! command -v gksu >/dev/null; then
+  # https://wiki.ubuntu.com/Wayland/gks
+  gksu() { (trap "xhost -si:localuser:root" INT TERM QUIT EXIT; xhost +si:localuser:root; sudo -H "$@") & }
 fi
 runas() {
   # script -qc makes a script believe stdout is a tty
