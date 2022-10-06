@@ -408,16 +408,17 @@ handshakes() {
 # Execute a cmd, block until stdin sees a specified regex, then execute an optional command in the background
 expected() {
   local CMD="$1"
-  local REGEX1="$2"
-  local CMD1="$3"
-  local REGEX2="$4"
-  local CMD2="$5"
-  local REGEX3="$6"
-  local CMD3="$7"
-  local REGEX4="$8"
-  local CMD4="$9"
-  local LOOP="${10:-1}"
-  local TIMEOUT="${11:--1}"
+  local TRAP="$2"
+  local REGEX1="$3"
+  local CMD1="$4"
+  local REGEX2="$5"
+  local CMD2="$6"
+  local REGEX3="$7"
+  local CMD3="$8"
+  local REGEX4="$9"
+  local CMD4="${10}"
+  local LOOP="${11:-1}"
+  local TIMEOUT="${12:--1}"
   local NOP1; [ -z "$REGEX1" ] && NOP1="#" || NOP1=""
   local NOP2; [ -z "$REGEX2" ] && NOP2="#" || NOP2=""
   local NOP3; [ -z "$REGEX3" ] && NOP3="#" || NOP3=""
@@ -435,6 +436,7 @@ expected() {
     }
     set timeout $TIMEOUT
     array set counts [list cmd0 0 cmd1 0 cmd2 0 cmd3 0]
+    trap { exec sh -c ":; $TRAP; true" >/dev/null 2>&1; exit } { SIGINT SIGTERM }
     spawn -noecho sh -c {:; $CMD}
     expect {
       $NOP1 -re {$REGEX1} { if { [myexec {$CMD1} cmd1] } { exp_continue } }
