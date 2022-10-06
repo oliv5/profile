@@ -1,12 +1,9 @@
 #!/bin/sh
 
 # Basic implementation of cd/back/forward functions
-cda() { command cd "$@"; }
-cdb() { command cd "$OLDPWD"; }
-cdf() { cdb "$@"; }
-
-# Replace cd
-cd() { cda "$@"; }
+cda() { :; } # for compatibility
+cdb() { command cd -; }
+cdf() { command cd -; }
 
 # Clean up all custom mappings
 cdu() { unalias cd cda cdb cdf 2>/dev/null || true; unset -f cd cda cdb cdf 2>/dev/null; }
