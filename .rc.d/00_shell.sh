@@ -600,3 +600,45 @@ shell_getopts() {
   set +o
   shopt -p 2>/dev/null
 }
+
+################################
+# Loop
+loop() {
+  local PAUSE=0
+  if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+    PAUSE=$1
+    shift
+  fi
+  while true; do eval "$@"; sleep $PAUSE; done
+}
+
+# Retry script
+retry() {
+  local RETRY=0
+  local LIMIT=-1
+  local PAUSE=0
+
+  # Trap interrupts
+  trap 'echo Interrupted after $RETRY trials; trap - INT TERM; exit;' INT TERM
+
+  # Init - check if $1 is an integer => retry limit
+  if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+    LIMIT=$1
+    shift
+  fi
+  if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+    PAUSE=$1
+    shift
+  fi
+
+  # Loop
+  false; while [ $? -ne 0 ] && [ $LIMIT -le 0 -o $RETRY -ne $LIMIT ]; do
+    [ $RETRY -gt 0 ] && sleep $PAUSE
+    RETRY=$(($RETRY+1))
+    eval "$@"
+  done
+
+  # Done - untrap and exit
+  trap - INT TERM
+  echo "Ended after $RETRY trial(s)"
+}
