@@ -429,7 +429,7 @@ expected() {
       global counts
       set counts(\$cmdid) [expr \$counts(\$cmdid) + 1]
       if {[regexp "^exec (.*)" \$cmdline all cmd]} {
-        append pids [exec -- \$cmd &]
+        append pids [exec -- sh -c ":; \$cmd" &]
       } else {
         eval "\$cmdline"
       }
