@@ -52,7 +52,7 @@ latex2pdf_modified() {
 alias pdf2booklet='pdfbook --short-edge'
 
 # Search into pdf
-pdf_search() {
+pdf_grep() {
   if command -v pdfgrep >/dev/null 2>&1; then
     pdfgrep -r -n "$@"
   else
