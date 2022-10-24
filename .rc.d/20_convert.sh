@@ -54,7 +54,7 @@ alias pdf2booklet='pdfbook --short-edge'
 # Search into pdf
 pdf_search() {
   if command -v pdfgrep >/dev/null 2>&1; then
-    pdfgrep -n "$@"
+    pdfgrep -r -n "$@"
   else
     local PATTERN="${1:?No pattern specified...}"
     shift
