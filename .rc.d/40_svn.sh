@@ -40,12 +40,6 @@ alias sr='cd "$(svn_root)"'
 # merge aliases
 smm='svn_merge'
 
-# Min fct
-command -v min >/dev/null 2>&1 ||
-min() {
-  echo $(("$1" < "$2" ? "$1" : "$2"))
-}
-
 # Ask user
 svn_askuser() {
   # Warning: don't put a pipe after ask_question or the return code will be modified
@@ -54,9 +48,8 @@ svn_askuser() {
 
 # Build a unique backup directory for this repo
 svn_bckdir() {
-  local DIR="$(readlink -m "$(svn_root)/../${1:-.svnbackup}/$(basename "$(svn_repo)")$(svn_branch)${2:+__$2}")"
+  local DIR="$(readlink -m "$(svn_root)/../${1:-.svnbackup}/$(basename "$(svn_repo)")/$(svn_branch)${2:+__$2}")"
   echo "${DIR}" | sed -e 's/ /_/g'
-  #mkdir -p "${DIR}"
 }
 
 # Build a backup filename for this repo
@@ -117,12 +110,12 @@ svn_rev() {
 
 # Get status file list
 svn_st() {
-  local ARG1="$1"; shift $(min 1 $#)
+  local ARG1="$1"; shift $(($# > 1 ? 1 : $#))
   #svn st "$@" | awk '/'"${ARG1:-^[^ ]}"'/ {$0=substr($0,9); gsub(/\"/,"\\\"",$0); printf "\"%s\"\n", $0}'
   svn st "$@" | grep -E "${ARG1:-^[^ ]}" | cut -c 9- | sed -E 's/^(.*)$/"\1"/'
 }
 svn_stx() {
-  local ARG1="$1"; shift $(min 1 $#)
+  local ARG1="$1"; shift $(($# > 1 ? 1 : $#))
   svn st "$@" | grep -E "${ARG1:-^[^ ]}" | cut -c 9- | tr '\n' '\0'
 }
 
@@ -188,7 +181,7 @@ svn_cl() {
 
 # Commit a changelist
 svn_ci() {
-  local ARG1="$1"; shift $(min 1 $#)
+  local ARG1="$1"; shift $(($# > 1 ? 1 : $#))
   svn ci --cl "${ARG1:?No changelist specified...}" "$@"
 }
 
@@ -228,7 +221,7 @@ svn_revert() {
   # Backup
   svn_export "" "$(svn_bckdir)/$(svn_bckname revert "" $(svn_rev)).7z"
   # Revert local modifications
-  local ARG1="$1"; shift $(min 1 $#)
+  local ARG1="$1"; shift $(($# > 1 ? 1 : $#))
   svn revert -R . ${ARG1:+--cl $ARG1} "$@"
 }
 
@@ -246,7 +239,7 @@ svn_rollback() {
 
 # Cherry-pick
 svn_cherrypick() {
-  local REV="${1:?No revision specified...}"; shift $(min 1 $#)
+  local REV="${1:?No revision specified...}"; shift $(($# > 1 ? 1 : $#))
   svn merge $(__svn_revarg "$REV") "$@"
 }
 
@@ -263,7 +256,7 @@ svn_export() {
     return 1
   fi
   # Shift already red arguments
-  shift $(min 2 $#)
+  shift $(($# > 2 ? 2 : $#))
   # Create archive, if not existing already
   if [ -z "$REV" ]; then
     # Export changes made upon HEAD
@@ -360,27 +353,27 @@ svn_history() {
 
 # Show logs in a range of revisions (-r and -c allowed)
 svn_log() {
-  local ARG1="$1"; shift $(min 1 $#)
+  local ARG1="$1"; shift $(($# > 1 ? 1 : $#))
   svn log $(__svn_revarg "$ARG1") "$@" --verbose
 }
 svn_shortlog() {
   svn_log "$@" | grep -E "^[^ |\.]"
 }
 svn_userlog() {
-  local ARG1="$1"; shift $(min 1 $#)
+  local ARG1="$1"; shift $(($# > 1 ? 1 : $#))
   svn_log "$@" | sed -n "/${ARG1:-$USER}/,/-----$/ p"
 }
 
 # Display content of a file (only -r rev allowed)
 svn_cat () {
-  local ARG1="$1"; shift $(min 1 $#)
+  local ARG1="$1"; shift $(($# > 1 ? 1 : $#))
   svn cat ${ARG1:+-r $ARG1} "$@"
 }
 
 # Display the changes in a file in a range of revisions
 # or list changed files in a range of revisions (-r and -c allowed)
 svn_diff() {
-  local ARG1="$1"; shift $(min 1 $#)
+  local ARG1="$1"; shift $(($# > 1 ? 1 : $#))
   svn diff $(__svn_revarg "$ARG1") "$@"
 }
 svn_diffm()  { svn_diff "$@" --diff-cmd meld; }
@@ -391,7 +384,7 @@ svn_difflx() { svn_diffl "$@" | grep -E "^[^ D]" | cut -c 9- | tr '\n' '\0'; }
 # Only for modified files
 __svn_diffb() {
   local FILE
-  local ARG1="${1:-true}"; local ARG2="${2:-.}"; shift $(min 2 $#)
+  local ARG1="${1:-true}"; local ARG2="${2:-.}"; shift $(($# > 2 ? 2 : $#))
   # Process each file in conflict or in command line
   svn_stx '^(A|M|R|C|\~|\!)' "$@" | while IFS="" read -r -d "" FILE ; do
     # Warning: eval remove one level of quotes
@@ -412,13 +405,13 @@ svn_diffbc() {
 
 # Make an archive based on the file status
 svn_zipst() {
-  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
+  local ARG1="$1"; local ARG2="$2"; shift $(($# > 2 ? 2 : $#))
   svn_stx "${ARG2:-^(A|M|R|\~|\!)}" "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn -xr!. "${ARG1:?No archive file defined}"
 }
 
 # Make an archive based on a diff
 svn_zipdiff() {
-  local ARG1="$1"; shift $(min 1 $#)
+  local ARG1="$1"; shift $(($# > 1 ? 1 : $#))
   local PATCH="diff$(__svn_revarg "$1" "_" "-").patch"
   svn_diff "$@" > "$PATCH"
   svn_difflx "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${ARG1:?No archive file defined}" "$PATCH"
@@ -437,7 +430,7 @@ svn_zipls() {
 
 # Returns the last archive found based on given name
 svn_ziplast() {
-  local ARG1="$1"; shift $(min 1 $#)
+  local ARG1="$1"; shift $(($# > 1 ? 1 : $#))
   svn_zipls "$@" | head -n ${ARG1:-1}
 }
 
@@ -468,10 +461,10 @@ _svn_bundle() {
   [ -z "${ARCHIVE##*/}" ] && ARCHIVE="${ARCHIVE%/*}/${NAME}"
   ARCHIVE="${ARCHIVE%%.txz}.txz"
   shift $(($# >= 3 ? 3 : $#))
-  # Cannot work on modified repos
+  # Check for modified local repo
   if svn_modified; then
-    echo "Some local files are modified..."
-    return 1
+    echo "WARNING: some local files are modified... (enter/ctrl-c)"
+    read _
   fi
   # Check action to run
   if [ "$ACTION" != "checkout" ] && [ "$ACTION" != "export" ]; then
@@ -479,20 +472,22 @@ _svn_bundle() {
     return 2
   fi
   # Check target archive presence
-  local TMPDIR="$(dirname "$ARCHIVE")/$(basename "$ARCHIVE" .txz)"
   if [ -e "$ARCHIVE" ]; then
     echo "File '$ARCHIVE' exists already..."
     return 3
   fi
   # Export / checkout
-  mkdir -p "$TMPDIR" &&
-    svn "$ACTION" "$(svn_url)@$REV" "$TMPDIR" "$@"
+  local TMPDIR="$(dirname "$ARCHIVE")/$(basename "$ARCHIVE" .txz)"
+  if [ "$ACTION" != "export" ]; then
+    mkdir -p "$TMPDIR"
+  fi
+  svn "$ACTION" "$(svn_url)@$REV" "$TMPDIR" "$@"
   XZ_OPT=-e9 tar -cJf "$ARCHIVE" -C "$TMPDIR" . &&
     command chmod -R +wX "$TMPDIR" &&
     command rm -r --one-file-system "$TMPDIR"
   ls -la "$ARCHIVE"
 }
-alias svn_export_files='_svn_bundle export'
+alias svn_export_all='_svn_bundle export'
 alias svn_bundle='_svn_bundle checkout'
 
 
