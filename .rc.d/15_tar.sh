@@ -224,7 +224,7 @@ txza() {
   local ARCHIVE="${1:?No archive to create...}"
   shift
   #tar -cvf - "$@" | xz -c -9 - > "$ARCHIVE"
-  tar -cvJf "$ARCHIVE" "$@"
+  XZ_OPT=-9 tar -cvJf "$ARCHIVE" "$@"
 }
 
 # tar > xz deflate
@@ -259,7 +259,7 @@ txzga(){
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
   #tar -cvf - "$@" | xz -c -9 - | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
-  tar -cvJf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  XZ_OPT=-9 tar -cvJf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
 }
 
 # gpg > xz > tar deflate
