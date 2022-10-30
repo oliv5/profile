@@ -96,18 +96,13 @@ _path_cleanup() {
   command -v awk >/dev/null || return 1
   command -v sed >/dev/null || return 1
   command -v cat >/dev/null || return 1
-  command -v _str_uniq >/dev/null ||
-    str_uniq() {
-      local _IFS="${1:- }"
-      local _OFS="${2}"
-      shift 2
-      printf '%s' "$@" | awk -vRS="$_IFS" -vORS="$_OFS" '!seen[$0]++ {str=str$1ORS} END{sub(ORS"$", "", str); printf "%s\n",str}'
-    }
   local VAR="${1:-PATH}"
   shift
   eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
   export $VAR="$(
-    { str_uniq : : "$(eval echo "\$$VAR")" || cat; } |
+    eval echo "\$$VAR" |
+    sed -r 's|\"||g' |
+    { awk -vRS=: -vORS=: '!seen[$0]++ {str=str$1ORS} END{sub(ORS"$", "", str); printf "%s\n",str}' || cat; } |
     { awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':' || cat; } |
     sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
   trap - EXIT

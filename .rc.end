@@ -37,6 +37,7 @@ test_locales() {
 [ -n "${HOME##*/}" ] && path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/bin/profile" "$HOME/bin/profile/wrappers" "$HOME/go/bin"
 path_append /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin
 path_cleanup
+path_remove_absent
 
 # Remove some aliases/fct shortcuts
 cmd_unset which find grep awk sed xargs cut
