@@ -1,0 +1,19 @@
+# List of environment source scripts
+
+- /etc/profile
+- /etc/profile.d/*
+
+- /etc/environment
+
+- /etc/bash.bashrc
+
+- ~/.profile
+- ~/.bash_profile
+- ~/.bash_login
+- ~/.bashrc
+
+- $BASH_ENV
+
+# Bash startup
+
+See https://zwischenzugs.com/2019/02/27/bash-startup-explained/
