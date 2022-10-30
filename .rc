@@ -21,17 +21,6 @@ rc_source() {
   local RC_ERR=0
 
   ##############
-  # Prerequisites
-  command -v grep >/dev/null || { echo "Grep is missing..." ; return 1; }
-  command -v awk >/dev/null || { echo "Awk is missing..." ; return 1; }
-  command -v sed >/dev/null || { echo "Sed is missing..." ; return 1; }
-  command -v head >/dev/null || { echo "Head is missing..." ; return 1; }
-  command -v cut >/dev/null || { echo "Cut is missing..." ; return 1; }
-  command -v sort >/dev/null || { echo "Sort is missing..." ; return 1; }
-  unset -f grep awk sed head cut sort
-  unalias grep awk sed head cut sort 2>/dev/null
-
-  ##############
   # Log function
   rc_log() {
     eval "echo $@ ${RC_VERBOSE:->/dev/null}"
@@ -90,12 +79,13 @@ rc_source() {
   ##############
   # Process arguments
   local FLAGS OPTIND OPTARG OPTERR=0
-  while getopts 'asvdr:l:' FLAGS; do
+  while getopts 'asvdpr:l:' FLAGS; do
     case "$FLAGS" in
       a) RC_ALL="*";;
       s) RC_VERBOSE=">/dev/null 2>&1";;
       v) RC_VERBOSE=">&1";;
       d) RC_DRYRUN="true";;
+      p) export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";;
       r) export RC_DIR="$OPTARG";;
       l) export RC_DIR_LOCAL="$OPTARG";;
       *) echo >&2 "Usage: .rc [-a] [-v] [-d]"
@@ -109,7 +99,18 @@ rc_source() {
     esac
   done
   shift $(expr $OPTIND - 1)
-  
+
+  ##############
+  # Prerequisites
+  command -v grep >/dev/null || { echo "Grep is missing..." ; return 1; }
+  command -v awk >/dev/null || { echo "Awk is missing..." ; return 1; }
+  command -v sed >/dev/null || { echo "Sed is missing..." ; return 1; }
+  command -v head >/dev/null || { echo "Head is missing..." ; return 1; }
+  command -v cut >/dev/null || { echo "Cut is missing..." ; return 1; }
+  command -v sort >/dev/null || { echo "Sort is missing..." ; return 1; }
+  unset -f grep awk sed head cut sort
+  unalias grep awk sed head cut sort 2>/dev/null
+
   ##############
   # Startup scripts
   if [ $# -eq 0 ]; then
