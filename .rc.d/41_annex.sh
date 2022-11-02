@@ -639,7 +639,8 @@ annex_upload() {
 # $FROM is used to selected the origin repo
 # $DBG is used to print the command on stderr (when not empty)
 # $ALL is used to select all files (when not empty)
-alias annex_transfer='FROM= ALL= _annex_transfer'
+# $WANTGET is used to select all wanted files from repos
+alias annex_transfer='FROM= ALL= WANTGET=1 _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
   local REPOS="${1:-$(annex_enabled)}"
@@ -649,16 +650,20 @@ _annex_transfer() {
   [ $# -le 2 ] && shift $# || shift 2
   [ -z "$REPOS" ] && return 0
   [ -z "$ALL" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--not --in $REPO"; done
+  [ -n "$WANTGET" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--want-get-by=$REPO"; done
   if git_bare; then
     # Bare repositories do not have "git annex find"
     echo "BARE REPOS NOT SUPPORTED YET"
   else
     # Plain git repositories
+    # 0) quick fsck for file location
+    for REPO in $REPOS; do
+      $DBG git annex fsck --fast --from "$REPO"
+    done
     # 1) copy the local files
     for REPO in $REPOS; do
       if annex_isexported "$REPO"; then
         $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
-        $DBG git annex fsck --fast --from "$REPO"
       else
         while ! $DBG git annex copy --to "$REPO" --fast "$@"; do sleep 1; done
       fi
@@ -693,7 +698,6 @@ _annex_transfer() {
             for REPO in $REPOS; do
               if annex_isexported "$REPO"; then
                 $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
-                $DBG git annex fsck --fast --from "$REPO"
               else
                 while ! $DBG git annex copy --to "$REPO" "$@"; do sleep 1; done
               fi
