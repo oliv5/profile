@@ -247,15 +247,15 @@ alias pg='pgrep -fl'
 alias lsofg='lsof | grep -i'
 
 # Du
-unalias duh duh0 duh1 duh2 duhl duhl0 duhl1 duhl2 2>/dev/null || true
+unalias duh duh0 duh1 duh2 duhlx duhlx0 duhlx1 duhlx2 2>/dev/null || true
 duh() { du -h "$@"; }
 duh0() { du -h -d0 "$@"; }
 duh1() { du -h -d1 "$@" | sort -h; }
 duh2() { du -h -d2 "$@" | sort -h; }
-duhl() { du -hL "$@"; }
-duhl0() { du -hL -d0 "$@" | sort -h; }
-duhl1() { du -hL -d1 "$@" | sort -h; }
-duhl2() { du -hL -d2 "$@" | sort -h; }
+duhlx() { du -hLx "$@"; }
+duhlx0() { du -hLx -d0 "$@" | sort -h; }
+duhlx1() { du -hLx -d1 "$@" | sort -h; }
+duhlx2() { du -hLx -d2 "$@" | sort -h; }
 
 # df
 alias dfh='df -h | grep -v /snap/'
