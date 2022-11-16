@@ -651,6 +651,13 @@ _annex_transfer() {
   [ -z "$REPOS" ] && return 0
   [ -z "$ALL" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--not --in $REPO"; done
   [ -n "$WANTGET" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--want-get-by=$REPO"; done
+  echo "REPOS=$REPOS"
+  echo "MAXSIZE=$MAXSIZE"
+  echo "SELECT=$SELECT"
+  echo "FROM=$FROM"
+  echo "ALL=$ALL"
+  echo "WANTGET=$WANTGET"
+  echo "DBG=$DBG"
   if git_bare; then
     # Bare repositories do not have "git annex find"
     echo "BARE REPOS NOT SUPPORTED YET"
@@ -727,6 +734,8 @@ _annex_transfer() {
 # $SKIP_EXISTING is used to skip existing remote files
 # $DELETE is used to delete the missing existing files (1=dry-run, 2=do-it)
 # $RSYNC_OPT is used to specify rsync options
+# $INCLUDE regex is used to include specific paths/files, default is *
+# $EXCLUDE regex is used to exclude specific paths/files
 alias annex_rsync='DELETE= SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
 alias annex_rsyncd='DELETE=2 SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
 alias annex_rsyncds='DELETE=1 SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
@@ -734,12 +743,24 @@ _annex_rsync() {
   annex_exists || return 1
   local DST="${1:?No root repo destination specified...}"
   local MAXSIZE="${2:-1073741824}"
+  local INCLUDE="${INCLUDE:-*}"
+  local EXCLUDE="${EXCLUDE}"
   local SRC="${PWD}"
   local DBG="${DBG:+echo [DBG]}"
   local RSYNC_OPT="${RSYNC_OPT:--v -r -z -s -i --inplace --size-only --progress -K -L -P}"
   [ $# -le 2 ] && shift $# || shift 2
   [ "${SRC%/}" = "${DST%/}" ] && return 2
   [ "${DST%%:*}" = "${DST}" ] && DST="localhost:/${DST}"
+  echo "SRC=$SRC"
+  echo "DST=$DST"
+  echo "MAXSIZE=$MAXSIZE"
+  echo "INCLUDE=$INCLUDE"
+  echo "EXCLUDE=$EXCLUDE"
+  echo "FROM=$FROM"
+  echo "RSYNC_OPT=$RSYNC_OPT"
+  echo "SKIP_EXISTING=$SKIP_EXISTING"
+  echo "DELETE=$DELETE"
+  echo "DBG=$DBG"
   if git_bare; then
     # Bare repositories do not have "git annex find"
     echo "BARE REPOS NOT TESTED YET. Press enter to go on..." && read NOP
@@ -751,7 +772,7 @@ _annex_rsync() {
     done
   else
     # Plain git repositories, list, get, copy and drop the remote files
-    git annex find --include='*' --print0 "${@:-$SRC}" | xargs -0 -r sh -c '
+    git annex find --include=$INCLUDE ${EXCLUDE:+--exclude=$EXCLUDE} --print0 "${@:-$SRC}" | xargs -0 -r sh -c '
       DBG="$1"; MAXSIZE="$2"; SKIP_EXISTING="$3"; RSYNC_OPT="$4"; DST="$5"
       shift 5
       TOTALSIZE=0
@@ -768,7 +789,7 @@ _annex_rsync() {
         SIZE=$(git annex info --bytes "$FILE" | awk "/size:/{print \$2}")
         # List the current file
         if [ $SIZE -gt $MAXSIZE ]; then
-          echo "File \"$FILE\" size ($SIZE) is greater than max size ($MAXSIZE). Skip it..."
+          echo "Warning: file \"$FILE\" size ($SIZE) is greater than max size ($MAXSIZE). Skip it..."
         elif [ -n "$SKIP_EXISTING" ]; then
           # Skip existing files
           DST_SIZE=0
@@ -777,16 +798,18 @@ _annex_rsync() {
             DST_SIZE=$(ssh ${DST_PORT:+-p "$DST_PORT"} "$DST_SERVER" stat -c %s "$DST_FILE" 2>&1) ||
             DST_SIZE=$(stat -c %s "$DST_FILE" 2>&1)
           if [ "$DST_SIZE" = "$SIZE" ]; then
-            echo "Skip identical existing file ${DST_FILE}"
+            ${DBG:-true} "Skip identical file ${FILE}"
           else
             # Enqueue the file
             set -- "$@" "$FILE"
             TOTALSIZE=$(($TOTALSIZE + $SIZE))
+            ${DBG:-true} "Enqueue file ${FILE}"
           fi
         else
           # Enqueue the file
           set -- "$@" "$FILE"
           TOTALSIZE=$(($TOTALSIZE + $SIZE))
+          ${DBG:-true} "Enqueue file ${FILE}"
         fi
         # Check if the transfer limits or last file were reached
         if [ $TOTALSIZE -ge $MAXSIZE -o $NUMFILES -eq 0 ]; then
