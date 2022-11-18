@@ -650,7 +650,9 @@ _annex_transfer() {
   [ $# -le 2 ] && shift $# || shift 2
   [ -z "$REPOS" ] && return 0
   [ -z "$ALL" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--not --in $REPO"; done
-  [ -n "$WANTGET" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--want-get-by=$REPO"; done
+  if [ $(annex_version) -ge $(annex_version 9.0) ]; then
+    [ -n "$WANTGET" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--want-get-by=$REPO"; done
+  fi
   echo "REPOS=$REPOS"
   echo "MAXSIZE=$MAXSIZE"
   echo "SELECT=$SELECT"
