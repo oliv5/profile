@@ -52,6 +52,7 @@ VERSION=1.21
 TYPE="auto"
 DEVICE=""
 TRACKS="longest"
+CHAPTERS=""
 ODIR="."
 ADIR=""
 TITLE=""
@@ -229,11 +230,15 @@ if [ "$TYPE" = "dvd" ]; then
     fi
   fi
 
-  # Select DVD tracks
+  # Select DVD tracks and chapters
   MAINTRACK=$(awk '/Longest track:/ {print $3}' "$DEVINFO")
   if [ -z "$MAINTRACK" ]; then
     echo >&2 "[ripme] Error: cannot get DVD tracks..."
     ExitHandler 1
+  fi
+  if [ "${TRACKS##*:}" != "${TRACKS}" ]; then
+    CHAPTERS="${TRACKS##*:}"
+    TRACKS="${TRACKS%%:*}"
   fi
   if [ "$TRACKS" = "disc" ]; then
     TRACKS=""
@@ -262,7 +267,8 @@ if [ "$TYPE" = "dvd" ]; then
     if [ "$METHOD" = "mplayer" ]; then
 
       # Proceed with the dump
-      $DRYRUN mplayer -quiet -input nodefault-bindings -noconsolecontrols -nolirc ${SPEED:+-dvd-speed $SPEED} ${MPLAYER_LIB}://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} ${MPLAYER_OPT} -dumpstream -dumpfile "$DUMPFILE"
+      MPLAYER_OPT="${MPLAYER_OPT:+$MPLAYER_OPT }-quiet -input nodefault-bindings -noconsolecontrols -nolirc"
+      $DRYRUN mplayer ${MPLAYER_LIB}://${TRACK} ${CHAPTERS:+-chapter $CHAPTERS} ${SPEED:+-dvd-speed $SPEED} ${DEVICE:+-dvd-device "$DEVICE"} ${MPLAYER_OPT} -dumpstream -dumpfile "$DUMPFILE"
 
     elif [ "$METHOD" = "vlc" ]; then
 
