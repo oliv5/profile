@@ -1,23 +1,23 @@
 #!/bin/sh
 # https://wiki.archlinux.org/title/USBGuard
 
-usbguarg_block() {
+usbguard_block() {
     sudo usbguard set-parameter ImplicitPolicyTarget block
 }
 
-usbguarg_allow() {
+usbguard_allow() {
     sudo usbguard set-parameter ImplicitPolicyTarget allow
 }
 
-usbguarg_show() {
+usbguard_show() {
     cat /etc/usbguard/rules.conf
 }
 
-usbguarg_list() {
+usbguard_list() {
     sudo sh -c 'usbguard generate-policy'
 }
 
-usbguarg_record() {
+usbguard_record() {
     sudo sh -c 'usbguard generate-policy > /etc/usbguard/rules.conf'
 }
 
@@ -29,7 +29,7 @@ usbguard_status() {
 usbguard_disable() {
     sudo systemctl start usbguard
     sudo systemctl start usbguard-dbus
-    usbguarg_allow
+    usbguard_allow
     sudo systemctl stop usbguard
     sudo systemctl stop usbguard-dbus
     sudo systemctl disable usbguard
@@ -46,6 +46,4 @@ usbguard_help() {
 }
 
 # Main
-if [ -n "$1" ]; then
-    "usbguard_$@"
-fi
+"usbguard_${@:-help}"
