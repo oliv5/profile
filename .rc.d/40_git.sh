@@ -479,13 +479,12 @@ fi
 # Fast-forward only
 git_pull_all() {
   git_exists || return 1
-  local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
-  local BRANCH="${2:-$(git_branch)}"
+  shift $(($# > 1 ? 1 : $#))
   for REMOTE in $REMOTES; do
     if git_remote_valid "$REMOTE"; then
       echo -n "Pull from $REMOTE: "
-      git_pull --ff-only "$REMOTE" $BRANCH
+      git_pull --ff-only "$REMOTE" "${@:-$(git_branch)}" || break
     fi
   done
 }
@@ -498,14 +497,12 @@ alias git_push='git push'
 alias git_push_all_all='git_push_all "" --all'
 git_push_all() {
   git_exists || return 1
-  local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
-  local BRANCH="${2:-$(git_branch)}"
-  shift $(($# > 2 ? 2 : $#))
+  shift $(($# > 1 ? 1 : $#))
   for REMOTE in $REMOTES; do
     if git_remote_valid "$REMOTE"; then
       echo -n "Push to $REMOTE: "
-      git push "$REMOTE" "$BRANCH" "$@"
+      git push "$REMOTE" "${@:-$(git_branch)}"
     fi
   done
 }
