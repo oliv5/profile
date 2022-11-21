@@ -455,9 +455,9 @@ alias svn_diffzipd='__svn_diffzip _7zdiffd'
 _svn_bundle() {
   svn_exists || return 1
   local ACTION="${1:-checkout}"
-  local REV="${2:-$(svn_rev)}"
+  local REV="${3:-$(svn_rev)}"
   local NAME="$(svn_bckname "svnbundle_$ACTION" "" "$REV").txz"
-  local ARCHIVE="${3:-$(svn_bckdir)/$NAME}"
+  local ARCHIVE="${2:-$(svn_bckdir)/$NAME}"
   [ -z "${ARCHIVE##*/}" ] && ARCHIVE="${ARCHIVE%/*}/${NAME}"
   ARCHIVE="${ARCHIVE%%.txz}.txz"
   shift $(($# >= 3 ? 3 : $#))
