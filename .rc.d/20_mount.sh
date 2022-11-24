@@ -97,6 +97,7 @@ umount_ecryptfs_root() {
   sudo umount -f "${1:?Missing mounted directory...}" ||
     sudo umount -l "${1:?Missing mounted directory...}"
   sudo keyctl clear @u
+  sudo keyctl clear @s
 }
 
 ############
@@ -115,6 +116,7 @@ mount_ecryptfs_user() {
   local SIG="$HOME/.ecryptfs/$CONFNAME.sig"
   chmod 700 "$HOME/.ecryptfs"
   ecryptfs-add-passphrase --fnek
+  keyctl link @u @s
   echo "$SRC $DST ecryptfs" > "$CONF"
   echo "$KEY1" > "$SIG"
   echo "$KEY2" >> "$SIG"
@@ -125,6 +127,7 @@ umount_ecryptfs_user() {
   local CONFNAME="${1:-private}"
   umount.ecryptfs_private "$CONFNAME"
   keyctl clear @u
+  keyctl clear @s
 }
 
 ############
