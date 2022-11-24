@@ -184,7 +184,7 @@ Decrypt(){
   fi
 
   # Delete original file if new one is present
-  if [ ! -z "$DELETE" -a -f "$OUTPUT" ]; then
+  if [ ! -z "$DELETE" -a -f "$OUTPUT" -a "$INPUT" != "$OUTPUT" ]; then
     DeleteFiles "$INPUT"
   fi
 }
@@ -244,7 +244,7 @@ Encrypt() {
   fi
 
   # Delete original file if new one is present
-  if [ ! -z "$DELETE" -a -f "$OUTPUT" ]; then
+  if [ ! -z "$DELETE" -a -f "$OUTPUT" -a "$INPUT" != "$OUTPUT" ]; then
     DeleteFiles "$INPUT"
   fi
 }
