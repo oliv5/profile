@@ -51,7 +51,7 @@ do case "$OPTNAME" in
   o)  OVERWRITE="--yes";;
   u)  EN_BATCH_RUN="";;
   v)  VERBOSE=""; STDOUT="/dev/stdout";;
-  z)  ZENITY="";;
+  z)  ZENITY=""; STDOUT="/dev/stdout";;
   [?]) echo >&2 "Usage: $(basename $0) v$VERSION [-e] [-g] [-d] [-k key] [-p] [-f] [-s] [-v] [-z]  ... directories/files"
        echo >&2 "-e    (e)ncrypt only"
        echo >&2 "-g    si(g)n (with -e only)"
@@ -94,8 +94,10 @@ DisplayWarning() {
 DisplayQuestion() {
   if [ -z "$ZENITY" ]; then
     IFS="$(printf '\n')"
+    stty -echo
     #read -s -t 30 -p "$2 " ANSWER
     read -p "$2 " ANSWER </dev/tty
+    stty echo
     echo $ANSWER
   else
     #echo $(zenity --title "$1" --entry --hide-text --text="$2" --timeout 30 | sed 's/^[ \t]*//;s/[ \t]*$//')
