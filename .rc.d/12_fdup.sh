@@ -7,8 +7,10 @@ alias ff_dup='find_duplicates'
 find_duplicates() {
   local TMP1="$(mktemp)"
   local TMP2="$(mktemp)"
+  local FILETYPES="${FILETYPES:--o -type l}"
+  echo -n > "$TMP1"
   for DIR in "${@:-.}"; do
-    find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum "{}" \; | sed -e 's/^\\//' >> "$TMP1"
+    find "${DIR:-.}" \( -type f $FILETYPES \) -exec md5sum "{}" \; | sed -e 's/^\\//' >> "$TMP1"
   done
   #awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
   sort -k 1 "$TMP1" | cut -d' ' -f 1 | uniq -d > "$TMP2"
@@ -28,11 +30,14 @@ rm_duplicates() {
 }
 
 # Find duplicate files in directory
+alias ff_dup0='find_duplicates0'
 find_duplicates0() {
   local TMP1="$(mktemp)"
   local TMP2="$(mktemp)"
+  local FILETYPES="${FILETYPES:--o -type l}"
+  echo -n > "$TMP1"
   for DIR in "${@:-.}"; do
-    find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum -z "{}" \; >> "$TMP1"
+    find "${DIR:-.}" \( -type f $FILETYPES \) -exec md5sum -z "{}" \; >> "$TMP1"
   done
   sort -z -k 1 "$TMP1" | cut -z -d' ' -f 1 | uniq -z -d | xargs -0 -n1 > "$TMP2"
   while read SUM; do
