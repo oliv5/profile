@@ -2,7 +2,7 @@
 Version=1.0
 Name=Sublime Text 3
 Comment=Sublime Text 3 source editor
-Exec=/bin/sh -c '$HOME/bin/sublime'
+Exec=/bin/sh -c 'exec $HOME/.local/bin/sublime'
 Icon=sublime-text
 Terminal=false
 Type=Application
@@ -11,5 +11,5 @@ Actions=new-window;
 
 [Desktop Action new-window]
 Name=New Window
-Exec=\$HOME/bin/sublime
+Exec=/bin/sh -c 'exec $HOME/.local/bin/sublime'
 OnlyShowIn=Unity;
