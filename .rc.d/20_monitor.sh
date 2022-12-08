@@ -290,25 +290,3 @@ lsof_close(){
   cd /proc/$PID/fd 
   ls -l | grep '(deleted)' | awk '{ print $9 }' | while read FILE; do :> /proc/$PID/fd/$FILE; done
 }
-
-################################
-# Find garbage files
-ff_garbage() {
-  ( set -vx
-    printf "Home garbage\n"
-    find "$HOME" -type f -name "*~" -print
-    ls "${HOME}"/.macromedia/* "${HOME}"/.adobe/*
-    printf "\nSystem coredumps\n"
-    sudo find /var -type f -name "core" -print
-    printf "\nTemporary files\n"
-    sudo ls /tmp
-    sudo ls /var/tmp
-    printf "\nLogs\n"
-    sudo du -a -b /var/log | sort -n -r | head -n 10
-    sudo ls /var/log/*.gz
-    printf "\nOpened but deleted\n"
-    sudo lsof -nP | grep '(deleted)'
-    sudo lsof -nP | awk '/deleted/ { sum+=$8 } END { print sum }'
-    sudo lsof -nP | grep '(deleted)' | awk '{ print $2 }' | sort | uniq
-  )
-}
