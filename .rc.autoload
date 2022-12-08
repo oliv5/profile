@@ -9,6 +9,7 @@
 .rc.d/15_gz.sh
 .rc.d/15_tar.sh
 .rc.d/15_zip.sh
+.rc.d/20_monitor.sh
 .rc.d/40_git.sh
 .rc.d/41_annex.sh
 .rc.d/50_agents.sh
