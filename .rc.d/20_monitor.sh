@@ -37,12 +37,11 @@ show_display_remote() {
 }
 
 ################################
-# Processes
-
 # Grep process IDs
 psgp(){
   ps aux | awk "/$1/ "'{print $2}'
 }
+
 # User processes
 pgu() {
   pgrep -flu "$(id -u ${1:-$USER})"
@@ -52,28 +51,38 @@ psgu() {
   shift
   psu "$USER" | grep -i "$@"
 }
+
 # List of PIDs
+if ! command -v isint >/dev/null; then
+  isint() { expr 1 "*" "$1" + 1 > /dev/null 2>&1; }
+fi
+if ! command -v pidof >/dev/null; then
+  alias pidof='pid'
+fi
 pid() {
   # Use xargs to trim leading spaces
   #[ $# -gt 0 ] && ps -C "$@" -o pid= | xargs
   for ARG; do
-    { isint "$ARG" && ps -C "$ARG" -o pid= || ps -p "$ARG" -o pid=; } | xargs
+    { isint "$ARG" && ps -p "$ARG" -o pid= || ps -C "$ARG" -o pid=; } | xargs
   done
 }
+
 # List of UIDs
 uid() {
   # Use xargs to trim leading spaces
   #[ $# -gt 0 ] && ps -C "$@" -o user= | xargs
   for ARG; do
-    { isint "$ARG" && ps -C "$ARG" -o user= || ps -p "$ARG" -o user=; } | xargs
+    { isint "$ARG" && ps -p "$ARG" -o user= || ps -C "$ARG" -o user=; } | xargs
   done
 }
+
 # List of PPIDs
+alias ppidof='ppid'
 ppid() {
   # Use xargs to trim leading spaces
   #[ $# -gt 0 ] && ps -C "$@" -o ppid= | xargs
   for ARG; do
-    { isint "$ARG" && ps -C "$ARG" -o ppid= || ps -p "$ARG" -o ppid=; } | xargs
+    { isint "$ARG" && ps -p "$ARG" -o ppid= || ps -C "$ARG" -o ppid=; } | xargs
   done
 }
 ppidn() {
@@ -86,12 +95,14 @@ ppidn() {
   done
   echo "$PID"
 }
+
 # List of zombies
 #http://www.noah.org/wiki/Kill_-9_does_not_work
 psz() {
   ps aux | awk '"[ZzDd]" ~ $8'
   #ps Haxwwo stat,pid,ppid,user,wchan:25,command | grep -e "^STAT" -e "^D" -e "^Z"
 }
+
 # Ps process parent
 psp() {
   for ARG; do
