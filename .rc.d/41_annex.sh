@@ -667,10 +667,12 @@ _annex_transfer() {
     # Plain git repositories
     # 0) quick fsck for file location
     for REPO in $REPOS; do
-      $DBG git annex fsck --fast --from "$REPO"
+      echo "Fsck $REPO..."
+      $DBG git annex fsck --fast --from "$REPO" "$@"
     done
     # 1) copy the local files
     for REPO in $REPOS; do
+      echo "Copy local files to $REPO..."
       if annex_isexported "$REPO"; then
         $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
       else
@@ -678,6 +680,7 @@ _annex_transfer() {
       fi
     done
     # 2) get, copy and drop the remote files
+    echo "Get remote files and copy..."
     git annex find --include='*' $SELECT --print0 "$@" | xargs -0 -r sh -c '
       annex_isexported() {
         git show git-annex:remote.log | grep "exporttree=yes.*name=$1" >/dev/null
@@ -723,7 +726,8 @@ _annex_transfer() {
   fi
   # 3) quick fsck for file location
   for REPO in $REPOS; do
-    $DBG git annex fsck --fast --from "$REPO"
+    echo "Fsck $REPO..."
+    $DBG git annex fsck --fast --from "$REPO" "$@"
   done
 }
 
@@ -773,7 +777,14 @@ _annex_rsync() {
       done
     done
   else
-    # Plain git repositories, list, get, copy and drop the remote files
+    # Plain git repositories
+    # 0) quick fsck for file location
+    for REPO in $REPOS; do
+      echo "Fsck $REPO..."
+      $DBG git annex fsck --fast --from "$REPO" "$@"
+    done
+    # 1) list, get, copy and drop the remote files
+    echo "List, get, copy and drop the remote files..."
     git annex find --include=$INCLUDE ${EXCLUDE:+--exclude=$EXCLUDE} --print0 "${@:-$SRC}" | xargs -0 -r sh -c '
       DBG="$1"; MAXSIZE="$2"; SKIP_EXISTING="$3"; RSYNC_OPT="$4"; DST="$5"
       shift 5
