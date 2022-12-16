@@ -559,13 +559,13 @@ git_bundle() {
   else
     git bundle create -q "$OUT" ${@:---all}
   fi
-  echo "Compress into $OUT"
+  echo "Compress into ${OUT}.xz"
   xz -k -z -S .xz --verbose $XZOPTS "$OUT" &&
     git_secure_delete "$OUT"
   OUT="${OUT}.xz"
   chown "$OWNER" "$OUT"
   if [ -n "$GPG_RECIPIENT" ]; then
-    echo "Encrypt bundle into '${OUT}.gpg'"
+    echo "Encrypt bundle into ${OUT}.gpg"
     gpg -v --output "${OUT}.gpg" --encrypt --trust-model always --recipient "$GPG_RECIPIENT" "${OUT}" &&
       git_secure_delete "${OUT}"
     OUT="${OUT}.gpg"
