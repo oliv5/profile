@@ -51,12 +51,8 @@ if command -v fzf >/dev/null 2>&1; then
   fi
   export FZF_DEFAULT_OPTS="--bind=tab:accept"
 fi
-# RPL
-# https://github.com/kcoyner/rpl
-if [ -x "$RC_DIR/bin/profile/rpl/rpl" ] ; then
-  path_append "$RC_DIR/bin/profile/rpl"
-fi
 # Others
+# https://github.com/kcoyner/rpl
 # https://github.com/sharkdp/fd
 # https://github.com/BurntSushi/ripgrep
 
