@@ -51,7 +51,16 @@ if command -v fzf >/dev/null 2>&1; then
   fi
   export FZF_DEFAULT_OPTS="--bind=tab:accept"
 fi
+# https://github.com/RichiH/vcsh
+if command -v vcsh >/dev/null 2>&1; then
+  if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/bin/profile/vcsh/completions/vcsh.bash" ]; then
+    if ! complete -p _vcsh >/dev/null 2>&1; then
+      source "$RC_DIR/bin/profile/vcsh/completions/vcsh.bash"
+    fi
+  fi
+fi
 # Others
+# https://myrepos.branchable.com/
 # https://github.com/kcoyner/rpl
 # https://github.com/sharkdp/fd
 # https://github.com/BurntSushi/ripgrep
