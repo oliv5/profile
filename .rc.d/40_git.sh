@@ -212,6 +212,11 @@ git_branches_head() {
   done | sort -r
 }
 
+# Get default-branch
+git_branch_default() {
+  git ${2:+--git-dir="$2"} remote show "${1:?No remote specified...}" | sed -n '/HEAD/s/.*: //p'
+}
+
 # Get current branch tracking
 alias git_tracking_remote='git_tracking | sed -s "s;/.*;;"'
 alias git_tracking_branch='git_tracking | sed -s "s;.*/;;"'
