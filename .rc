@@ -195,7 +195,6 @@ rc_hook() {
 
 rc_setup_hook() {
   command -v grep >/dev/null || return 1
-  command -v mktemp >/dev/null || return 1
   if [ -n "$BASH_VERSION" ] && [ "${PROMPT_COMMAND%%rc_hook*}" = "${PROMPT_COMMAND}" ]; then
     PROMPT_COMMAND="rc_hook${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
   fi
