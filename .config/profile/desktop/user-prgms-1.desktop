@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=Manual start programs #1
+Name=User programs #1
 Exec=/bin/sh -c 'exec $HOME/.local/bin/manual-start-1.sh'
-Icon=go-first.png
+Icon=go-first
 Terminal=true
 Type=Application
 StartupNotify=true
