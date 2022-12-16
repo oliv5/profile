@@ -46,8 +46,10 @@ cmd_unset which find grep awk sed xargs cut
 # Load plugins
 # https://github.com/junegunn/fzf
 if command -v fzf >/dev/null 2>&1; then
-  if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/bin/profile/fzf/.fzf.bash" ] ; then
-    source "$RC_DIR/bin/profile/fzf/.fzf.bash"
+  if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/bin/profile/fzf/.fzf.bash" ]; then
+    if ! complete -p | grep _fzf_ >/dev/null; then
+      source "$RC_DIR/bin/profile/fzf/.fzf.bash"
+    fi
   fi
   export FZF_DEFAULT_OPTS="--bind=tab:accept"
 fi
