@@ -771,7 +771,7 @@ _annex_rsync() {
     # Bare repositories do not have "git annex find"
     echo "BARE REPOS NOT TESTED YET. Press enter to go on..." && read NOP
     find annex/objects -type f | while read SRCNAME; do
-      annex_fromkey0 "$SRCNAME" | xargs -0 -rn1 echo | while read DSTNAME; do
+      annex_fromkey0_all "$SRCNAME" | xargs -0 -rn1 echo | while read DSTNAME; do
         DST_DIR="$(dirname "${DST##*:}/${DSTNAME}")"
         while ! $DBG rsync -K -L --rsync-path="mkdir -p \"${DST_DIR}\" && rsync" $RSYNC_OPT "${SRC}/${SRCNAME}" "${DST}/${DSTNAME}"; do sleep 1; done
       done
@@ -1151,14 +1151,13 @@ alias annex_du='git annex info --fast'
 
 ########################################
 # Find files from key
-# Note key = file content, so there can be
-# multiple files mapped to a single key
-annex_fromkey0() {
+# A file can have had multiple names
+annex_fromkey0_all() {
   for KEY; do
     KEY="$(basename "$KEY")"
     #git show -999999 -p --no-color --word-diff=porcelain -S "$KEY" | 
     #git log -n 1 -p --no-color --word-diff=porcelain -S "$KEY" |
-    git log -p --all --no-color --word-diff=porcelain -S "$KEY" |
+    git log -p --all --no-color --no-textconv --word-diff=porcelain -S "$KEY" |
       awk '/^(---|\+\+\+) (a|b)/{line=$0} /'$KEY'/{printf "%s\0",substr(line,5); exit 0}' |
       # Remove leading/trailing double quotes, leading "a/", trailing spaces. Escape '%'
       sed -z -e 's/\s*$//' -e 's/^"//' -e 's/"$//' -e 's/^..//' -e 's/%/\%/g' |
@@ -1173,6 +1172,23 @@ annex_fromkey0() {
       #' _ "$KEY"
   done
 }
+annex_fromkey_all() {
+  annex_fromkey0_all "$@" | xargs -r0 -n1
+}
+
+annex_fromkey0() {
+  for KEY; do
+    KEY="$(basename "$KEY")"
+    git log -p --all --no-color --no-textconv --word-diff=porcelain -S "$KEY" |
+      awk '/^(---|\+\+\+) (a|b)/{line=$0} /'$KEY'/{printf "%s\0",substr(line,5); exit 0}' |
+      # Remove leading/trailing double quotes, leading "a/", trailing spaces. Escape '%'
+      sed -z -e 's/\s*$//' -e 's/^"//' -e 's/"$//' -e 's/^..//' -e 's/%/\%/g' |
+      # Limit output to the first one
+      head -z -n 1 |
+      # printf does evaluate octal charaters from UTF8
+      xargs -r0 -I {} -- printf "{}\0"
+  done
+}
 annex_fromkey() {
   annex_fromkey0 "$@" | xargs -r0 -n1
 }
@@ -1180,7 +1196,7 @@ annex_fromkey() {
 # Check if key exists in the annex (use the default backend)
 annex_key_exists() {
   for KEY; do
-    annex_fromkey0 "$KEY" | xargs -r0 git annex find | grep -m 1 -e "." >/dev/null && echo "$KEY"
+    annex_fromkey0_all "$KEY" | xargs -r0 git annex find | grep -m 1 -e "." >/dev/null && echo "$KEY"
   done
 }
 
@@ -1253,7 +1269,7 @@ annex_listunused_by_pattern() {
   for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
   annex_unused | grep -E '^\s+[0-9]+\s' | 
     while IFS=' ' read -r NUM KEY; do
-      annex_fromkey0 "$KEY" |
+      annex_fromkey0_all "$KEY" |
         eval grep --color=never -z "${PATTERNS:-''}" &&
           echo -e "$NUM $KEY" && break
     done
