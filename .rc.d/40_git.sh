@@ -592,16 +592,16 @@ git_incbundle() {
   git_exists || return 1
   local TAGNAME="$(basename "${1:-incbundle.$(uname -n)}")"
   [ $# -ge 1 ] && shift
-  local PREV="$(git_shorthash "${TAGNAME}_last")"
+  local PREV="$(git_shorthash "${TAGNAME}")"
   local NEXT="$(git_shorthash)"
   if [ -n "$PREV" ]; then
     if [ "$PREV" = "$NEXT" ]; then
-      echo "New incremental bundle from ${TAGNAME}_last ($PREV) to HEAD ($NEXT) would be empty. Skip it..."
+      echo "New incremental bundle from ${TAGNAME} ($PREV) to HEAD ($NEXT) would be empty. Skip it..."
       return 0
     else
-      echo "Make incremental bundle from ${TAGNAME}_last ($PREV) to HEAD ($NEXT)"
+      echo "Make incremental bundle from ${TAGNAME} ($PREV) to HEAD ($NEXT)"
       local NAME="${PREV}.${NEXT}.bundle.inc"
-      git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags "${TAGNAME}_last~1.." ||
+      git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags "${TAGNAME}~1.." ||
         return $?
     fi
   else
@@ -610,15 +610,14 @@ git_incbundle() {
     git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags ||
       return $?
   fi
-  # Set tags
-  git tag -f "${TAGNAME}_last" "HEAD"
-  git tag -f "${TAGNAME}_$(date +%Y%m%d-%H%M%S)" "HEAD"
+  # Set tag
+  git tag -f "${TAGNAME}" "HEAD"
 }
 
 # Reset incremental bundles chain; next bundle will be full
 git_incbundle_reset() {
   local TAGNAME="$(basename "${1:-incbundle.$(uname -n)}")"
-  git tag -d "${TAGNAME}_last"
+  git tag -d "${TAGNAME}"
 }
 
 # Git upkeep
@@ -1356,6 +1355,14 @@ else
     git_tag_local_only "$@" | xargs -r git tag -d
   }
 fi
+
+# Get tag date (creation date by default in %s format)
+# https://stackoverflow.com/questions/13208734/get-the-time-and-date-of-git-tags
+git_tag_date() {
+	for TAG in "${@:-}"; do
+		git for-each-ref --format="%(creatordate:format:${TAG_DATE_FORMAT:-%s})" refs/tags/${TAG}
+	done
+}
 
 ########################################
 # Easy amend of previous commit
