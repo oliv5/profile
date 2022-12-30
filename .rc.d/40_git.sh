@@ -1285,7 +1285,7 @@ git_find_bin() {
 ########################################
 # Create a tag
 git_tag_create() {
-  git tag "tag_$(date +%Y%m%d-%H%M%S).$(git_branch)${1:+_$1}"
+  git tag "tag_$(date +%Y%m%d-%H%M%S).${2:-$(git_branch)}${1:+_$1}" ${2:+"$2"}
 }
 
 # Delete a tag totally (local & remotes)
