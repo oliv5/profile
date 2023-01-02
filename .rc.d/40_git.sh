@@ -620,6 +620,19 @@ git_incbundle_reset() {
   git tag -d "${TAGNAME}"
 }
 
+# Recreate all remotes refs from a bundle file
+git_bundle_import_remote_refs() {
+  for BUNDLE; do
+    git bundle list-heads "$BUNDLE" |
+      while read SHA REF; do
+        echo + git update-ref "$REF" "$SHA"
+        git update-ref "$REF" "$SHA"
+      done
+  done
+}
+
+########################################
+
 # Git upkeep
 git_upkeep() {
   local DBG=""
@@ -1338,7 +1351,7 @@ git_tag_local_only() {
 }
 
 # Prune local tags not in remote at all
-if ! [ $(git_version) -gt $(git_version 1.7.8) ]; then
+if [ $(git_version) -gt $(git_version 1.7.8) ]; then
   git_tag_remote_prune() {
     # Confirmation
     git fetch --dry-run --prune "${@:?No remote specified...}" "+refs/tags/*:refs/tags/*"
@@ -1352,7 +1365,7 @@ else
     git_tag_local_only "$@"
     ask_question "Proceed? (y/n) " y Y >/dev/null || return 0
     # Go !
-    git_tag_local_only "$@" | xargs -r git tag -d
+    git_tag_local_only "$@" | sed 's;refs/tags/;;' | xargs -r git tag -d
   }
 fi
 
