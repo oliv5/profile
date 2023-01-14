@@ -676,7 +676,7 @@ _annex_transfer() {
       if annex_isexported "$REPO"; then
         $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
       else
-        while ! $DBG git annex copy --to "$REPO" --fast "$@"; do sleep 1; done
+        $DBG git annex copy --to "$REPO" --fast "$@"
       fi
     done
     # 2) get, copy and drop the remote files
@@ -706,12 +706,12 @@ _annex_transfer() {
         if [ $TOTALSIZE -ge $MAXSIZE -o $NUMFILES -eq 0 ]; then
           # Transfer the listed files so far, if any
           if [ $# -gt 0 ]; then
-            while ! $DBG git annex get ${FROM:+--from "$FROM"} "$@"; do sleep 1; done
+            $DBG git annex get ${FROM:+--from "$FROM"} "$@"
             for REPO in $REPOS; do
               if annex_isexported "$REPO"; then
                 $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
               else
-                while ! $DBG git annex copy --to "$REPO" "$@"; do sleep 1; done
+                $DBG git annex copy --to "$REPO" "$@"
               fi
             done
             $DBG git annex drop "$@"
@@ -773,7 +773,7 @@ _annex_rsync() {
     find annex/objects -type f | while read SRCNAME; do
       annex_fromkey0_all "$SRCNAME" | xargs -0 -rn1 echo | while read DSTNAME; do
         DST_DIR="$(dirname "${DST##*:}/${DSTNAME}")"
-        while ! $DBG rsync -K -L --rsync-path="mkdir -p \"${DST_DIR}\" && rsync" $RSYNC_OPT "${SRC}/${SRCNAME}" "${DST}/${DSTNAME}"; do sleep 1; done
+        $DBG rsync -K -L --rsync-path="mkdir -p \"${DST_DIR}\" && rsync" $RSYNC_OPT "${SRC}/${SRCNAME}" "${DST}/${DSTNAME}"
       done
     done
   else
@@ -828,12 +828,12 @@ _annex_rsync() {
         if [ $TOTALSIZE -ge $MAXSIZE -o $NUMFILES -eq 0 ]; then
           # Transfer the listed files so far, if any
           if [ $# -gt 0 ]; then
-            while ! $DBG git annex get ${FROM:+--from "$FROM"} "$@"; do sleep 1; done
+            $DBG git annex get ${FROM:+--from "$FROM"} "$@"
             for FILE; do
               DST_DIR="$(dirname "${DST##*:}/${FILE}")"
-              while ! $DBG rsync -K -L --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"; do sleep 1; done
+              $DBG rsync -K -L --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"
             done
-            while ! $DBG git annex drop "$@"; do sleep 1; done
+            $DBG git annex drop "$@"
           fi
           # Empty list
           set --
@@ -844,9 +844,9 @@ _annex_rsync() {
     ' _ "$DBG" "$MAXSIZE" "${SKIP_EXISTING:+1}" "$RSYNC_OPT" "$DST"
     # Delete missing destination files
     if [ "$DELETE" = 1 ]; then
-      while ! $DBG rsync --dry-run -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC/" "$DST/"; do sleep 1; done
+      $DBG rsync --dry-run -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC/" "$DST/"
     elif [ "$DELETE" = 2 ]; then
-      while ! $DBG rsync -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC/" "$DST/"; do sleep 1; done
+      $DBG rsync -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC/" "$DST/"
     fi
   fi
 }
