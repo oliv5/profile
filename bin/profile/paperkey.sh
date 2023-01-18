@@ -3,7 +3,7 @@
 
 paperkey_print() {
     for FILE; do
-        lp -o media=a4 -o page-bottom=36 -o page-left=36 -o page-right=36 -o page-top=36 -o sides=two-sided-long-edge "$FILE"
+        lp -o media=a4 -o page-bottom=10 -o page-left=15 -o page-right=10 -o page-top=10 -o sides=two-sided-long-edge "$FILE"
     done
 }
 
