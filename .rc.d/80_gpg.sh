@@ -54,3 +54,15 @@ gpg_agent_load_passphrase() {
 		echo "$PASSPHRASE" | /usr/lib/gnupg/gpg-preset-passphrase --preset "$KEY"
 	done
 }
+
+# Armor/dearmor a key
+gpg_armor() {
+	for FILE; do
+		gpg --enarmor < "$FILE" > "${FILE%.*}.asc"
+	done
+}
+gpg_dearmor() {
+	for FILE; do
+		gpg --dearmor < "$FILE" > "${FILE%.*}.gpg"
+	done
+}
