@@ -12,10 +12,22 @@ alias gpg_export_priv='gpg --armor --export-secret-key'
 gpg_export_all() {
 	local WHO="${1:?No recipient specified...}"
 	local NAME="${2:?No output file name specified...}"
+	local ANSWER
 	gpg --armor --export "$WHO" > "${NAME}.pub.asc"
 	gpg --armor --export-secret-keys "$WHO" > "${NAME}.sec.asc"
 	gpg --armor --export-secret-subkeys "$WHO" > "${NAME}.sec.sub.asc"
 	gpg --armor --gen-revoke "$WHO" > "${NAME}.rev.asc"
+	if command -v paperkey >/dev/null; then
+		gpg --export-secret-keys "$WHO" | paperkey --output "${NAME}.sec.paperkey"
+		gpg --export-secret-subkeys "$WHO" | paperkey --output "${NAME}.sec.sub.paperkey"
+	fi
+	read -p "Encrypt asc files with symmetrical passphrase? (y/n): " ANSWER
+	if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
+		for FILE in "${NAME}"*.asc "${NAME}"*.paperkey; do
+			gpg --symmetric "$FILE"
+			if [ -r "$FILE.gpg" ]; then rm "$FILE"; fi
+		done
+	fi
 }
 
 # Shortcut for gpg-preset-passphrase not in the path
