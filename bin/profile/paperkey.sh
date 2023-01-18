@@ -27,7 +27,7 @@ paperkey_restore() {
 }
 
 # Main
-if [ $# -gt 1 ]; then
+if [ $# -ge 1 ]; then
     CMD="${1##paperkey_}"
     shift
     paperkey_$CMD "$@"
