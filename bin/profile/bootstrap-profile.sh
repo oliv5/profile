@@ -87,11 +87,13 @@ Main() {
 	fi
 
 	# Choose if we use a private data folder
-	read -p "Path to the private data directory, if any (empty is '\$HOME'): " PRIVATE
-	PRIVATE="${PRIVATE:-$HOME}"
+	PRIVATE="$1"
+	if [ -z "$PRIVATE" ]; then
+		read -p "Path to the private data directory, if any (empty is '\$HOME'): " PRIVATE
+		PRIVATE="${PRIVATE:-$HOME}"
+	fi
 	if [ "$PRIVATE" != "$HOME" ]; then
 		HOME="${PRIVATE}/home"
-		echo "Changing HOME to $HOME"
 	fi
 
 	echo "HOME: $HOME"
