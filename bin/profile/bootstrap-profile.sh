@@ -86,18 +86,22 @@ Main() {
 		return 1
 	fi
 
-	# Setup private data folder
-	read -p "Choose the private data directory (empty is '\$HOME'): " PRIVATE
+	# Choose if we use a private data folder
+	read -p "Path to the private data directory, if any (empty is '\$HOME'): " PRIVATE
 	PRIVATE="${PRIVATE:-$HOME}"
 	if [ "$PRIVATE" != "$HOME" ]; then
-		export HOME="${PRIVATE}/home"
+		HOME="${PRIVATE}/home"
+		echo "Changing HOME to $HOME"
 	fi
+
 	echo "HOME: $HOME"
 	echo "PRIVATE: $PRIVATE"
 	read -p "Continue? (enter/ctrl-c)" ANSWER
 	echo
 	mkdir -p "$HOME"
 	mkdir -p "$PRIVATE"
+	export HOME
+	export PRIVATE
 
 	# Setup packages
 	install git git
