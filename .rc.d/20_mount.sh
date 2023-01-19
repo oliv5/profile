@@ -54,13 +54,13 @@ mount_cleaner() {
 ############
 # Mount helpers
 ecryptfs_wrap_passphrase() {
-  local FILE="${1:-$HOME/.ecryptfs/wrapped-passphrase}"
+  local FILE="${1:-$HOME/.private/wrapped-passphrase}"
   ( stty -echo; printf "Passphrase: " 1>&2; read PASSWORD; stty echo; echo "$PASSWORD"; ) |
     xargs printf "%s\n%s" $(od -x -N 100 --width=30 /dev/random | head -n 1 | sed "s/^0000000//" | sed "s/\s*//g") |
     ecryptfs-wrap-passphrase "$FILE"
 }
 ecryptfs_unwrap_passphrase() {
-  local FILE="${1:-$HOME/.ecryptfs/wrapped-passphrase}"
+  local FILE="${1:-$HOME/.private/wrapped-passphrase}"
   ( stty -echo; printf "Passphrase: " 1>&2; read PASSWORD; stty echo; echo "$PASSWORD"; ) |
     ecryptfs-insert-wrapped-passphrase-into-keyring "$FILE" -
 }
@@ -109,14 +109,12 @@ mount_ecryptfs_user() {
   local DST="${2:?Missing dest directory...}"
   local KEY1="${3:?Missing content key...}"
   local KEY2="${4:-$KEY1}"
-  local CIPHER="aes" # Param 5 unused
-  local KEYLEN="16" # Param 6 unused
   local CONFNAME="${7:-private}"
-  local CONF="$HOME/.ecryptfs/$CONFNAME.conf"
-  local SIG="$HOME/.ecryptfs/$CONFNAME.sig"
+  local CONF="$HOME/.private/$CONFNAME.conf"
+  local SIG="$HOME/.private/$CONFNAME.sig"
   chmod 700 "$HOME/.ecryptfs"
   ecryptfs-add-passphrase --fnek
-  keyctl link @u @s
+  keyctl link @u @s # Workaround for FS#55943 (https://bugs.archlinux.org/task/55943). See https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=870126#10
   echo "$SRC $DST ecryptfs" > "$CONF"
   echo "$KEY1" > "$SIG"
   echo "$KEY2" >> "$SIG"
@@ -124,7 +122,7 @@ mount_ecryptfs_user() {
   chmod 770 "$DST"
 }
 umount_ecryptfs_user() {
-  local CONFNAME="${1:-private}"
+  local CONFNAME="$(basename "${1:-private}")"
   umount.ecryptfs_private "$CONFNAME"
   keyctl clear @u
   keyctl clear @s
@@ -153,9 +151,9 @@ mount_ecryptfs_simple() {
   chmod 770 "$DST"
 }
 umount_ecryptfs_simple() {
-  local SRC="${1:?Missing mounted directory...}"
-  chmod 700 "$SRC"
-  ecryptfs-simple -uk "$SRC"
+  local DST="${1:?Missing mounted directory...}"
+  chmod 700 "$DST"
+  ecryptfs-simple -uk "$DST"
 }
 
 ############
@@ -163,15 +161,16 @@ umount_ecryptfs_simple() {
 mount_private_ecryptfs() {
   local SRC="${1:-$HOME/.private}"
   local DST="${2:-$HOME/private}"
-  local SIG="${3:-$HOME/.ecryptfs/private.sig}"
-  local KEY="$(cat "$SIG" 2>/dev/null | head -n 1)"
+  local SIG="${3:-$SRC/private.sig}"
+  local KEY1="$(cat "$SIG" 2>/dev/null | head -n 1)"
+  local KEY2="$(cat "$SIG" 2>/dev/null | tail -n 1)"
   local CONFNAME="${4:-$(basename "$DST")}"
   local TOOL="$5"
   if [ -z "$TOOL" ]; then
     command -v ecryptfs-simple >/dev/null && TOOL=mount_ecryptfs_simple || TOOL=mount_ecryptfs_root
   fi
   mkdir -p "$DST"
-  "$TOOL" "$SRC" "$DST" "$KEY" "" "" "" "$CONFNAME"
+  "$TOOL" "$SRC" "$DST" "$KEY1" "$KEY2" "" "" "$CONFNAME"
 }
 umount_private_ecryptfs() {
   local DST="${1:-$HOME/private}"
@@ -179,7 +178,33 @@ umount_private_ecryptfs() {
   if [ -z "$TOOL" ]; then
     command -v ecryptfs-simple >/dev/null && TOOL=umount_ecryptfs_simple || TOOL=umount_ecryptfs_root
   fi
-  "$TOOL" "$(basename "$DST")"
+  "$TOOL" "$DST"
+}
+
+# Setup a private folder
+setup_private_ecryptfs() {
+  local SRC="${1:-$HOME/.private}"
+  local DST="${2:-$HOME/private}"
+  local SIG="${3:-$SRC/private.sig}"
+  # Ecryptfs cannot be used recursively
+  # Special case: home folder is already encrypted and SRC/DST are within
+  if grep "$HOME" /proc/mounts | grep -i ecryptfs >/dev/null; then
+    if echo "$SRC" | grep "$HOME" >/dev/null || echo "$DST" | grep "$HOME" >/dev/null; then
+      echo >&2 "Error: ecryptfs cannot be used recursively; HOME folder is already encrypted. Abort..."
+      return 1
+    fi
+  fi
+  if [ -e "$SIG" ]; then
+    echo >&2 "Error: signature file $SIG exists already. Abort..."
+    return 1
+  fi
+  mkdir -p "$SRC" "$DST"
+  echo -n "Passphrase 1: "
+  local KEY1="$(ecryptfs-add-passphrase | grep -oE '\[.*\]' | tr -d '[]')"
+  echo -n "Passphrase 2: "
+  local KEY2="$(ecryptfs-add-passphrase | grep -oE '\[.*\]' | tr -d '[]')"
+  echo $KEY1 > "$SIG"
+  echo $KEY2 >> "$SIG"
 }
 
 
