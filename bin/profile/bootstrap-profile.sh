@@ -3,6 +3,24 @@
 set -e
 
 ###################
+ask_question() { 
+    local REPLY
+    local ACK
+    local STDIN=/dev/fd/0
+    if [ -c "/dev/fd/$1" ]; then
+        STDIN=/dev/fd/$1
+        shift $(($# > 1 ? 1 : $#))
+    fi
+    read ${1:+-p "$1"} REPLY < ${STDIN}
+    shift $(($# > 1 ? 1 : $#))
+    echo "$REPLY"
+    for ACK in "$@"; do
+        [ "$REPLY" = "$ACK" ] && return 0
+    done
+    return 1
+}
+
+###################
 # Install a set of packages
 install_packages() {
 	if apt --version >/dev/null 2>&1; then
@@ -86,24 +104,17 @@ bootstrap_profile() {
 		return 1
 	fi
 
-	# Choose if we use a private data folder
-	PRIVATE="$1"
-	if [ -z "$PRIVATE" ]; then
-		read -p "Path to the private data directory, if any (empty is '\$HOME'): " PRIVATE
-		PRIVATE="${PRIVATE:-$HOME}"
+	# Choose where to put the HOME folder
+	local NEW_HOME
+	local OLD_HOME="$HOME"
+	read -p "Change HOME path ($HOME)? (empty = no change): " NEW_HOME
+	HOME="${NEW_HOME:-$HOME}"
+	if [ "$HOME" != "$OLD_HOME" ]; then
+		echo "HOME: $HOME"
+		read -p "Continue? (enter/ctrl-c)" NEW_HOME
+		mkdir -p "$HOME"
+		export HOME
 	fi
-	if [ "$PRIVATE" != "$HOME" ]; then
-		HOME="${PRIVATE}/home"
-	fi
-
-	echo "HOME: $HOME"
-	echo "PRIVATE: $PRIVATE"
-	read -p "Continue? (enter/ctrl-c)" ANSWER
-	echo
-	mkdir -p "$HOME"
-	mkdir -p "$PRIVATE"
-	export HOME
-	export PRIVATE
 
 	# Setup packages
 	install ssh openssh
@@ -130,7 +141,7 @@ bootstrap_profile() {
 
 	# Clone profile repository
 	local URL="https://github.com/oliv5/profile.git"
-	if [ "$PRIVATE" = "$HOME" ]; then
+	if [ "$HOME" = "$OLD_HOME" ]; then
 		if ! vcsh list | grep profile >/dev/null; then
 			vcsh clone "$URL" profile
 		else
