@@ -129,7 +129,7 @@ bootstrap_profile() {
 	install fzf fzf https://github.com/junegunn/fzf.git "./install --no-fish --no-zsh"
 
 	# Clone profile repository
-	URL="https://github.com/oliv5/profile.git"
+	local URL="https://github.com/oliv5/profile.git"
 	if [ "$PRIVATE" = "$HOME" ]; then
 		if ! vcsh list | grep profile >/dev/null; then
 			vcsh clone "$URL" profile
@@ -146,4 +146,4 @@ bootstrap_profile() {
 }
 
 ###################
-(bootstrap_profile "$@")
+bootstrap_profile "$@"
