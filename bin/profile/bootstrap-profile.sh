@@ -79,7 +79,7 @@ install() {
 }
 
 ###################
-Main() {
+bootstrap_profile() {
 	# Check prerequisites
 	if ! export HOME 2>/dev/null; then
 		echo >&2 "Error: you are not using a bash/dash compatible shell ($SHELL); Abort..."
@@ -106,6 +106,7 @@ Main() {
 	export PRIVATE
 
 	# Setup packages
+	install ssh openssh
 	install git git
 	install wget wget
 	install rsync rsync
@@ -120,8 +121,8 @@ Main() {
 	else
 		echo >&2 "Warning: unknown target; skip installing git-annex ..."
 	fi
-	install mr mr https://github.com/joeyh/myrepos.git
-	install vcsh vcsh https://github.com/RichiH/vcsh.git
+	install mr mr https://github.com/joeyh/myrepos.git "ln -s _mr/mr ../"
+	install vcsh vcsh https://github.com/RichiH/vcsh.git "ln -s _vcsh/vcsh ../"
 	install repo repo https://storage.googleapis.com/git-repo-downloads/repo
 	install fdfind fd-find https://github.com/sharkdp/fd.git "install cargo cargo" "make"
 	install rpl rpl https://github.com/kcoyner/rpl.git "ln -s _rpl/rpl ../"
@@ -145,4 +146,4 @@ Main() {
 }
 
 ###################
-(Main "$@")
+(bootstrap_profile "$@")
