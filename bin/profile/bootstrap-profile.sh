@@ -117,7 +117,8 @@ bootstrap_profile() {
 	fi
 
 	# Setup packages
-	install ssh openssh
+	install sshd openssh-server
+	install ssh openssh-client
 	install git git
 	install wget wget
 	install rsync rsync
@@ -132,7 +133,7 @@ bootstrap_profile() {
 	else
 		echo >&2 "Warning: unknown target; skip installing git-annex ..."
 	fi
-	install mr mr https://github.com/joeyh/myrepos.git "ln -s _mr/mr ../"
+	install mr myrepos https://github.com/joeyh/myrepos.git "ln -s _mr/mr ../"
 	install vcsh vcsh https://github.com/RichiH/vcsh.git "ln -s _vcsh/vcsh ../"
 	install repo repo https://storage.googleapis.com/git-repo-downloads/repo
 	install fdfind fd-find https://github.com/sharkdp/fd.git "install cargo cargo" "make"
