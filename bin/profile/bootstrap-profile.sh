@@ -36,29 +36,34 @@ install_packages() {
 # Install from sources
 install_from_sources() {
 	local PACKAGE="${1:?No package specified...}"
-	local URL="${2:?No URL specified...}"
+	local URL="$2"
 	local DST="$HOME/.local/bin"
 	shift $(($# > 2 ? 2 : $#))
 
 	# Download sources
 	mkdir -p "$DST"
 	DST="$DST/_$PACKAGE"
-	if [ "${URL%.git}" != "$URL" ]; then
-		git clone --depth 1 "$URL" "$DST" ||
-			return 2
-	elif [ "${URL%.tgz}" != "$URL" ] || [ "${URL%.tar.gz}" != "$URL" ]; then
-		mkdir -p "$DST"
-		curl "$URL" | tar -xvz -C "$DST" ||
-			return 2
-	else
-		wget "$URL" -O "$DST" &&
-			chmod a+x "$DST" ||
-			return 2
+	if [ -n "$URL" ]; then
+		echo "Downloading from url $URL"
+		if [ "${URL%.git}" != "$URL" ]; then
+			git clone --depth 1 "$URL" "$DST" ||
+				return 2
+		elif [ "${URL%.tgz}" != "$URL" ] || [ "${URL%.tar.gz}" != "$URL" ]; then
+			mkdir -p "$DST"
+			curl "$URL" | tar -xvz -C "$DST" ||
+				return 2
+		else
+			wget "$URL" -O "$DST" &&
+				chmod a+x "$DST" ||
+				return 2
+		fi
 	fi
 
 	# Post-install
 	if [ $# -gt 0 ]; then
+		echo "Post-install commands..."
 		( cd "$DST"; for CMD; do eval "$CMD"; done )
+		echo "Done!"
 	fi
 
 	return 0
