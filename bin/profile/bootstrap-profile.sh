@@ -21,6 +21,21 @@ ask_question() {
 }
 
 ###################
+# Change HOME folder
+change_home() {
+	local NEW_HOME
+	echo "Current HOME: $HOME"
+	read -p "New HOME (empty = no change): " NEW_HOME
+	NEW_HOME="${NEW_HOME:-$HOME}"
+	if [ "$HOME" != "$NEW_HOME" ]; then
+		export HOME="$NEW_HOME"
+		echo "HOME: $HOME"
+		read -p "Continue? (enter/ctrl-c)" NEW_HOME
+		mkdir -p "$HOME"
+	fi
+}
+
+###################
 # Install a set of packages
 install_packages() {
 	if apt --version >/dev/null 2>&1; then
@@ -108,20 +123,18 @@ bootstrap_profile() {
 		echo >&2 "Error: you are not using a bash/dash compatible shell ($SHELL); Abort..."
 		return 1
 	fi
-
-	# Choose where to put the HOME folder
-	local NEW_HOME
-	local OLD_HOME="$HOME"
-	read -p "Change HOME path ($HOME)? (empty = no change): " NEW_HOME
-	HOME="${NEW_HOME:-$HOME}"
-	if [ "$HOME" != "$OLD_HOME" ]; then
-		echo "HOME: $HOME"
-		read -p "Continue? (enter/ctrl-c)" NEW_HOME
-		mkdir -p "$HOME"
-		export HOME
+	
+	# Android: change HOME
+	if [ -n "$ANDROID_HOME" ]; then
+		echo "Current HOME: $HOME"
+		if ask_question "Set HOME in /sdcard/private/home ? (y/N)" Y y; then
+			export HOME="/sdcard/private/home"
+			mkdir -p "$HOME"
+		fi
 	fi
 
 	# Setup packages
+	echo "Install packages..."
 	install sshd openssh-server
 	install ssh openssh-client
 	install git git
@@ -130,6 +143,7 @@ bootstrap_profile() {
 	install curl curl
 	install gpg gnupg
 	install gawk gawk
+	install sed sed
 	install make make
 	if [ "$(uname -p)" = "x86_64" ]; then
 		install git-annex git-annex https://downloads.kitenet.net/git-annex/linux/current/git-annex-standalone-amd64.tar.gz
@@ -146,20 +160,31 @@ bootstrap_profile() {
 	install fzf fzf https://github.com/junegunn/fzf.git "./install --no-fish --no-zsh"
 
 	# Clone profile repository
+	echo "Clone profile..."
 	local URL="https://github.com/oliv5/profile.git"
-	if [ "$HOME" = "$OLD_HOME" ]; then
+	local PROFILE_PATH="$HOME"
+	if [ -n "$ANDROID_HOME" ]; then
+		if ask_question "Set profile in /sdcard/private/profile ? (y/N)" Y y; then
+			PROFILE_PATH="/sdcard/private/profile"
+		fi
+	else
+		read -p "Profile clone path (empty = HOME): " PROFILE_PATH
+	fi
+	if [ -z "$PROFILE_PATH" ] || [ "$PROFILE_PATH" = "$HOME" ]; then
 		if ! vcsh list | grep profile >/dev/null; then
 			vcsh clone "$URL" profile
 		else
 			echo >&2 "Warning: skip cloning existing profile repo ..."
 		fi
 	else
-		if ! [ -d "$PRIVATE/profile" ]; then
-			git clone "$URL" "$PRIVATE/profile"
+		if ! [ -d "$PROFILE_PATH" ]; then
+			mkdir -p "$(dirname "$PROFILE_PATH")"
+			git clone "$URL" "$PROFILE_PATH"
 		else
 			echo >&2 "Warning: skip cloning existing profile repo ..."
 		fi
 	fi
+	echo
 }
 
 ###################
