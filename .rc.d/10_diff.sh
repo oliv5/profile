@@ -98,19 +98,19 @@ diff2m() { _diff2 "meld" "$@"; }
 
 # Diff using rsync
 diffr() {
-  rsync -avsn "$@"
+  rsync -avsnc "$@" | grep -v '/$'
 }
 diffrd() {
-  rsync -avsn --delete "$@" | grep "^delet"
+  rsync -avsnc --delete "$@" | grep "^delet" | grep -v '/$'
 }
 diffru() {
-  rsync -avsn --existing "$@"
+  rsync -avsnc --existing "$@" | grep -v '/$'
 }
 diffrn() {
-  rsync -avsn --ignore-existing "$@"
+  rsync -avsnc --ignore-existing "$@" | grep -v '/$'
 }
 diffrs() {
-  rsync -rvn --size-only "$@"
+  rsync -rvn --size-only "$@" | grep -v '/$'
 }
 
 ########################################
