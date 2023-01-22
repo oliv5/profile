@@ -65,6 +65,34 @@ ecryptfs_unwrap_passphrase() {
     ecryptfs-insert-wrapped-passphrase-into-keyring "$FILE" -
 }
 
+############
+# Setup ecryptfs encryption
+setup_ecryptfs() {
+  local SRC="${1:?Missing source directory...}"
+  local DST="${2:?Missing dest directory...}"
+  local SIG="${3:-$SRC/private.sig}"
+  # Ecryptfs cannot be used recursively
+  # Special case: home folder is already encrypted and SRC/DST are within
+  if grep "$HOME" /proc/mounts | grep -i ecryptfs >/dev/null; then
+    if echo "$SRC" | grep "$HOME" >/dev/null; then
+      echo >&2 "Error: ecryptfs cannot be used recursively; HOME folder is already encrypted. Abort..."
+      return 1
+    fi
+  fi
+  if [ -e "$SIG" ]; then
+    echo >&2 "Error: signature file $SIG exists already. Abort..."
+    return 1
+  fi
+  mkdir -p "$SRC"
+  echo -n "Passphrase 1: "
+  local KEY1="$(ecryptfs-add-passphrase | grep -oE '\[.*\]' | tr -d '[]')"
+  echo -n "Passphrase 2: "
+  local KEY2="$(ecryptfs-add-passphrase | grep -oE '\[.*\]' | tr -d '[]')"
+  echo $KEY1 > "$SIG"
+  echo $KEY2 >> "$SIG"
+}
+
+############
 # Raw mount ecryptfs using root
 mount_ecryptfs_root() {
   local SRC="${1:?Missing source directory...}"
@@ -180,33 +208,12 @@ umount_private_ecryptfs() {
   fi
   "$TOOL" "$DST"
 }
-
-# Setup a private folder
 setup_private_ecryptfs() {
   local SRC="${1:-$HOME/.private}"
   local DST="${2:-$HOME/private}"
   local SIG="${3:-$SRC/private.sig}"
-  # Ecryptfs cannot be used recursively
-  # Special case: home folder is already encrypted and SRC/DST are within
-  if grep "$HOME" /proc/mounts | grep -i ecryptfs >/dev/null; then
-    if echo "$SRC" | grep "$HOME" >/dev/null || echo "$DST" | grep "$HOME" >/dev/null; then
-      echo >&2 "Error: ecryptfs cannot be used recursively; HOME folder is already encrypted. Abort..."
-      return 1
-    fi
-  fi
-  if [ -e "$SIG" ]; then
-    echo >&2 "Error: signature file $SIG exists already. Abort..."
-    return 1
-  fi
-  mkdir -p "$SRC" "$DST"
-  echo -n "Passphrase 1: "
-  local KEY1="$(ecryptfs-add-passphrase | grep -oE '\[.*\]' | tr -d '[]')"
-  echo -n "Passphrase 2: "
-  local KEY2="$(ecryptfs-add-passphrase | grep -oE '\[.*\]' | tr -d '[]')"
-  echo $KEY1 > "$SIG"
-  echo $KEY2 >> "$SIG"
+  setup_ecryptfs "$SRC" "$DST" "$SIG"
 }
-
 
 #####################################
 # Mount encfs
@@ -229,6 +236,66 @@ mount_private_encfs() {
 }
 umount_private_encfs() {
   umount_encfs "${1:-$HOME/private}"
+}
+
+#####################################
+# Mount dmcrypt
+# https://gist.github.com/d4v3y0rk/e19d346ec9836b4811d4fecc1e1d5d64
+setup_dmcrypt() {
+  local IMG="${1:?Missing image source file...}"
+  local DST="${2:?Missing dest directory...}"
+  local SIZE="${3:?Missing image file size (ex: 1024M)...}"
+  local FTYPE="${4:-ext4}"
+  local NAME="$(basename "$IMG" .img)"
+  local MAP="/dev/mapper/$NAME"
+  if [ -e "$IMG" ]; then
+	echo "Error: image file $IMG exists already..."
+	return 1
+  fi
+  if [ -e "$MAP" ]; then
+	echo "Error: map device $MAP exists already..."
+	return 1
+  fi
+  mkdir -p "$(dirname "$IMG")"
+  fallocate -l "$SIZE" "$IMG"
+  sudo cryptsetup -y luksFormat "$IMG"
+  sudo cryptsetup open "$IMG" "$NAME"
+  sudo mkfs.$FTYPE "$MAP"
+}
+mount_dmcrypt() {
+  local IMG="${1:?Missing image source file...}"
+  local DST="${2:?Missing dest directory...}"
+  local NAME="$(basename "$IMG" .img)"
+  local MAP="/dev/mapper/$NAME"
+  mkdir -p "$DST"
+  if ! [ -e "$MAP" ]; then
+	sudo cryptsetup open "$IMG" "$NAME"
+  fi
+  sudo mount "$MAP" "$DST"
+}
+umount_dmcrypt() {
+  local IMG="${1:?Missing image source file...}"
+  local DST="${2:?Missing dest directory...}"
+  local NAME="$(basename "$IMG" .img)"
+  sudo umount "$DST"
+  sudo cryptsetup close "$NAME"
+}
+setup_private_dmcrypt() {
+  local IMG="${1:-$HOME/.private/private.img}"
+  local DST="${2:-$HOME/private}"
+  local SIZE="${3:-4096M}"
+  local FTYPE="${4:-ext4}"
+  setup_dmcrypt "$IMG" "$DST" "$SIZE" "$FTYPE"
+}
+mount_private_dmcrypt() {
+  local IMG="${1:-$HOME/.private/private.img}"
+  local DST="${2:-$HOME/private}"
+  mount_dmcrypt "$IMG" "$DST"
+}
+umount_private_dmcrypt() {
+  local IMG="${1:-$HOME/.private/private.img}"
+  local DST="${2:-$HOME/private}"
+  umount_dmcrypt "$IMG" "$DST"
 }
 
 #####################################
