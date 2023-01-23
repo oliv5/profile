@@ -11,67 +11,47 @@ _run() {
   echo >&2 "$@"; "$@"
 }
 
-# Extract some parameters
-_get_wol_params() {
-  eval MAC="${1:-\${${PROFILE}_MAC:?No MAC address defined...}}"
-  eval IP="${2:-\${${PROFILE}_IP:-255.255.255.255}}"
-  eval PORT="${3:-\${${PROFILE}_PORT:-9}}"
-  ITF="${4:-eth0}"
-  # Convert '-' into ':'
-  MAC="$(echo $MAC | tr '-' ':' | tr '[:lower:]' '[:upper:]')"
-}
-_get_ssh_params() {
-  SSH_CREDS="${1:?No SSH host/credentials specified...}"
-  SSH_PARAMS="$2"
-}
-
-# Print known wol URLs
-_urls() {
-  echo "https://www.depicus.com/wake-on-lan/woli?m=${MAC}&i=${IP}&s=255.255.255.255&p=${PORT}"
-}
-
 # Execute the WOL command
 _execute_wol() {
-  local PROFILE="$(echo $1 | tr '[:lower:]' '[:upper:]')"
-  local METHOD="$2"
-  local MAC
-  local IP
-  local PORT
-  local ITF
-  local SSH_CREDS
-  local SSH_PARAMS
-  shift $(($# < 2 ? $# : 2))
+  local METHOD="${1:?No wol method specified...}"
+  local MAC="${2:?No MAC address specified...}"
+  local IP="$3"
+  local PORT="${4:-9}"
+  local ITF="$5"
+  local MASK="255.255.255.255"
+  local URL
 
   if _exists wakeonlan "$METHOD"; then
-    _get_wol_params "$@"
-    _run wakeonlan -i "${IP}" -p "${PORT}" "${MAC}";
+    MAC="$(echo $MAC | sed 's/-/:/g')"
+    _run wakeonlan -i "$IP" -p "$PORT" "$MAC"
   elif _exists etherwake "$METHOD"; then
-    _get_wol_params "$@"
-    _run etherwake -i "${ITF}" -b "${MAC}"
-  elif _exists curl "$METHOD"; then
-    _get_wol_params "$@"
-    for URL in $(_urls); do
-      _run curl -qs "${URL}" >/dev/null && break
-    done
-  elif _exists wget "$METHOD"; then
-    _get_wol_params "$@"
-    for URL in $(_urls); do
-      _run wget --timeout=10 -q -O /dev/null "${URL}" && break
-    done
-  elif _exists ssh "$METHOD"; then
-    local SSH_CREDS="${1:?No SSH host/credentials specified...}"
-    local METHOD="$2"; [ "$METHOD" = "ssh" ] && METHOD=""
-    shift $(($# < 2 ? $# : 2))
-    ssh "$SSH_CREDS" -- sh -c ':; . "$HOME/bin/profile/wol.sh" "$@"' "$PROFILE" "$METHOD" "$@"
+    _run etherwake -i "${ITF:?No interface specified...}" -b "$MAC"
+  elif [ "$METHOD" = "web" ] || [ "${METHOD%%s://*}" = "http" ]; then
+    MAC="$(echo $MAC | sed 's/:\|-//g')"
+    [ -z "$IP" ] && IP="$(curl -qs icanhazip.com)"
+    if [ "$METHOD" = "web" ]; then
+      URL="https://www.depicus.com/wake-on-lan/woli?m=${MAC}&i=${IP}&s=${MASK}&p=${PORT}"
+    else
+      # Evaluate \$VARIABLES
+      eval URL="\"$METHOD\""
+    fi
+    if command -v curl >/dev/null; then
+      _run curl -qs "$URL" >/dev/null
+    elif command -v wget >/dev/null; then
+      _run wget --timeout=10 -q -O /dev/null "$URL"
+    else
+      echo "Open this URL in your web browser: $URL"
+    fi
   else
-    echo >&2 "No appropriate WOL method available..."
-    false
+    echo >&2 "Unknown WOL method ($METHOD)..."
+    return 1
   fi
+  return 0
 }
 
 # Main
 if [ $# -eq 0 ]; then
-  echo >&2 "Usage: wol.sh <profile> <method> [method params...]"
+  echo >&2 "Usage: wol.sh <wakeonlan|etherwake|web|http(s)://...> [MAC] [IP] [PORT] [ITF]"
   false
 else
   _execute_wol "$@"

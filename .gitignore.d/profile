@@ -5,6 +5,8 @@
 !/.bash_logout
 !/.bash_profile
 !/.bashrc
+!/bin
+!/bin/profile
 !/bin/profile/bashtop
 !/bin/profile/bfg.jar
 !/bin/profile/checkbashisms.sh
@@ -84,6 +86,7 @@
 !/bin/profile/wol.sh
 !/bin/profile/woof
 !/bin/profile/woofy
+!/.config/Code/User
 !/.config/Code/User/c_cpp_properties.json.2.sample
 !/.config/Code/User/c_cpp_properties.json.sample
 !/.config/Code/User/keybindings.json
@@ -961,6 +964,7 @@
 !/.ctags
 !/.dashrc
 !/.exrc
+!/.gitignore.d
 !/.gitignore.d/profile
 !/.inputrc
 !/.mkshrc
@@ -968,6 +972,7 @@
 !/.pylintrc
 !/.rc
 !/.rc.autoload
+!/.rc.d
 !/.rc.d/00_shell.sh
 !/.rc.d/01_ansi.sh
 !/.rc.d/01_fct.min
