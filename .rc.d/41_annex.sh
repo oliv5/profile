@@ -638,27 +638,26 @@ annex_upload() {
 # without downloading the whole repo locally at once
 # $FROM is used to selected the origin repo
 # $DBG is used to print the command on stderr (when not empty)
-# $ALL is used to select all files (when not empty)
-# $WANTGET is used to select all wanted files from repos
-alias annex_transfer='FROM= ALL= WANTGET=1 _annex_transfer'
+# $SELECT is used to select files to copy; values: want-get / missing / [all]
+alias annex_transfer='FROM= SELECT=missing _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
   local REPOS="${1:-$(annex_enabled)}"
   local MAXSIZE="${2:-1073741824}"
   local DBG="${DBG:+echo}"
-  local SELECT=""
+  local SELECTED=""
   [ $# -le 2 ] && shift $# || shift 2
+  REPOS="$(bash -c "sort <(echo $REPOS | xargs -n1) <(echo $(git_remotes) | xargs -n1) | uniq -d")"
   [ -z "$REPOS" ] && return 0
-  [ -z "$ALL" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--not --in $REPO"; done
+  [ "$SELECT" = "missing" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--not --in $REPO"; done
   if [ $(annex_version) -ge $(annex_version 9.0) ]; then
-    [ -n "$WANTGET" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--want-get-by=$REPO"; done
+    [ "$SELECT" = "want-get" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--want-get-by=$REPO"; done
   fi
   echo "REPOS=$REPOS"
   echo "MAXSIZE=$MAXSIZE"
   echo "SELECT=$SELECT"
+  echo "SELECTED=$SELECTED"
   echo "FROM=$FROM"
-  echo "ALL=$ALL"
-  echo "WANTGET=$WANTGET"
   echo "DBG=$DBG"
   if git_bare; then
     # Bare repositories do not have "git annex find"
@@ -680,8 +679,8 @@ _annex_transfer() {
       fi
     done
     # 2) get, copy and drop the remote files
-    echo "Copy remote files..."
-    git annex find --include='*' $SELECT --print0 "$@" | xargs -0 -r sh -c '
+    echo "Get/copy remote files..."
+    git annex find --include='*' $SELECTED --print0 "$@" | xargs -0 -r sh -c '
       annex_isexported() {
         git show git-annex:remote.log | grep "exporttree=yes.*name=$1" >/dev/null
       }
