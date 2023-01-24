@@ -84,24 +84,14 @@ alias arg_restore='eval set -- "$__"'
 arg_intersect() {
   local L1="${1:?No list #1 specified...}"
   local L2="${2:?No list #2 specified...}"
-  local TMP1="$(mktemp)"
-  local TMP2="$(mktemp)"
-  echo "$L1" | xargs -n1 > "$TMP1"
-  echo "$L2" | xargs -n1 > "$TMP2"
-	sort "$TMP1" "$TMP2" | uniq -d | xargs
-  rm "$TMP1" "$TMP2"
+  { local A; for A; do echo $A; done; } | sort -u
 }
 
 # Show differences between 2 arguments lists
 arg_diff() {
   local L1="${1:?No list #1 specified...}"
   local L2="${2:?No list #2 specified...}"
-  local TMP1="$(mktemp)"
-  local TMP2="$(mktemp)"
-  echo "$L1" | xargs -n1 > "$TMP1"
-  echo "$L2" | xargs -n1 > "$TMP2"
-	sort "$TMP1" "$TMP2" | uniq -u | xargs
-  rm "$TMP1" "$TMP2"
+  { local A; for A; do echo $A; done; } | sort | uniq -d
 }
 
 ################################

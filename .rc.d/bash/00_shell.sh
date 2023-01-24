@@ -31,18 +31,3 @@ bash_completion() {
   complete -o bashdefault -o default -o nospace -F "$2" "$1" 2>/dev/null \
   || complete -o default -o nospace -F "$2" "$1"
 }
-
-################################
-# Intersect 2 arguments lists
-arg_intersect() {
-  local L1="${1:?No list #1 specified...}"
-  local L2="${2:?No list #2 specified...}"
-	bash -c "sort <(echo $L1 | xargs -n1) <(echo $L2 | xargs -n1) | uniq -d"
-}
-
-#~ # Show differences between 2 arguments lists
-arg_diff() {
-  local L1="${1:?No list #1 specified...}"
-  local L2="${2:?No list #2 specified...}"
-	bash -c "sort <(echo $L1 | xargs -n1) <(echo $L2 | xargs -n1) | uniq -u"
-}
