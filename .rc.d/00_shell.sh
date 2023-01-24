@@ -66,7 +66,7 @@ arg_lastn() {
 # Is in list?
 alias is_in='arg_is_in'
 arg_is_in() {
-  [ $# -lt 2 ] && return 0
+  [ $# -lt 2 ] && return 1
   local Q="$1"
   shift
   local A
@@ -79,6 +79,30 @@ arg_save_var() { local _VAR_="${1:-__}"; [ $# -ge 1 ] && shift; local _VAL_="$(a
 alias arg_save='__="$(arg_quote "$@")"'
 alias arg_reset='arg_save; set --'
 alias arg_restore='eval set -- "$__"'
+
+# Intersect 2 arguments lists
+arg_intersect() {
+  local L1="${1:?No list #1 specified...}"
+  local L2="${2:?No list #2 specified...}"
+  local TMP1="$(mktemp)"
+  local TMP2="$(mktemp)"
+  echo "$L1" | xargs -n1 > "$TMP1"
+  echo "$L2" | xargs -n1 > "$TMP2"
+	sort "$TMP1" "$TMP2" | uniq -d | xargs
+  rm "$TMP1" "$TMP2"
+}
+
+# Show differences between 2 arguments lists
+arg_diff() {
+  local L1="${1:?No list #1 specified...}"
+  local L2="${2:?No list #2 specified...}"
+  local TMP1="$(mktemp)"
+  local TMP2="$(mktemp)"
+  echo "$L1" | xargs -n1 > "$TMP1"
+  echo "$L2" | xargs -n1 > "$TMP2"
+	sort "$TMP1" "$TMP2" | uniq -u | xargs
+  rm "$TMP1" "$TMP2"
+}
 
 ################################
 # https://stackoverflow.com/questions/18186929/differences-between-login-shell-and-interactive-shell
