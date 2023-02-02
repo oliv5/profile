@@ -9,7 +9,7 @@ _rgrep() {
   local FILES="${2##*/}"
   local DIR="${2%"$FILES"}"
   FILES="$(_fglob "${FILES}" "-g " " ")"
-  shift 2
+  shift $(($# >= 2 ? 2 : $#))
   (set -f; command rg --no-heading -n ${GARGS} "$@" "${PATTERN}" ${FILES} "${DIR:-.}")
 }
 unset GARGS
