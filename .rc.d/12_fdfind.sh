@@ -80,7 +80,7 @@ _fdgrep1() {
   else
     local ARGS="$1"; shift $#
   fi
-  (set -f; __fdfind "$@" -t f -0 |
+  (set -f; __fdfind "${@:-}" -t f -0 |
     eval xargs -r0 grep -nH --color ${GCASE} ${GARGS} -e "${ARGS:-''}")
 }
 _fdgrep() { _fdgrep1 "$@"; }
