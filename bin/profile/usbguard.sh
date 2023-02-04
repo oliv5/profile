@@ -26,17 +26,31 @@ usbguard_status() {
     sudo systemctl status usbguard-dbus
 }
 
-usbguard_disable() {
+usbguard_start() {
     sudo systemctl start usbguard
     sudo systemctl start usbguard-dbus
-    usbguard_allow
+}
+
+usbguard_stop() {
     sudo systemctl stop usbguard
     sudo systemctl stop usbguard-dbus
+}
+
+usbguard_status() {
+    sudo systemctl status usbguard
+    sudo systemctl status usbguard-dbus
+}
+
+usbguard_disable() {
+    usbguard_start
+    usbguard_allow
+    usbguard_stop
     sudo systemctl disable usbguard
     sudo systemctl disable usbguard-dbus
 }
 
 usbguard_enable() {
+    usbguard_start
     sudo systemctl enable usbguard
     sudo systemctl enable usbguard-dbus
 }
