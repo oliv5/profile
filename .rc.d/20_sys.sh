@@ -50,6 +50,39 @@ mkchroot(){
   chroot "$DST"
 }
 
+# Schroot
+mkschroot() {
+  local DIR="${1:?No chroot directory specified...}"
+  local DISTR="${2:?No distribution name specified...}"
+  local NAME="$(basename "$DIR")"
+  local CONF="/etc/schroot/chroot.d/$NAME"
+  shift 2
+  [ -e "$DIR" ] && echo >&2 "Chroot directory exists already... Abort !" && return 1
+  [ -e "$CONF" ] && echo >&2 "Schroot config file $CONF exists already... Abort !" && return 2
+  sudo mkdir -p "$DIR" || { echo >&2 "Cannot create chroot directory... Abort !" && return 3; }
+  sudo debootstrap "$DISTR" "$DIR" "$@"
+  sudo cat > "$CONF" <<EOF
+# schroot chroot definitions.
+# See schroot.conf(5) for complete documentation of the file format.
+#
+# Please take note that you should not add untrusted users to
+# root-groups, because they will essentially have full root access
+# to your system.  They will only have root access inside the chroot,
+# but that's enough to cause malicious damage.
+#
+[$NAME]
+description=$NAME chroot
+type=directory
+directory="$DIR"
+users=$USER
+root-users=
+root-groups=root
+profile=desktop
+personality=linux
+preserve-environment=true
+EOF
+}
+
 ################################
 # Fstab to autofs conversion
 fstab2autofs() {
