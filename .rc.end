@@ -136,8 +136,8 @@ alias p='cd ..'
 
 # Cd helper
 cdrp() { cd "$(realpath "$@")"; }
-cdr() { command -v _rfind >/dev/null && cd "$(_rfind "$@")"; }
-alias r='cdr'
+cdroot() { local DIR="$(command -v _rfind >/dev/null && _rfind "$@")"; test -n "$DIR" && cd "$DIR"; }
+alias r='cdroot'
 
 # Vim & co
 alias v='${VI:-false}'
