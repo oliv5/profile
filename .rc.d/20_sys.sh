@@ -17,6 +17,14 @@ alias cpu_performence='sudo sh -c "echo performance > /sys/devices/system/cpu/cp
 alias cpu_ondemand='sudo sh -c "echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"'
 
 ################################
+# Check endianness
+# https://serverfault.com/questions/163487/how-to-tell-if-a-linux-system-is-big-endian-or-little-endian
+is_littleendian() {
+  { echo -n I | od -to2 | awk '{ print substr($2,6,1); exit}'; } 2>/dev/null
+  { echo -n I | hexdump -o | awk '{ print substr($2,6,1); exit}'; } 2>/dev/null
+}
+
+################################
 # Event tester
 alias event_list='xev'
 alias event_showkey='showkey -s'
