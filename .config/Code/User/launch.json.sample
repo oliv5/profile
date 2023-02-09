@@ -1,3 +1,5 @@
+// Debug configuration file
+// See https://code.visualstudio.com/docs/editor/debugging
 // See https://code.visualstudio.com/docs/cpp/cpp-debug
 // See https://go.microsoft.com/fwlink/?linkid=830387
 {
