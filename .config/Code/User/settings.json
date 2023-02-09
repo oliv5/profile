@@ -14,7 +14,6 @@
     "workbench.sideBar.location": "right",
     "workbench.enableExperiments": false,
     "workbench.settings.enableNaturalLanguageSearch": false,
-    "workbench.activityBar.visible": false,
     "workbench.editor.openPositioning": "right",
     "workbench.colorCustomizations": {},
     "workbench.colorTheme": "Aramok's GLX Black",
@@ -28,13 +27,6 @@
         "**/.svn/**": true,
         "**/node_modules/*/**": true
     },
-    
-    // Misc
-    "git.enabled": false,
-    "settingsSync.keybindingsPerPlatform": false,
-    "telemetry.telemetryLevel": "off",
-    "update.mode": "manual",
-    "http.systemCertificates": false,
 
     // Search
     "search.searchEditor.reusePriorSearchConfiguration": true,
@@ -56,6 +48,13 @@
         ".pycscope.out": true,
         ".starscope.db": true
     },
+
+    // Tasks
+    "typescript.tsc.autoDetect": "off",
+    "grunt.autoDetect": "off",
+    "jake.autoDetect": "off",
+    "gulp.autoDetect": "off",
+    "npm.autoDetect": "off",
 
     // Debug
     "debug.terminal.clearBeforeReusing": true,
@@ -89,9 +88,17 @@
     "terminal.integrated.altClickMovesCursor": false,
     "terminal.integrated.tabs.enabled": false,
 
-    // Extensions
+    // Misc
     "extensions.autoUpdate": false,
+    "update.mode": "manual",
+    "settingsSync.keybindingsPerPlatform": false,
+    "telemetry.telemetryLevel": "off",
+    "http.systemCertificates": false,
+    "git.enabled": false,
+
+    // Extensions
     "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "C_Cpp.errorSquiggles": "disabled",
     "scope4code.databasePath": "${workspaceRoot}/",
     "scope4code.executablePath": "/usr/bin/cscope",
     "scope4code.engineCommands": {
@@ -127,9 +134,6 @@
     "cscopeCode.auto": false,
     "cscopeCode.build": "/usr/bin/cscope -RbU",
     "gitlens.keymap": "none",
-    "timeline.excludeSources": [
-        "git-history"
-    ],
     "vssolution.createTemplateFolderQuestion": false,
     "vssolution.altSolutionFolders": [
         "VsProj"
@@ -137,21 +141,20 @@
     "vssolution.showMode": "explorer",
     "eventCommandMapper.eventMaps": [
         {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.action.focusActiveEditorGroup"},
-        // {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.action.terminal.focus"},
-        // {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.debug.action.toggleRepl"},
-        // {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.panel.repl.view.focus"},
+        //{"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.action.terminal.focus"},
+        //{"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.debug.action.toggleRepl"},
+        //{"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.panel.repl.view.focus"},
         ////////////////////////////////////////////////////////////////////////////////////////////////
         {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.focusActiveEditorGroup"},
-        {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closeSidebar"},
-        // {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closePanel"},
-        // {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.terminal.focus"},
-        // {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.terminal.toggleTerminal"},
+        //{"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closeSidebar"},
+        //{"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closePanel"},
+        //{"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.terminal.focus"},
+        //{"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.terminal.toggleTerminal"},
     ],
     "Lua.completion.callSnippet": "Both",
-    "C_Cpp.errorSquiggles": "Disabled",
-    "autoHide.autoHideSideBar": "true",
-    "autoHide.autoHidePanel": "false",
+    "autoHide.autoHideSideBar": false,
+    "autoHide.autoHidePanel": false,
     "autoHide.sideBarDelay": 750,
     "autoHide.panelDelay": 750,
-    "autoHide.hideOnOpen": "true",
+    "autoHide.hideOnOpen": false,
 }

@@ -23,37 +23,41 @@
 { "key": "escape",                "command": "workbench.action.focusActiveEditorGroup", "when":"panelFocus" },
 { "key": "escape",                "command": "workbench.action.closeSidebar", "when":"sideBarFocus" },
 { "key": "ctrl+escape",           "command": "extension.multiCommand.execute", "args":
-    { "sequence": [ "workbench.action.closeSidebar", "workbench.action.closePanel" ] } },
+    { "sequence": [ "workbench.action.closeSidebar", "workbench.action.closePanel", "workbench.action.closeAuxiliaryBar" ] } },
+{ "key": "shift+escape",          "command": "extension.multiCommand.execute", "args":
+    { "sequence": [ "workbench.action.closeSidebar", "workbench.action.closePanel", "workbench.action.closeAuxiliaryBar" ] } },
 
 // F12 bar toggling
-{ "key": "f12",                   "command": "extension.multiCommand.execute", "args":
-    { "sequence": [ "workbench.action.closeSidebar", "workbench.action.closePanel" ] } },
-{ "key": "shift+f12",             "command": "workbench.action.toggleSidebarVisibility" },
+{ "key": "f12",                   "command": "extension.multiCommand.execute", "when" : "sideBarVisible", "args":
+    { "sequence": [ "workbench.action.closeSidebar", "workbench.action.closePanel", "workbench.action.closeAuxiliaryBar" ] } },
+{ "key": "f12",                   "command": "extension.multiCommand.execute", "when" : "! sideBarVisible", "args":
+    { "sequence": [ "workbench.action.toggleSidebarVisibility", "workbench.action.togglePanel", "workbench.action.toggleAuxiliaryBar", "workbench.action.focusActiveEditorGroup" ] } },
+{ "key": "f12",                   "command": "workbench.action.closePanel", "when" : "panelVisible" },
 { "key": "alt+f12",               "command": "workbench.action.toggleActivityBarVisibility" },
+{ "key": "shift+f12",             "command": "workbench.action.toggleSidebarVisibility" },
 { "key": "ctrl+f12",              "command": "workbench.action.togglePanel" },
 { "key": "ctrl+shift+f12",        "command": "workbench.action.toggleFullScreen" },
+{ "key": "ctrl+alt+f12",          "command": "workbench.action.toggleAuxiliaryBar" },
 
-// Sidebar
-{ "key": "ctrl+alt+b",            "command": "workbench.action.toggleSidebarVisibility" },
-{ "key": "ctrl+alt+d",            "command": "workbench.view.debug", "when" : "!sideBarFocus" },
-{ "key": "ctrl+alt+d",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-{ "key": "ctrl+alt+e",            "command": "workbench.view.extensions", "when" : "!sideBarFocus" },
-{ "key": "ctrl+alt+e",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-{ "key": "ctrl+alt+g",            "command": "workbench.view.scm", "when": "workbench.scm.active" },
-{ "key": "ctrl+alt+g",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-{ "key": "ctrl+alt+s",            "command": "workbench.view.search", "when": "!sideBarFocus" },
-{ "key": "ctrl+alt+s",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-{ "key": "ctrl+alt+f",            "command": "workbench.view.search", "when": "!sideBarFocus" }, // alias for ctrl+alt+s not working
-{ "key": "ctrl+alt+f",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" }, // alias for ctrl+alt+s not working
-{ "key": "ctrl+e",                "command": "extension.multiCommand.execute", "when" : "!sideBarFocus", "args":
-    { "sequence": [ "workbench.view.explorer", "workbench.explorer.fileView.focus" ] } },
-{ "key": "ctrl+e",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-
-// Panel
+// Panel & bars
 { "key": "ctrl+alt+p",            "command": "workbench.action.togglePanel" },
+{ "key": "ctrl+alt+b",            "command": "workbench.action.toggleSidebarVisibility" },
+{ "key": "ctrl+alt+s",            "command": "workbench.action.toggleAuxiliaryBar" },
+{ "key": "ctrl+alt+a",            "command": "workbench.action.toggleActivityBarVisibility" },
+{ "key": "ctrl+b",                "command": "-workbench.action.toggleSidebarVisibility" },
+
+// Views
+{ "key": "ctrl+alt+d",            "command": "workbench.view.debug" },
 { "key": "ctrl+alt+y",            "command": "workbench.debug.action.toggleRepl" },
 { "key": "ctrl+alt+o",            "command": "workbench.action.output.toggleOutput" },
 { "key": "ctrl+alt+t",            "command": "workbench.action.terminal.toggleTerminal" },
+{ "key": "ctrl+alt+e",            "command": "workbench.view.extensions" },
+{ "key": "ctrl+alt+g",            "command": "workbench.view.scm", "when": "workbench.scm.active" },
+{ "key": "ctrl+alt+f",            "command": "workbench.view.search" },
+{ "key": "ctrl+e",                "command": "extension.multiCommand.execute", "args":
+    { "sequence": [ "workbench.view.explorer", "workbench.explorer.fileView.focus" ] } },
+{ "key": "ctrl+alt+l",            "command": "outline.toggleVisibility" },
+{ "key": "ctrl+alt+r",            "command": "CppReferencesView.toggleVisibility" },
 
 // Quick actions (searches / navigate)
 { "key": "ctrl+tab",              "command": "workbench.action.quickOpenPreviousRecentlyUsedEditorInGroup" },
@@ -61,6 +65,7 @@
 { "key": "ctrl+shift+[backquote]","command": "workbench.action.openNextRecentlyUsedEditorInGroup" },
 { "key": "ctrl+p",                "command": "workbench.action.quickOpen" },
 { "key": "ctrl+shift+p",          "command": "workbench.action.showCommands" },
+{ "key": "alt+w",                 "command": "workbench.action.showAllEditorsByMostRecentlyUsed" }, // MRU files
 { "key": "ctrl+o",                "command": "workbench.action.showAllEditorsByMostRecentlyUsed" }, // MRU files
 { "key": "ctrl+shift+o",          "command": "workbench.action.openRecent" }, // MRU workspaces
 { "key": "ctrl+t",                "command": "workbench.action.gotoSymbol" },
@@ -153,7 +158,9 @@
     { "sequence": [ "toggleFindCaseSensitive", "toggleSearchCaseSensitive" ] } },
 { "key": "alt+r",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
     { "sequence": [ "toggleFindRegex", "toggleSearchRegex" ] } },
-{ "key": "alt+w",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
+//{ "key": "alt+w",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
+//    { "sequence": [ "toggleFindWholeWord", "toggleSearchWholeWord" ] } },
+{ "key": "alt+x",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
     { "sequence": [ "toggleFindWholeWord", "toggleSearchWholeWord" ] } },
 
 // Folding
@@ -168,20 +175,20 @@
 { "key": "ctrl+shift+q",          "command": "editor.action.blockComment", "when": "editorTextFocus" },
 
 // Intellisense peek/preview
-{ "key": "ctrl+d d",              "command": "editor.action.peekDeclaration" }, // same as editor.action.revealDefinition
-{ "key": "ctrl+d e",              "command": "editor.action.peekDefinition", "when": "editorHasDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
-{ "key": "ctrl+d c",              "command": "editor.action.referenceSearch.trigger" },
-{ "key": "ctrl+d i",              "command": "editor.action.peekImplementation", "when": "editorHasImplementationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
-{ "key": "ctrl+d t",              "command": "editor.action.peekTypeDefinition" },
+{ "key": "ctrl+d ctrl+d",         "command": "editor.action.peekDeclaration", "when": "editorHasDeclarationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
+{ "key": "ctrl+d ctrl+e",         "command": "editor.action.peekDefinition", "when": "editorHasDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+d ctrl+c",         "command": "editor.action.referenceSearch.trigger", "when": "editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+d ctrl+i",         "command": "editor.action.peekImplementation", "when": "editorHasImplementationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+d ctrl+t",         "command": "editor.action.peekTypeDefinition", "when": "editorHasTypeDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 
 // Intellisense goto
-{ "key": "ctrl+enter",            "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
-{ "key": "ctrl+d ctrl+d",         "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
-{ "key": "ctrl+d ctrl+e",         "command": "editor.action.revealDefinition", "when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor" },
+{ "key": "ctrl+enter",            "command": "editor.action.goToDeclaration", "when": "editorHasDeclarationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+d d",              "command": "editor.action.goToDeclaration", "when": "editorHasDeclarationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+d e",              "command": "editor.action.revealDefinition", "when": "editorHasDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 { "key": "ctrl+backspace",        "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
-{ "key": "ctrl+d ctrl+c",         "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
-{ "key": "ctrl+d ctrl+i",         "command": "editor.action.goToImplementation", "when": "editorHasImplementationProvider && editorTextFocus && !isInEmbeddedEditor" },
-{ "key": "ctrl+d ctrl+t",         "command": "editor.action.goToTypeDefinition" },
+{ "key": "ctrl+d c",              "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+d i",              "command": "editor.action.goToImplementation", "when": "editorHasImplementationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+d t",              "command": "editor.action.goToTypeDefinition", "when": "editorHasTypeDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 
 // Quickfix proposals
 { "key": "ctrl+shift+space",      "command": "editor.action.quickFix", "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly" },
@@ -208,19 +215,17 @@
 // Tasks
 { "key": "f6",                    "command": "extension.multiCommand.execute", "when": "!inDebugMode", "args":
     { "sequence": [ "closeMarkersNavigation", "workbench.action.tasks.build" ] } },
-// { "key": "f6",                    "command": "extension.multiCommand.execute", "when": "inDebugMode", "args":
-    // { "sequence": [ "closeMarkersNavigation", "workbench.action.debug.stop", "workbench.action.tasks.build", "workbench.action.debug.start" ] } },
+{ "key": "ctrl+f6",               "command": "extension.multiCommand.execute", "when": "inDebugMode", "args":
+    { "sequence": [ "closeMarkersNavigation", "workbench.action.debug.stop", "workbench.action.tasks.build", "workbench.action.debug.start" ] } },
 { "key": "shift+f6",              "command": "workbench.action.tasks.runTask", "when": "!inDebugMode", "args": "Clean" },
 { "key": "ctrl+f6",               "command": "workbench.action.tasks.test", "when": "!inDebugMode" },
-{ "key": "ctrl+shift+f6",         "command": "workbench.action.tasks.build" },
-{ "key": "ctrl+shift+b",          "command": "workbench.action.tasks.build" },
 
 //////////////////////////////////////////////////
 // Extensions
 
 // Extension Microsoft C/C++ intellisense
-{ "key": "ctrl+b ctrl+b",         "command": "C_Cpp.SwitchHeaderSource", "when": "editorTextFocus && editorLangId == 'c' || editorTextFocus && editorLangId == 'cpp' || editorTextFocus && editorLangId == 'cuda-cpp'" },
-{ "key": "alt+o",                 "command": "-C_Cpp.SwitchHeaderSource", "when": "editorTextFocus && editorLangId == 'c' || editorTextFocus && editorLangId == 'cpp' || editorTextFocus && editorLangId == 'cuda-cpp'" },
+{ "key": "ctrl+b ctrl+b",         "command": "C_Cpp.SwitchHeaderSource", "when": "(editorTextFocus && editorLangId == 'c') || (editorTextFocus && editorLangId == 'cpp') || (editorTextFocus && editorLangId == 'cuda-cpp')" },
+{ "key": "alt+o",                 "command": "-C_Cpp.SwitchHeaderSource", "when": "(editorTextFocus && editorLangId == 'c') || (editorTextFocus && editorLangId == 'cpp') || (editorTextFocus && editorLangId == 'cuda-cpp')" },
 
 // Build & debugging
 //{ "key": "shift+f5",            "command": "extension.multiCommand.execute", "args":
