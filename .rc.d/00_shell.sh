@@ -165,7 +165,8 @@ shell_script() {
   if [ "$OSTYPE" = *darwin* ]; then greadlink -f "$0"; else readlink -f "$0"; fi; fi
 }
 shell_path() {
-  if [ -n "$BASH_VERSION" ]; then (builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd); else
+  # if [ -n "$BASH_VERSION" ]; then (builtin cd "$(dirname "${BASH_SOURCE[0]}")" && pwd); else
+  if [ -n "$BASH_VERSION" ]; then readlink -f "$(dirname "${BASH_SOURCE[0]}")"; else
   if [ "$OSTYPE" = *darwin* ]; then greadlink -f "$(dirname "$0")"; else readlink -f "$(dirname "$0")"; fi; fi
 }
 
