@@ -68,8 +68,8 @@
 { "key": "alt+w",                 "command": "workbench.action.showAllEditorsByMostRecentlyUsed" }, // MRU files
 { "key": "ctrl+o",                "command": "workbench.action.showAllEditorsByMostRecentlyUsed" }, // MRU files
 { "key": "ctrl+shift+o",          "command": "workbench.action.openRecent" }, // MRU workspaces
-{ "key": "ctrl+t",                "command": "workbench.action.gotoSymbol" },
-{ "key": "ctrl+shift+t",          "command": "workbench.action.showAllSymbols" },
+{ "key": "ctrl+t",                "command": "workbench.action.showAllSymbols" },
+{ "key": "ctrl+shift+t",          "command": "workbench.action.gotoSymbol" },
 
 // Cursor/focus navigation
 { "key": "alt+left",              "command": "workbench.action.navigateBack" },
