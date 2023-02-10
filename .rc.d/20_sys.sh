@@ -245,3 +245,12 @@ bat_charging_level() {
 bat_charging_status() {
   sudo cat "${1:-/sys/class/power_supply/battery/status}" #| tr '[:upper:]' '[:lower:]'
 }
+
+################################
+# Add into sudoers.d/
+sudoers_nopasswd() {
+    local CMD="${1:?No command specified...}"
+    local USER="${2:-%sudo}"
+    local NAME="${3:-noname_$(date +%s)}"
+    echo "$USER ALL = NOPASSWD: $CMD" | sudo EDITOR='tee' visudo "/etc/sudoers.d/$NAME"
+}
