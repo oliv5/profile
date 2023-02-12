@@ -61,6 +61,13 @@ alias rsync_mvn='rsync -a --remove-source-files --ignore-existing' # Recursive m
 alias rsync_cpu='rsync -a --existing' # Recursive copy, existing files only
 alias rsync_mvu='rsync -a --remove-source-files --existing' # Recursive move, existing files only
 
+# https://askubuntu.com/questions/719439/using-rsync-with-sudo-on-the-destination-machine
+# in sudoers: $USER ALL=(ALL) NOPASSWD:/usr/bin/rsync
+rsync_as_user() {
+  rsync --rsync-path="sudo /usr/bin/rsync" "$@"
+  #~ read -s -p "Remote sudo password: " SUDOPASS && rsync --rsync-path="echo $SUDOPASS | sudo -Sv && sudo rsync" "$@"
+}
+
 ##############################
 # Copy files & preserve permissions
 alias cp_rsync='rsync_cp'
