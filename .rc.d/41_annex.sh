@@ -60,6 +60,15 @@ annex_uninit() {
   git --git-dir="${1:-.}" config --replace-all core.bare false
 }
 
+########################################
+# Annex config - these parameters are stored in the annex for all repos to see them
+annex_config_set() { git annex config --set "$@"; }
+annex_config_rm() { git annex config --unset "$1"; }
+annex_config_set_remotes() { local REMOTE; for REMOTE in $(git_remotes "$1"); do git annex config --set "remote.$REMOTE.$2" "$3"; done; }
+annex_config_rm_remotes() { local REMOTE; for REMOTE in $(git_remotes "$1"); do git annex config --unset "remote.$REMOTE.$2"; done; }
+
+########################################
+
 # Setup v7 annex in dual mode: plain & annexed files
 # https://git-annex.branchable.com/git-annex/
 # https://git-annex.branchable.com/tips/largefiles/
@@ -67,13 +76,13 @@ annex_uninit() {
 # https://git-annex.branchable.com/forum/lets_discuss_git_add_behavior/#comment-37e0ecaf8e0f763229fd7b8ee9b5a577
 annex_mixed_content() {
   local SIZE="${1:-nothing}"
-  local LOCAL="${2:-1}"
-  if [ -n "$LOCAL" ]; then
-    _set_config() { git config --replace-all "$@"; }
-    _rm_config() { git config --unset-all "$1"; }
+  local INREMOTE="$2"
+  if [ -z "$INREMOTE" ]; then
+    _set_config() { git_config_set "$@"; }
+    _rm_config() { git_config_rm "$1"; }
   else
-    _set_config() { git annex config --set "$@"; }
-    _rm_config() { git annex config --unset "$1"; }
+    _set_config() { annex_config_set "$@"; }
+    _rm_config() { annex_config_rm "$1"; }
   fi
   if [ "$SIZE" = "remove" ] || [ "$SIZE" = "rm" ]; then
     _rm_config annex.gitaddtoannex
@@ -93,6 +102,32 @@ annex_mixed_content() {
     _set_config annex.addsmallfiles "false"
     _set_config annex.largefiles "$SIZE"
   fi
+}
+
+########################################
+# Limitations
+annex_autocommit() {
+  git_config annex.autocommit "$@"
+}
+
+annex_remotes_push_enable() {
+  git_config_remotes annex-push "$@"
+}
+
+annex_remotes_pull_enable() {
+  git_config_remotes annex-pull "$@"
+}
+
+annex_remotes_sync_enable() {
+  git_config_remotes annex-sync "$@"
+}
+
+annex_remotes_ignore() {
+  git_config_remotes annex-ignore "$@"
+}
+
+annex_remotes_readonly() {
+  git_config_remotes annex-readonly "$@"
 }
 
 ########################################
@@ -1050,54 +1085,6 @@ annex_preferred() {
   if [ -r "$WANTED" ]; then
     cat "$WANTED" | xargs -d\\n -r -n1 -- sh -c 'eval git annex wanted $*' _
   fi
-}
-
-########################################
-# Configure the local repo
-annex_config() {
-  local PARAM="${1:?No parameter specified...}"
-  local BOOL="${2:-true}"
-  test "$BOOL" = "true" || BOOL=false
-  git config --replace-all "annex.$PARAM" "$BOOL"
-  echo -n annex.$PARAM=
-  git config --get "annex.$PARAM"
-}
-
-# Configure remotes
-annex_remotes_config() {
-  local PARAM="${1:?No parameter specified...}"
-  local BOOL="${2:-true}"
-  test "$BOOL" = "true" || BOOL=false
-  for REMOTE in $(git_remotes "$3"); do
-    git config --replace-all "remote.$REMOTE.$PARAM" "$BOOL"
-    echo -n remote.$REMOTE.$PARAM=
-    git config --get "remote.$REMOTE.$PARAM"
-  done
-}
-
-# Limitations
-annex_autocommit() {
-  annex_config autocommit "$@"
-}
-
-annex_remotes_push_enable() {
-  annex_remotes_config annex-push "$@"
-}
-
-annex_remotes_pull_enable() {
-  annex_remotes_config annex-pull "$@"
-}
-
-annex_remotes_sync_enable() {
-  annex_remotes_config annex-sync "$@"
-}
-
-annex_remotes_ignore() {
-  annex_remotes_config annex-ignore "$@"
-}
-
-annex_remotes_readonly() {
-  annex_remotes_config annex-readonly "$@"
 }
 
 ########################################

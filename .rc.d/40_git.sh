@@ -91,6 +91,12 @@ cat <<EOF
 EOF
 }
 
+# Configure the repos
+git_config_set() { git config --replace-all "$@"; }
+git_config_rm() { git config --unset-all "$1"; }
+git_config_set_remotes() { local REMOTE; for REMOTE in $(git_remotes "$1"); do git config --replace-all "remote.$REMOTE.$2" "$3"; done; }
+git_config_rm_remotes() { local REMOTE; for REMOTE in $(git_remotes "$1"); do git config --unset-all "remote.$REMOTE.$2"; done; }
+
 ########################################
 # Set shadow-like clone (only specific branch)
 git_set_shallow() {
