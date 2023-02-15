@@ -231,9 +231,8 @@ var_has() {
 ################################
 # Get error status of piped commands:
 # option #1: bash set -o pipefail and ${PIPESTATUS[0]}
-# option #2: use mispipe (sudo apt install mispipe)
-# option #3: use named pipes
-# https://stackoverflow.com/questions/17757039/equivalent-of-pipefail-in-dash-shell
+# option #2: use mispipe (sudo apt install moreutils)
+# option #3: use named pipes to do an alternate mispipe implementation
 
 # Create a named fifo/pipe
 crpipe() {
@@ -313,9 +312,11 @@ rdpipe() {
 # Executes 2 cmds in a pipe & returns the status of the first one
 # https://unix.stackexchange.com/a/16709
 # https://linux.die.net/man/1/mispipe
+# https://unix.stackexchange.com/questions/14270/get-exit-status-of-process-thats-piped-to-another
 command -v mispipe >/dev/null 2>&1 ||
 mispipe() {
   # Ex: ( exec 4>&1; ERR=$({ { (echo 'toto titi'; false); echo $? >&3; } | grep toto; } 3>&1 >&4); exec 4>&-; echo "Errcode=$ERR" )
+  # Ex: { { { { someprog; echo $? >&3; } | filter >&4; } 3>&1; } | { read xs; exit $xs; } } 4>&1
   local CMD1="${1:?No command 1 specified...}"
   local CMD2="${2:?No command 2 specified...}"
   local PIPE1="${3:-3}"
