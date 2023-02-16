@@ -55,7 +55,7 @@
 		"makefile.extensionOutputFolder": "./.vscode",
 		"docwriter.progress.trackFunctions": false,
 		"docwriter.style": "Doxygen",
-        "debug_binary_name" : "my_binary_to_debug",
+		"debug_binary_name" : "my_binary_to_debug",
 	},
 	"tasks": {
 		"version": "2.0.0",
@@ -105,18 +105,18 @@
 					"isDefault": true
 				}
 			},
-            {
-                "label": "Pause",
-                "detail": "Pause the debugger",
-                "type": "shell",
-                "command": "test -n \"${config:debug_binary_name}\" && sudo killall -TRAP ${config:debug_binary_name}",
-                "isBackground": true,
-                "problemMatcher": [],
-                "presentation": {
-                    "group": "debug",
-                    "isDefault": true
-                }
-            },
+			{
+				"label": "Pause",
+				"detail": "Pause the debugger",
+				"type": "shell",
+				"command": "test -n \"${config:debug_binary_name}\" && sudo killall -TRAP ${config:debug_binary_name}",
+				"isBackground": true,
+				"problemMatcher": [],
+				"group": "test",
+				"presentation": {
+					"reveal": "never"
+				},
+			},
 		]
 	},
 	"launch": {
