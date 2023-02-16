@@ -199,7 +199,6 @@
 // Debugger
 { "key": "f5",                    "command": "workbench.action.debug.start", "when": "debuggersAvailable && !inDebugMode" },
 { "key": "f5",                    "command": "workbench.action.debug.continue", "when": "debuggersAvailable && inDebugMode" },
-//{ "key": "f5",                    "command": "workbench.action.debug.pause", "when": "debuggersAvailable && debugState == 'running'" },
 { "key": "f5",                    "command": "extension.multiCommand.execute", "when": "debuggersAvailable && debugState == 'running'", "args":
     { "sequence": [ "workbench.action.debug.pause", { "command": "workbench.action.tasks.runTask", "args": "Pause" } ] } },
 { "key": "shift+f5",              "command": "workbench.action.debug.stop", "when": "debuggersAvailable && inDebugMode" },
@@ -230,8 +229,8 @@
 // Extensions
 
 // Extension Microsoft C/C++ intellisense
-{ "key": "ctrl+b ctrl+b",         "command": "C_Cpp.SwitchHeaderSource", "when": "(editorTextFocus && editorLangId == 'c') || (editorTextFocus && editorLangId == 'cpp') || (editorTextFocus && editorLangId == 'cuda-cpp')" },
-{ "key": "alt+o",                 "command": "-C_Cpp.SwitchHeaderSource", "when": "(editorTextFocus && editorLangId == 'c') || (editorTextFocus && editorLangId == 'cpp') || (editorTextFocus && editorLangId == 'cuda-cpp')" },
+{ "key": "ctrl+b ctrl+b",         "command": "C_Cpp.SwitchHeaderSource", "when": "editorTextFocus && editorLangId == 'c' || editorTextFocus && editorLangId == 'cpp' || editorTextFocus && editorLangId == 'cuda-cpp'" },
+{ "key": "alt+o",                 "command": "-C_Cpp.SwitchHeaderSource", "when": "editorTextFocus && editorLangId == 'c' || editorTextFocus && editorLangId == 'cpp' || editorTextFocus && editorLangId == 'cuda-cpp'" },
 
 // Build & debugging
 //{ "key": "shift+f5",            "command": "extension.multiCommand.execute", "args":
