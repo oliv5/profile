@@ -117,6 +117,18 @@
 					"reveal": "never"
 				},
 			},
+            {
+                "label": "End execution",
+                "detail": "End execution gracefully",
+                "type": "shell",
+                "command": "test -n \"${config:debug_binary_name}\" && sudo killall -TERM ${config:debug_binary_name}",
+                "isBackground": true,
+                "problemMatcher": [],
+                "group": "test",
+                "presentation": {
+                    "reveal": "never"
+                }
+            },
 		]
 	},
 	"launch": {
