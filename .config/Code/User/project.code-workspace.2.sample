@@ -55,6 +55,7 @@
 		"makefile.extensionOutputFolder": "./.vscode",
 		"docwriter.progress.trackFunctions": false,
 		"docwriter.style": "Doxygen",
+        "debug_binary_name" : "my_binary_to_debug",
 	},
 	"tasks": {
 		"version": "2.0.0",
@@ -103,7 +104,19 @@
 					"kind": "build",
 					"isDefault": true
 				}
-			}
+			},
+            {
+                "label": "Pause",
+                "detail": "Pause the debugger",
+                "type": "shell",
+                "command": "test -n \"${config:debug_binary_name}\" && sudo killall -TRAP ${config:debug_binary_name}",
+                "isBackground": true,
+                "problemMatcher": [],
+                "presentation": {
+                    "group": "debug",
+                    "isDefault": true
+                }
+            },
 		]
 	},
 	"launch": {
@@ -116,7 +129,7 @@
 				"name": "Build and run",
 				"type": "cppdbg",
 				"request": "launch",
-				"program": "${workspaceFolder:root}/Debug/binary",
+				"program": "${workspaceFolder:root}/Debug/my_binary_to_debug",
 				"args": [ ],
 				"stopAtEntry": false,
 				"cwd": "${workspaceFolder:root}/Debug",

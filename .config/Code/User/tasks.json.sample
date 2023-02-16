@@ -69,6 +69,18 @@
 				"reveal": "always",
 				"panel": "new"
 			}
-		}
+		},
+        {
+			"label": "Pause",
+			"detail": "Pause the debugger",
+			"type": "shell",
+			"command": "test -n \"${config:debug_binary_name}\" && sudo killall -TRAP ${config:debug_binary_name}",
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"group": "debug",
+                "isDefault": true
+			}
+		},
 	]
 }
