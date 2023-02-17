@@ -17,8 +17,13 @@ ssh_agent() {
 	fi
 	return 0
 }
+
 ssh_agent_kill() {
 	eval $(ssh-agent -k)
+}
+
+ssh_agent_alive() {
+	timeout 0.1 ssh-add -l >/dev/null 2>&1
 }
 
 # Disable SSH-agent forwarding for the local user
