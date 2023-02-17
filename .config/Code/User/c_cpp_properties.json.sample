@@ -5,12 +5,22 @@
             "includePath": [
                 "/usr/include/linux",
                 "${workspaceFolder}/**",
+                "${default}"
             ],
-            "defines": [],
-            "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c11",
-            "cppStandard": "c++14",
-            "intelliSenseMode": "linux-gcc-x64"
+            "defines": [ 
+                "${default}",
+            ],
+            "compilerPath": "${default}",
+            "compilerArgs": [ "-Wno-unused-parameters", "-Wno-unused-variable", "-Wno-missing-field-initializers" ],
+            "cStandard": "${default}",
+            "cppStandard": "${default}",
+            "intelliSenseMode": "linux-gcc-x64",
+            "browse": {
+                "path" : [
+                    "${workspaceFolder}",
+                    "${default}"
+                ]
+            }
         }
     ],
     "version": 4
