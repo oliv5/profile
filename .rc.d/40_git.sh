@@ -1361,20 +1361,15 @@ git_tag_delete() {
   ' _ {} $REMOTES
 }
 
-# Get previous tag
+# Get last created tags
+git_tag_last_created() {
+  git tag --sort=-committerdate -l
+}
+
+# Get previous tag in branch
 git_tag_prev() {
   for FROM in "${@:-}"; do
     git describe --tags --abbrev=0 ${FROM:+${FROM}^}
-  done
-}
-
-# List previous tags in a range of commits
-git_tag_list_prev() {
-  local FROM="${1:-HEAD}"
-  local TO="$(git tag -l $2)"
-  while [ "$FROM" != "$TO" ]; do
-    FROM="$(git describe --tags --abbrev=0 ${FROM:+${FROM}^} 2>/dev/null)"
-    [ -n "$FROM" ] && echo "$FROM"
   done
 }
 
@@ -1584,6 +1579,7 @@ alias gdt='git diff $(git_tracking)'
 alias gddt='git diff $(git_tracking)'
 alias gdct='git diff --cached $(git_tracking)'
 alias gdmt='git difftool -y $(git_tracking)'
+alias gddl='git diff $(git_tag_last_created | head -n 1)'
 alias gda='git_diff_all'
 alias gdda='git_diff_all'
 alias gdma='git_diffm_all'
