@@ -269,11 +269,13 @@ git_branches_info() {
 
 # Check a branch exists
 git_branch_exists() {
-  local BRANCH="${1}/"
-  local REMOTE="${BRANCH#*/}"
-  echo "$1" | grep -- '/' >/dev/null && BRANCH="remotes/$1" || BRANCH="heads/$1"
-  #[ -n "$(git ${2:+--git-dir="$2"} for-each-ref --shell refs/${BRANCH})" ]
-  git ${2:+--git-dir="$2"} show-ref "refs/${BRANCH}" >/dev/null
+  git ${2:+--git-dir="$2"} show-ref "$1" >/dev/null
+}
+git_branch_exists_local() {
+  git_branch_exists "refs/heads/$1" "$2"
+}
+git_branch_exists_remote() {
+  git_branch_exists "refs/remotes/$1" "$2"
 }
 
 # Set an existing branch to a given SHA1 without checking it out
@@ -299,8 +301,13 @@ git_branch_delete() {
   done
 }
 
-# List remote branches
+# List remote branches without network access
 git_branches_remote() {
+  git for-each-ref ${2:+--git-dir="$2"} --format='%(refname:short)' refs/remotes${1:+/$1}
+}
+
+# List remote branches with network access
+git_branches_ls_remote() {
   git ls-remote --heads | awk '{print substr($2,12)}'
 }
 
@@ -381,6 +388,54 @@ git_st() {
 git_stx() {
   git ${3:+--git-dir="$3"} status -z ${2:+"$2"} | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
 }
+
+# Files status in a commit
+git_ls_in_ref() {
+  git diff-tree --no-commit-id --name-status -r "${2:-HEAD}" | awk "/^($1)/ {print \$2}"
+}
+git_ls_deleted_in_ref()  { git_ls_in_ref D "$@"; }
+git_ls_created_in_ref()  { git_ls_in_ref A|C "$@"; }
+git_ls_updated_in_ref()  { git_ls_in_ref R|T "$@"; }
+git_ls_modified_in_ref() { git_ls_in_ref M "$@"; }
+
+# List files by action (A=added, D=deleted, M=modified)
+#~ git_filter_by_status() {
+  #~ local FILTER="${1:?No status filter ADM specified...}"
+  #~ local STATUS="${2:?No file status ADM specified...}"
+  #~ shift 2
+  #~ git diff-tree -r "${@:-HEAD}" --diff-filter=$FILTER --raw | awk '
+    #~ function basename(file) {
+      #~ sub(".*/", "", file)
+      #~ return file
+    #~ }
+    #~ {
+      #~ # Get parameters
+      #~ hash=$3 $4
+      #~ action=$5
+      #~ file=$6
+      #~ sub("    ", "", file)
+      #~ name=basename(file)
+      #~ # Filter files, reject already seen ones
+      #~ if ((hash in seen) || (name in seen)) {
+        #~ delete validated[hash]
+        #~ delete validated[name]
+      #~ } else if (action == "'$STATUS'") {
+        #~ validated[hash]=file
+      #~ }
+      #~ seen[hash]=file
+      #~ seen[name]=file
+    #~ }
+    #~ END {
+      #~ for (x in validated) {
+        #~ print validated[x]
+      #~ }
+    #~ }
+  #~ '
+#~ }
+#~ git_deleted() { git_filter_by_status AD D "$@"; }
+#~ git_created() { git_filter_by_status AD A "$@"; }
+#~ git_updated() { git_filter_by_status DM M "$@"; }
+#~ git_modified() { git_filter_by_status M M "$@"; }
 
 # Get remote names
 git_remotes() {
@@ -489,8 +544,7 @@ else
 git_pull() { git pull "$@"; }
 fi
 
-# Batch pull from all remotes
-# Fast-forward only
+# Pull current branch from all existing remotes
 git_pull_all() {
   git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
@@ -503,11 +557,31 @@ git_pull_all() {
   done
 }
 
-########################################
-# Alias for compatibility
-alias git_push='git push'
+# Checkout and update all branches from all remotes
+git_up() {
+  git_exists || return 1
+  git_modified && echo "Cannot run, repo is not clean..." && return 2
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="$2"
+  local CURRENT_REF="$(git symbolic-ref --short HEAD 2>/dev/null || git_hash)"
+  for REMOTE in $REMOTES; do
+    if git_remote_valid "$REMOTE"; then
+      echo -n "Pull from $REMOTE: "
+      for BRANCH in ${BRANCHES:-$(git_branches_remote "$REMOTE" | cut -d/ -f2-)}; do
+        if git_branch_exists "$BRANCH"; then
+          git checkout "$BRANCH" || break
+        else
+          git checkout --no-track "$REMOTE/$BRANCH" || break
+        fi
+        git_pull --ff-only "$REMOTE" "$BRANCH" || break
+      done
+    fi
+  done
+  git checkout "$CURRENT_REF" 2>/dev/null
+}
 
-# Batch push to all existing remotes, use --all as branch to push all branches
+########################################
+# Push current branch to all existing remotes
 alias git_push_all_all='git_push_all "" --all'
 git_push_all() {
   git_exists || return 1
@@ -531,6 +605,12 @@ git_push_enable() {
   for REMOTE in ${@:-$(git_remotes)}; do
     git config --unset "remote.${REMOTE}.pushurl" no-push
   done
+}
+
+########################################
+# Sync local & remotes repo
+git_sync() {
+  git_up && git_push_all "" --all
 }
 
 ########################################
@@ -943,47 +1023,6 @@ git_cat() {
     git show ${REV}:"$FILE"
   done
 }
-
-# List files by action (A=added, D=deleted, M=modified)
-git_filter_by_status() {
-  local FILTER="${1:?No status filter ADM specified...}"
-  local STATUS="${2:?No file status ADM specified...}"
-  shift 2
-  git diff-tree -r "${@:-HEAD}" --diff-filter=$FILTER --raw | awk '
-    function basename(file) {
-      sub(".*/", "", file)
-      return file
-    }
-    {
-      # Get parameters
-      hash=$3 $4
-      action=$5
-      file=$6
-      sub("    ", "", file)
-      name=basename(file)
-      # Filter files, reject already seen ones
-      if ((hash in seen) || (name in seen)) {
-        delete validated[hash]
-        delete validated[name]
-      } else if (action == "'$STATUS'") {
-        validated[hash]=file
-      }
-      seen[hash]=file
-      seen[name]=file
-    }
-    END {
-      for (x in validated) {
-        print validated[x]
-      }
-    }
-  '
-}
-
-# List created/deleted/modified files
-git_deleted() { git_filter_by_status AD D "$@"; }
-git_created() { git_filter_by_status AD A "$@"; }
-git_updated() { git_filter_by_status DM M "$@"; }
-git_modified() { git_filter_by_status M M "$@"; }
 
 ########################################
 # Subtrees
