@@ -65,30 +65,40 @@ mkschroot() {
   local NAME="$(basename "$DIR")"
   local CONF="/etc/schroot/chroot.d/$NAME"
   shift 2
-  [ -e "$DIR" ] && echo >&2 "Chroot directory exists already... Abort !" && return 1
-  [ -e "$CONF" ] && echo >&2 "Schroot config file $CONF exists already... Abort !" && return 2
-  sudo mkdir -p "$DIR" || { echo >&2 "Cannot create chroot directory... Abort !" && return 3; }
-  sudo debootstrap "$DISTR" "$DIR" "$@"
-  sudo cat > "$CONF" <<EOF
+  sudo mkdir -p "$DIR" || { echo >&2 "Cannot create chroot directory... Abort !" && return 1; }
+  sudo mkdir -p "/etc/schroot/chroot.d/" || { echo >&2 "Cannot create schroot config directory... Abort !" && return 2; }
+  sudo sh -c '
+cat > "$1" <<EOF
 # schroot chroot definitions.
 # See schroot.conf(5) for complete documentation of the file format.
 #
 # Please take note that you should not add untrusted users to
 # root-groups, because they will essentially have full root access
 # to your system.  They will only have root access inside the chroot,
-# but that's enough to cause malicious damage.
+# but that is enough to cause malicious damage.
 #
-[$NAME]
-description=$NAME chroot
+[$2]
+description=Chroot for $2
 type=directory
-directory="$DIR"
-users=$USER
-root-users=
+directory=$3
+users=$4
+root-users=root
 root-groups=root
-profile=desktop
-personality=linux
-preserve-environment=true
+aliases=default
 EOF
+' _ "$CONF" "$NAME" "$(readlink -f "$DIR")" "$USER"
+  sudo debootstrap "$DISTR" "$DIR" "$@"
+}
+
+# https://askubuntu.com/questions/148638/how-do-i-enable-the-universe-repository
+# https://manpages.ubuntu.com/manpages/trusty/man1/add-apt-repository.1.html
+mkschroot_setup_bionic() {
+  sudo schroot -u root -c "${1:-bionic}" -- sh -c '
+    passwd $1
+    sudo apt install software-properties-common
+    sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
+    sudo apt update
+  ' _ "$USER"
 }
 
 ################################
