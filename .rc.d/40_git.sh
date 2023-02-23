@@ -569,11 +569,16 @@ git_up() {
       echo -n "Pull from $REMOTE: "
       for BRANCH in ${BRANCHES:-$(git_branches_remote "$REMOTE" | cut -d/ -f2-)}; do
         if git_branch_exists "$BRANCH"; then
-          git checkout "$BRANCH" || break
+          if [ "$(git_hash "refs/heads/$BRANCH")" != "$(git_hash "refs/remotes/$REMOTE/$BRANCH")" ]; then
+            git checkout "$BRANCH" &&
+              git_pull --ff-only "$REMOTE" "$BRANCH" || continue
+          else
+            echo "Skip already aligned $REMOTE/$BRANCH ..."
+          fi
         else
-          git checkout --no-track "$REMOTE/$BRANCH" || break
+          git checkout --no-track "$REMOTE/$BRANCH" &&
+            git_pull --ff-only "$REMOTE" "$BRANCH" || continue
         fi
-        git_pull --ff-only "$REMOTE" "$BRANCH" || break
       done
     fi
   done
