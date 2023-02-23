@@ -3,8 +3,8 @@
 # Some general-purpose fcts
 command -v relpath >/dev/null ||
 relpath() {
-  { command -v realpath && realpath -m --relative-to="${2:-$PWD}" "$1"; } ||
-  { command -v python && python -c "import os.path; print(os.path.relpath('$1', '${2:-$PWD}'))"; } ||
+  { command -v realpath >/dev/null && realpath -m --relative-to="${2:-$PWD}" "$1"; } ||
+  { command -v python >/dev/null && python -c "import os.path; print(os.path.relpath('$1', '${2:-$PWD}'))"; } ||
   echo "$1"
 }
 command -v abspath >/dev/null ||
