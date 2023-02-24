@@ -1,3 +1,20 @@
+macro _strstr_backward(a,b) {
+	len_a = strlen(a) - 1
+	len_b = strlen(b) - 1
+	i = len_a
+	j = len_b
+	while(i > 0) {
+		if (a[i] != b[j])
+			j = len_b
+		else
+			j = j - 1
+		if (j == 0)
+			return i
+		i = i - 1
+	}
+	return -1
+}
+
 macro Indented(hbuf) {
 	numLines = GetBufLineCount(hbuf)
 	i = numLines - 1
@@ -57,6 +74,10 @@ macro SameHeaderCompact(hbuf) {
 		link = GetSourceLink(hbuf, i)
 		if (link == "") {
 			line_text = GetBufLine(hbuf, i)
+			pos = _strstr_backward(link_text, " line ")
+			if (pos != -1) {
+				link_text = strtrunc(link_text, pos) # "line " # (last_link.ln + 1) # " : "
+			}
 			PutBufLine(hbuf, i, link_text # line_text)
 			SetSourceLink(hbuf, i, last_link.file, last_link.ln)
 			last_link.ln = last_link.ln + 1
