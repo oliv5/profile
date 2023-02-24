@@ -59,6 +59,7 @@ macro SameHeaderCompact(hbuf) {
 			line_text = GetBufLine(hbuf, i)
 			PutBufLine(hbuf, i, link_text # line_text)
 			SetSourceLink(hbuf, i, last_link.file, last_link.ln)
+			last_link.ln = last_link.ln + 1
 		} else {
 			link_text = GetBufLine(hbuf, i)
 			last_link = link
