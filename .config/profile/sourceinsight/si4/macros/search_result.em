@@ -15,6 +15,17 @@ macro _strstr_backward(a,b) {
 	return -1
 }
 
+macro _strltrim(a) {
+	len = strlen(a)
+	i = 0
+	while(i <= len) {
+		if (a[i] != " " && a[i] != "\t")
+			break
+		i = i + 1
+	}
+	return strmid(a, i, len)
+}
+
 macro Indented(hbuf) {
 	numLines = GetBufLineCount(hbuf)
 	i = numLines - 1
@@ -22,12 +33,11 @@ macro Indented(hbuf) {
 		link = GetSourceLink(hbuf, i)
 		if (link == "") {
 			line_text = GetBufLine(hbuf, i)
-			PutBufLine(hbuf, i, " " # line_text)
+			line_text = _strltrim(line_text)
+			PutBufLine(hbuf, i, "\t" # line_text)
 		}
 		i = i - 1
 	}
-	replaceInBuf(hbuf, "^  *", "    ", 0, numLines, false/*matchcase*/, true/*regexp*/, false/*wholeword*/, false/*confirm*/)
-	replaceInBuf(hbuf, "^    \t*", "    ", 0, numLines, false/*matchcase*/, true/*regexp*/, false/*wholeword*/, false/*confirm*/)
 }
 
 macro GroupedIndented(hbuf) {
@@ -37,14 +47,13 @@ macro GroupedIndented(hbuf) {
 		link = GetSourceLink(hbuf, i)
 		if (link == "") {
 			line_text = GetBufLine(hbuf, i)
-			PutBufLine(hbuf, i, " " # line_text)
+			line_text = _strltrim(line_text)
+			PutBufLine(hbuf, i, "\t" # line_text)
 		} else {
 			InsBufLine(hbuf, i, "")
 		}
 		i = i - 1
 	}
-	replaceInBuf(hbuf, "^  *", "    ", 0, numLines, false/*matchcase*/, true/*regexp*/, false/*wholeword*/, false/*confirm*/)
-	replaceInBuf(hbuf, "^    \t*", "    ", 0, numLines, false/*matchcase*/, true/*regexp*/, false/*wholeword*/, false/*confirm*/)
 }
 
 macro SameHeader(hbuf) {
@@ -55,14 +64,13 @@ macro SameHeader(hbuf) {
 		link = GetSourceLink(hbuf, i)
 		if (link == "") {
 			line_text = GetBufLine(hbuf, i)
+			line_text = _strltrim(line_text)
 			PutBufLine(hbuf, i, link_text # line_text)
 		} else {
 			link_text = GetBufLine(hbuf, i)
 		}
 		i = i + 1
 	}
-	replaceInBuf(hbuf, "^\\([^:]*: \\) *", "\\1", 0, numLines, false/*matchcase*/, true/*regexp*/, false/*wholeword*/, false/*confirm*/)
-	replaceInBuf(hbuf, "^\\([^:]*: \\)\\t*", "\\1", 0, numLines, false/*matchcase*/, true/*regexp*/, false/*wholeword*/, false/*confirm*/)
 }
 
 macro SameHeaderCompact(hbuf) {
@@ -74,6 +82,7 @@ macro SameHeaderCompact(hbuf) {
 		link = GetSourceLink(hbuf, i)
 		if (link == "") {
 			line_text = GetBufLine(hbuf, i)
+			line_text = _strltrim(line_text)
 			pos = _strstr_backward(link_text, " line ")
 			if (pos != -1) {
 				link_text = strtrunc(link_text, pos) # "line " # (last_link.ln + 1) # " : "
@@ -90,8 +99,6 @@ macro SameHeaderCompact(hbuf) {
 		}
 		i = i + 1
 	}
-	replaceInBuf(hbuf, "^\\([^:]*: \\) *", "\\1", 0, numLines, false/*matchcase*/, true/*regexp*/, false/*wholeword*/, false/*confirm*/)
-	replaceInBuf(hbuf, "^\\([^:]*: \\)\\t*", "\\1", 0, numLines, false/*matchcase*/, true/*regexp*/, false/*wholeword*/, false/*confirm*/)
 }
 
 macro RemoveErrors(hbuf) {
@@ -110,7 +117,7 @@ event DocumentChanged(sFile) {
 		hbuf = GetBufHandle(sFile)
 		if hbuf == hNil
 			stop
-		if (! IsBufDirty(hbuf)) // Prevent rentry
+		if (!IsBufDirty(hbuf)) // Prevent rentry
 			stop
 		RemoveErrors(hbuf)
 		SameHeaderCompact(hbuf)
