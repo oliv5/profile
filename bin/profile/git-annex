@@ -2,7 +2,7 @@
 # Git annex wrapper
 
 # Forbid git annex initremote or enableremote when git config contains a reference to gcrypt
-if git config -l 2>/dev/null | grep -i gcrypt >/dev/null; then
+if [ -z "$GIT_ANNEX_ALLOW_GCRYPT" ] && git config -l 2>/dev/null | grep -i gcrypt >/dev/null; then
     I=1
     while [ $I -le $# ]; do
         P="$(eval echo \$$I)"
