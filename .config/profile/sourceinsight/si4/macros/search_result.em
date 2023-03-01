@@ -105,7 +105,7 @@ macro RemoveErrors(hbuf) {
 	numLines = GetBufLineCount(hbuf)
 	sel = SearchInBuf(hbuf, "^---- .* Search Errors Encountered (.*) ----.*", 0, 0, true/*matchcase*/, true/*regexp*/, false/*wholeword*/)
 	if (sel == "")
-		stop
+		return nil
 	while(sel.lnFirst < numLines) {
 		DelBufLine(hbuf, sel.lnFirst)
 		numLines = numLines - 1
