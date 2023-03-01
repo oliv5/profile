@@ -229,10 +229,14 @@ git_branch_default() {
 # Get current branch tracking
 alias git_tracking_remote='git_tracking | sed -s "s;/.*;;"'
 alias git_tracking_branch='git_tracking | sed -s "s;.*/;;"'
-alias git_get_tracking='git_tracking'
-git_tracking() {
+git_get_tracking() {
   git ${2:+--git-dir="$2"} rev-parse --abbrev-ref --symbolic-full-name "$1@{upstream}" 2>/dev/null | grep -v '@{upstream}'
   #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
+}
+git_tracking() {
+  local TRACKING="$(git_get_tracking "$@")"
+  [ -z "$TRACKING" ] && echo "$(git_remotes | cut -d ' ' -f 1)/$(git_branch)" ||
+  echo "${TRACKING:-$(git_remotes | cut -d ' ' -f 1)/$(git_branch)}"
 }
 
 # Set default tracking
@@ -1646,7 +1650,7 @@ alias gbu='git branch --set-upstream-to '  # set branch upstream
 alias gb='git branch'
 # Tracking branches
 alias gst='git_set_tracking'
-alias ggt='git_get_tracking'
+alias ggt='git_tracking'
 # Stash aliases
 alias gsc='git_stash_create'
 alias gss='git_stash_save'
@@ -1790,6 +1794,7 @@ alias git_ignore_changes='git update-index --assume-unchanged'
 alias git_noignore_changes='git update-index --no-assume-unchanged'
 # gitk aliases
 alias gk='gitk'
+alias gkt='gitk HEAD $(git_tracking)'
 # ls aliases
 alias gls='git_ls'
 alias glsg='git_ls | grep'
