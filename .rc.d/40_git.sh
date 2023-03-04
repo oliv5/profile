@@ -1778,6 +1778,7 @@ alias grbi5='git rebase -i HEAD~5'
 alias grbit='git rebase -i $(git_tracking)'
 # Fetch/pull/push aliases
 alias gpu='git push'
+alias gpuu='git push -u'
 alias gpua='git_push_all'
 alias gup='git_pull'
 alias gupa='git_pull_all'
