@@ -3,14 +3,11 @@
 
 # Forbid git annex initremote or enableremote when git config contains a reference to gcrypt
 if [ -z "$GIT_ANNEX_ALLOW_GCRYPT" ] && git config -l 2>/dev/null | grep -i gcrypt >/dev/null; then
-    I=1
-    while [ $I -le $# ]; do
-        P="$(eval echo \$$I)"
+    for P; do
         if [ "$P" = "initremote" ] || [ "$P" = "enableremote" ]; then
             echo >&2 "Git annex $P is forbidden when gcrypt is used..."
             exit 1
         fi
-        I=$(($I + 1))
     done
 fi
 
