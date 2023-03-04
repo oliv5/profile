@@ -62,7 +62,7 @@ macro SameHeader(hbuf) {
 	i = 1
 	while(i < numLines) {
 		link = GetSourceLink(hbuf, i)
-		if (link == "") {
+		if (link == nil) {
 			line_text = GetBufLine(hbuf, i)
 			line_text = _strltrim(line_text)
 			PutBufLine(hbuf, i, link_text # line_text)
@@ -75,12 +75,16 @@ macro SameHeader(hbuf) {
 
 macro SameHeaderCompact(hbuf) {
 	numLines = GetBufLineCount(hbuf)
+	if (numLines < 2)
+		return nil
 	last_link = GetSourceLink(hbuf, 1)
+	if (last_link == nil)
+		return nil
 	link_text = ""
 	i = 1
 	while(i < numLines) {
 		link = GetSourceLink(hbuf, i)
-		if (link == "") {
+		if (link == nil) {
 			line_text = GetBufLine(hbuf, i)
 			line_text = _strltrim(line_text)
 			pos = _strstr_backward(link_text, " line ")
