@@ -889,6 +889,7 @@
 !/.ctags
 !/.dashrc
 !/.exrc
+!/.gitignore.d
 !/.gitignore.d/profile
 !/.inputrc
 !/.mkshrc
@@ -896,6 +897,7 @@
 !/.pylintrc
 !/.rc
 !/.rc.autoload
+!/.rc.d
 !/.rc.d/.rc.list.sample.linux
 !/.rc.d/.rc.list.sample.termux
 !/.rc.d/00_shell.sh
