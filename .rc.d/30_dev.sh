@@ -2,10 +2,10 @@
 
 # Find file in a CVS, fallback to std file search otherwise
 alias dff='_dfind'
-_dfind() { if git_exists "$(dirname "$1")"; then git ls-files "*$@"; elif svn_exists "$(dirname "$1")"; then svn ls -R "$(dirname "$1")" | grep -E "$@"; else _ffind "$@"; fi; }
+_dfind() { local DIR="$(dirname "$1")"; if git_exists "$DIR"; then git ls-files "*$@"; elif svn_exists "$DIR"; then svn ls -R "$DIR" | grep -E "$@"; else _ffind "$@"; fi; }
 
 # Find a CVS root folder
-alias rffd='_rfind'
+alias rff='_rfind'
 _rfind() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then git_worktree "$@"; fi };
 
 # Grep based code search
@@ -53,13 +53,17 @@ alias ishell='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_SHEL
 alias   iref='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_REF"'
 
 # Grep based code block search
-_dsearch() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; GARGS=-E _dgrep1 $_DGEXT_REF "${ARG1//NAME/$ARG2}" "$@"); }
-#_DGREGEX_FUNC='(^|\s+|::)NAME\s*\(([^;]*$|[^\}]\})'
-_DGREGEX_FUNC='\w+\s+NAME\s*\(\s*($|\w+\s+\w+|void)'
-_DGREGEX_VAR='^[^\(]*\w+\s*(\*|&)*\s*NAME\s*(=.+|\(\w+\)|\[.+\])?\s*(;|,)'
+_dsearch1() { local A="$1"; local B="$2"; shift $(min 2 $#); (set -f; GARGS=-E _dgrep1 $_DGEXT_REF "${A//NAME/$B}" "$@"); } # Single line
+_dsearch2() { local A="$1"; local B="$2"; shift $(min 2 $#); (set -f; GARGS="-Ezo --color=always" _dgrep1 $_DGEXT_REF "${A//NAME/$B}" "$@" | xargs -r0 -n1; echo); } # Multiline
+_dsearch3() { local A="$1"; local B="$2"; shift $(min 2 $#); (set -f; _rgrep "${A//NAME/$B}" $_DGEXT_REF -U ${GCASE}); }
+_dsearch() { if command -v _rgrep >/dev/null; then _dsearch3 "$@"; else _dsearch2 "$@"; fi; }
+#_DGREGEX_FUNC='\S*\s*NAME\s*\(\s*($|\S+\s+\S+|void)' # Single line
+_DGREGEX_FUNC='NAME\s*\([^\n;]*\)\s*\{' # Multiline
+# _DGREGEX_VAR='^[^\(]*\S+\s*(\*|&)*\s*NAME\s*(=.+|\(\S+\)|\[.+\])?\s*(;|,)' # Single line
+_DGREGEX_VAR='[\w\*]+\s*NAME[\s\n]*(=[^;=]+)?;' # Multiline
 _DGREGEX_STRUCT='(struct|union|enum|class)\s*NAME\s*(\{|$)'
 _DGREGEX_TYPEDEF='(typedef\s+\w+\s+NAME)|(^\s*NAME\s*;)'
-_DGREGEX_DEFINE='(#define\s+NAME|^\s*NAME\s*,)|(^\s*NAME\s*=.*,)'
+_DGREGEX_DEFINE='(#define\s+NAME)|(^\s*NAME\s*,)|(^\s*NAME\s*=.*,)'
 _DGREGEX_ALL="($_DGREGEX_FUNC)|($_DGREGEX_VAR)|($_DGREGEX_STRUCT)|($_DGREGEX_TYPEDEF)|($_DGREGEX_DEFINE)"
 alias      def='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_ALL"'
 alias      var='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_VAR"'
