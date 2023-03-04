@@ -639,5 +639,78 @@ ut_13() {
 )
 }
 
+# Test 14 ssh: create bare repo; clone/initremote/enablremote OK
+ut_14() {
+  SRV="${1:?No ssh server name specified...}"
+  export GIT_ANNEX_ALLOW_GCRYPT=1
+
+  (
+  ssh $SRV sh -c ':;
+  set -e
+  NAME=bare # dont change !
+  cd /tmp
+  [ -e $NAME ] && chmod -R 777 $NAME && rm -rf $NAME
+  mkdir -p "$NAME" && cd "$NAME" && pwd || exit 0
+  git init --bare
+  git annex init $NAME
+  echo "DONE"
+  '
+  )
+
+  (
+  set -e
+  NAME=test1
+  cd /tmp
+  [ -e $NAME ] && chmod -R 777 $NAME && rm -rf $NAME
+  mkdir -p "$NAME" && cd "$NAME" && pwd || exit 0
+  git init .
+  git annex init $NAME
+  ls /tmp > A
+  ls / > B
+  ps -def > C
+  export GCRYPT_ALLOW_NEW_REPO=1
+  git remote add bare gcrypt::ssh://$SRV/tmp/bare
+  git annex add A B C
+  git annex sync
+  git config --add remote.bare.annex-uuid $(ssh "$SRV" cat /tmp/bare/config | awk -F= '/uuid/{print $2}')
+  git annex copy . --to bare
+  git annex initremote bare2 type=gcrypt encryption=sharedpubkey gitrepo=ssh://$SRV/tmp/bare keyid='Olivier Lanneluc <olivier.lanneluc@gmail.com>'
+  git annex copy . --to bare2
+  git annex sync
+  echo "DONE"
+  )
+
+  (
+  set -e
+  NAME=test2
+  cd /tmp
+  [ -e $NAME ] && chmod -R 777 $NAME && rm -rf $NAME
+  mkdir -p "$NAME" && cd "$NAME" && pwd || exit 0
+  git init .
+  git annex init $NAME
+  git remote add bare gcrypt::ssh://$SRV/tmp/bare
+  git annex sync
+  git annex enableremote bare2
+  git annex get . --from bare2
+  echo "DONE"
+  )
+
+  (
+  set -e
+  NAME=test3
+  cd /tmp
+  [ -e $NAME ] && chmod -R 777 $NAME && rm -rf $NAME
+  mkdir -p "$NAME" && cd "$NAME" && pwd || exit 0
+  git init .
+  git annex init $NAME
+  git remote add bare gcrypt::ssh://$SRV/tmp/bare
+  git annex sync
+  git annex enableremote bare2
+  git annex get . --from bare2
+  echo "DONE"
+  )
+
+}
+
 # Main
 "$@"
