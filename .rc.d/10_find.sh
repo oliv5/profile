@@ -255,6 +255,16 @@ find_bin() {
 }
 alias ff_bin='find_bin'
 
+###########################################
+# Find dos files
+find_dos() {
+  _ffind "${@:-./}$" -type f -print0 | xargs -r0 file | grep "CRLF" | cut -d: -f1
+}
+
+find_unix() {
+  _ffind "${@:-./}$" -type f -print0 | xargs -r0 file | grep -v "CRLF" | cut -d: -f1
+}
+
 ################################
 # Find garbage files
 ff_garbage() {
