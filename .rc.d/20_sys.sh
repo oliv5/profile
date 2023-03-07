@@ -84,7 +84,7 @@ directory=$3
 users=$4
 root-users=root
 root-groups=root
-aliases=default
+#aliases=default
 EOF
 ' _ "$CONF" "$NAME" "$(readlink -f "$DIR")" "$USER"
   sudo debootstrap "$DISTR" "$DIR" "$@"
@@ -92,7 +92,7 @@ EOF
 
 # https://askubuntu.com/questions/148638/how-do-i-enable-the-universe-repository
 # https://manpages.ubuntu.com/manpages/trusty/man1/add-apt-repository.1.html
-mkschroot_setup_bionic() {
+mkschroot_post_setup() {
   sudo schroot -u root -c "${1:-bionic}" -- sh -c '
     passwd $1
     sudo apt install software-properties-common
