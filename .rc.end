@@ -82,8 +82,10 @@ if [ ${#PS1} -lt 5 ]; then
 fi
 
 # Disable vblank
-export vblank_mode=0
-export __GL_SYNC_TO_VBLANK=0
+vblank_off() {
+  export vblank_mode=0
+  export __GL_SYNC_TO_VBLANK=0
+}
 
 # Disable console beep
 #command -v xset >/dev/null 2>&1 && pidof X >/dev/null && timeout 2s xset b off 2>/dev/null # From X11 window system
