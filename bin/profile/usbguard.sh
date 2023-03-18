@@ -21,9 +21,18 @@ usbguard_record() {
     sudo sh -c 'usbguard generate-policy > /etc/usbguard/rules.conf'
 }
 
+usbguard_add() {
+    sudo sh -c 'for RULE; do echo "$RULE" >> /etc/usbguard/rules.conf; done' _ "$@"
+}
+
 usbguard_status() {
     sudo systemctl status usbguard
     sudo systemctl status usbguard-dbus
+}
+
+usbguard_restart() {
+    sudo systemctl restart usbguard
+    sudo systemctl restart usbguard-dbus
 }
 
 usbguard_start() {
