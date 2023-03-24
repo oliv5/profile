@@ -85,12 +85,56 @@ ask_passwd() {
 }
 
 ################################
-# Retry
-alias retry='retry.sh'
+# Loop
+loop() {
+  local PAUSE=0
+  if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+    PAUSE=$1
+    shift
+  fi
+  while true; do eval "$@"; sleep $PAUSE; done
+}
 
-# Repeat
+# Retry in loop until success
+retry() {
+  local RETRY=0
+  local LIMIT=-1
+  local PAUSE=0
+
+  # Trap interrupts
+  trap 'echo Interrupted after $RETRY trials; trap - INT TERM; exit;' INT TERM
+
+  # Init - check if $1 is an integer => retry limit
+  if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+    LIMIT=$1
+    shift
+  fi
+  if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+    PAUSE=$1
+    shift
+  fi
+
+  # Loop
+  false; while [ $? -ne 0 ] && [ $LIMIT -le 0 -o $RETRY -ne $LIMIT ]; do
+    [ $RETRY -gt 0 ] && sleep $PAUSE
+    RETRY=$(($RETRY+1))
+    eval "$@"
+  done
+
+  # Done - untrap and exit
+  trap - INT TERM
+  echo "Ended after $RETRY trial(s)"
+}
+
+# Repeat N times
 repeat() {
   local NUM="${1:?No repeat count specified...}"
   shift
   for NUM in $(seq $NUM); do "$@"; done
 }
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+if [ -n "$1" ]; then "$@"; else true; fi

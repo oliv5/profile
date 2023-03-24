@@ -47,6 +47,14 @@ fct_eval() {
   echo "$(fct_tiny "$FCT") ; $FCT" "$@"
 }
 
+# Run a function in sudo env
+alias sudo_fct='fct_sudo'
+fct_sudo() {
+  local FCT="${1:?No fct defined...}"
+  shift
+  sudo sh -c "$(fct_tiny $FCT); $FCT "'"$@"' _ "$@"
+}
+
 # Append to fct
 fct_append() {
   local FCT="${1:?No fct specified}"; shift
