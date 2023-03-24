@@ -51,8 +51,9 @@ fct_eval() {
 alias sudo_fct='fct_sudo'
 fct_sudo() {
   local FCT="${1:?No fct defined...}"
+  local CONTENT="$(fct_tiny $FCT)"
   shift
-  sudo sh -c "$(fct_tiny $FCT); $FCT "'"$@"' _ "$@"
+  sudo sh -c "${CONTENT:-echo ERROR: cannot find fct $FCT...}; $FCT "'"$@"' _ "$@"
 }
 
 # Append to fct
