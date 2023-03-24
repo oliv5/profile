@@ -121,6 +121,27 @@ git_clone_empty() { git clone --no-checkout "$@"; }
 git_clone_shallow() { git clone --no-checkout --depth "$@"; } # implies --single-branch
 git_clone_single() { git clone --no-checkout --single-branch -b "$@"; }
 
+# Incremental clone
+git_clone_inc() {(
+  set -e
+  local REPO="$1"
+  local DIR="$2"
+  git clone --recurse-submodules --no-checkout --depth=1 "$REPO" "$DIR"
+  cd "$DIR"
+  git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+  git_fetch_inc
+  git pull
+)}
+
+# Incremental fetch
+git_fetch_inc() {
+  local N=1
+  while [ $N -le ${1:-10000000} ]; do
+    git fetch --depth=$N
+    N=$(($N * 10))
+  done
+}
+
 ########################################
 # Get git version
 git_version() {
