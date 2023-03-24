@@ -6,15 +6,22 @@ ssh_agent() {
 	command -v ssh-agent >/dev/null 2>&1 || return 1
 	local SSH_AGENT_FILE="$HOME/.ssh-agent-info"
 	ssh-add -l >/dev/null 2>&1
-	if [ $? -eq 2 ]; then
-		test -r "$SSH_AGENT_FILE" && \
-			eval "$(cat "$SSH_AGENT_FILE")" >/dev/null
-		ssh-add -l >/dev/null 2>&1
-		if [ $? -eq 2 ]; then
-			(umask 066; ssh-agent > "$SSH_AGENT_FILE")
-			eval "$(cat "$SSH_AGENT_FILE")" >/dev/null
-		fi
-	fi
+	case $? in
+		1) cat > "$SSH_AGENT_FILE" <<EOF
+export SSH_AGENT_LAUNCHER=$SSH_AGENT_LAUNCHER
+export SSH_AUTH_SOCK=$SSH_AUTH_SOCK
+unset SSH_AGENT_PID
+EOF
+		;;
+		2) 	test -r "$SSH_AGENT_FILE" && \
+				eval "$(cat "$SSH_AGENT_FILE")" >/dev/null
+			ssh-add -l >/dev/null 2>&1
+			if [ $? -eq 2 ]; then
+				(umask 066; ssh-agent > "$SSH_AGENT_FILE")
+				eval "$(cat "$SSH_AGENT_FILE")" >/dev/null
+			fi
+		;;
+	esac
 	return 0
 }
 
