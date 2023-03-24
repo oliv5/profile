@@ -86,6 +86,7 @@ ask_passwd() {
 
 ################################
 # Loop
+alias sudo_loop='fct_sudo loop'
 loop() {
   local PAUSE=0
   if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
@@ -96,6 +97,7 @@ loop() {
 }
 
 # Retry in loop until success
+alias sudo_retry='fct_sudo retry'
 retry() {
   local RETRY=0
   local LIMIT=-1
@@ -127,6 +129,7 @@ retry() {
 }
 
 # Repeat N times
+alias sudo_repeat='fct_sudo repeat'
 repeat() {
   local NUM="${1:?No repeat count specified...}"
   shift
