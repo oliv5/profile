@@ -9,7 +9,7 @@
 	let g:loaded_taglist = 1
 	"let g:loaded_tagbar = 1
 	let g:loaded_srcexpl = 1
-	"let g:loaded_nerd_tree = 1
+	let g:loaded_nerd_tree = 1
 	let g:loaded_trinity = 1
 	let g:ccvext_version = 1
 	let g:loaded_yankring = 1
