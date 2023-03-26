@@ -13,6 +13,7 @@
 " Resources
 " Vim refcards: http://tnerual.eriogerg.free.fr/vim.html
 " Vim tips: http://www.rayninfo.co.uk/vimtips.html
+" Neovim transition: https://neovim.io/doc/user/nvim.html#nvim-from-vim
 
 " *******************************************************
 " } Environment preamble {
@@ -92,7 +93,9 @@ silent !mkdir -p "$XDG_CACHE_HOME/vim/vimbackup" "$XDG_CACHE_HOME/vim/vimview" "
 "  :20  :  20 lines of command-line history
 "  %    :  buffer list
 "  n... :  viminfo file location
-if filewritable($XDG_CACHE_HOME . "/vim")
+if has('nvim')
+	set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/nviminfo
+elseif filewritable($XDG_CACHE_HOME . "/vim")
 	set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
 endif
 
@@ -160,9 +163,10 @@ if has('syntax')
 endif
 
 " Select font
-if !exists('g:loaded_vimrc')
-	"set guifont=Lucida_Console:h11
-	set guifont=Monospace\ 9
+if !exists('g:loaded_vimrc') && exists(':GuiFont')
+	if ! has('nvim')
+		set guifont=Monospace\ 9
+	endif
 endif
 
 " Gui options
