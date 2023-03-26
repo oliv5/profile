@@ -17,7 +17,6 @@
 " *******************************************************
 " } Environment preamble {
 " *******************************************************
-
 " Version check
 if v:version < 700
 	echoe ".vimrc requires VIM 7.0 or above"
@@ -54,7 +53,6 @@ endif
 " *******************************************************
 " } Before scripts {
 " *******************************************************
-
 " Use before config
 if filereadable(expand("~/.vimrc.before"))
 	source ~/.vimrc.before
@@ -76,6 +74,8 @@ set noerrorbells            " No bells (!!)
 set novisualbell            " No visual bells too
 set updatetime=1000         " Swap file write / event CursorHold delay (in ms)
 set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
+set timeoutlen=100          " keymappings timeout
+"set ttimeoutlen=100         " key codes timeout (see :set <left>?, keep it small unless on slow systems)
 
 " Set directories - old-school setup, may be overwritten later
 set backupdir=$XDG_CACHE_HOME/vim/vimbackup
@@ -143,7 +143,6 @@ endif
 " *******************************************************
 " } User Interface {
 " *******************************************************
-
 " Theme & color scheme
 if has('syntax')
 	syntax on     " Syntax highlight
