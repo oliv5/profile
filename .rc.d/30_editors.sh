@@ -34,10 +34,8 @@ unset VIM # bug at startup if defined
 unset VIM_USETABS
 unset VIM_NOREMOTE
 
-# Start gvim
+# Manage gvim command line options
 if command -v gvim >/dev/null; then
-  # Open gvim server when file is specified
-  # Otherwise open bare gvim
   export VI="gvim"
   gvim() {
     local ARGS="$1"
@@ -56,6 +54,22 @@ if command -v gvim >/dev/null; then
       ARGS="${ARGS:+$ARGS }$ARG"
     done
     eval command gvim $ARGS
+  }
+fi
+
+# Manage nvim-qt command line options
+if command -v nvim-qt >/dev/null; then
+  alias gnvim="nvim-qt"
+  alias ngvim="nvim-qt"
+  export VI="nvim-qt"
+  nvim-qt() {
+    local ARG
+    local ARGS=""
+    for ARG; do
+      ARG="$(echo "$ARG" | awk -F':' '{printf "\"%s\" +%s",$1,$2}')"
+      ARGS="${ARGS:+$ARGS }$ARG"
+    done
+    eval command nvim-qt $ARGS
   }
 fi
 
