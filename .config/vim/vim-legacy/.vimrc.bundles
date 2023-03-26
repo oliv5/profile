@@ -2,7 +2,7 @@
 " } Select plugins and options {
 " *******************************************************
 " Use tabs when there is no graphical UI
-if !has("gui_running")
+if !has("gui_running") && !has("nvim")
 	let g:vimrc_useTabs = 1
 	let g:loaded_minibufexplorer = 1
 endif
