@@ -17,6 +17,7 @@
     "workbench.editor.openPositioning": "right",
     "workbench.colorCustomizations": {},
     "workbench.colorTheme": "Aramok's GLX Black",
+    "workbench.startupEditor": "none",
 
     // Explorer pane sidebar
     "explorer.openEditors.visible": 50,

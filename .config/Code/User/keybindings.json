@@ -201,10 +201,10 @@
 { "key": "f5",                    "command": "workbench.action.debug.continue", "when": "debuggersAvailable && inDebugMode" },
 { "key": "f5",                    "command": "extension.multiCommand.execute", "when": "debuggersAvailable && debugState == 'running'", "args":
     { "sequence": [ "workbench.action.debug.pause", { "command": "workbench.action.tasks.runTask", "args": "Pause" } ] } },
-{ "key": "shift+f5",              "command": "workbench.action.debug.stop", "when": "debuggersAvailable && inDebugMode" },
-{ "key": "ctrl+f5",               "command": "extension.multiCommand.execute", "when": "debuggersAvailable && debugState == 'running'", "args":
-    { "sequence": [ "workbench.action.debug.pause", { "command": "workbench.action.tasks.runTask", "args": "Pause" } ] } },
-{ "key": "ctrl+shift+f5",         "command": "workbench.action.debug.restart", "when": "debuggersAvailable && inDebugMode" },
+{ "key": "shift+f5",              "command": "extension.multiCommand.execute", "when": "debuggersAvailable", "args":
+    { "sequence": [ "workbench.action.debug.stop", { "command": "workbench.action.tasks.runTask", "args": "Stop" } ] } },
+{ "key": "ctrl+f5",               "command": "extension.multiCommand.execute", "when": "debuggersAvailable && inDebugMode", "args":
+    { "sequence": [ "workbench.action.debug.restart", { "command": "workbench.action.tasks.runTask", "args": "Stop" } ] } },
 { "key": "ctrl+shift+f5",         "command": "workbench.action.debug.selectandstart", "when": "debuggersAvailable && !inDebugMode" },
 { "key": "f10",                   "command": "workbench.action.debug.stepOver", "when": "debuggersAvailable && inDebugMode" },
 { "key": "shift+f10",             "command": "editor.debug.action.runToCursor", "when": "debuggersAvailable && inDebugMode" },
@@ -228,17 +228,19 @@
 { "key": "ctrl+f6",               "command": "workbench.action.tasks.test", "when": "!inDebugMode" },
 { "key": "ctrl+shift+f6",         "command": "workbench.action.tasks.runTask", "when": "!inDebugMode" },
 
+// Tags
+// https://stackoverflow.com/questions/50725243/vscode-how-to-keybind-an-external-command/50749571#50749571
+// https://stackoverflow.com/questions/52786022/shortcut-for-running-terminal-command-in-vs-code
+{ "key": "ctrl+alt+b",            "command": "workbench.action.terminal.sendSequence", "args": { "text": "mkalltags . \u000D" }},
+
 //////////////////////////////////////////////////
 // Extensions
 
-// Extension Microsoft C/C++ intellisense
+// Extension Microsoft C/C++ intellisense (ms-vscode.cpptools)
 { "key": "ctrl+b ctrl+b",         "command": "C_Cpp.SwitchHeaderSource", "when": "editorTextFocus && editorLangId == 'c' || editorTextFocus && editorLangId == 'cpp' || editorTextFocus && editorLangId == 'cuda-cpp'" },
 { "key": "alt+o",                 "command": "-C_Cpp.SwitchHeaderSource", "when": "editorTextFocus && editorLangId == 'c' || editorTextFocus && editorLangId == 'cpp' || editorTextFocus && editorLangId == 'cuda-cpp'" },
 
-// Build & debugging
-//{ "key": "shift+f5",            "command": "extension.multiCommand.execute", "args":
-//    { "sequence": [ "workbench.action.debug.stop", "workbench.action.closePanel", "workbench.action.closeSidebar" ] } }
-
+// Extension seungukshin.cscope-code
 // Cscope: https://github.com/SeungukShin/cscope-code
 //{ "key": "ctrl+d ctrl+d",         "command": "extension.cscope-code.definition", "when": "editorTextFocus" },
 //{ "key": "ctrl+d ctrl+c",         "command": "extension.cscope-code.caller", "when": "editorTextFocus" },
@@ -246,6 +248,7 @@
 //{ "key": "ctrl+d ctrl+backspace", "command": "extension.cscope-code.symbol", "when": "editorTextFocus" },
 //{ "key": "ctrl+d ctrl+t",         "command": "extension.cscope-code.symbol", "when": "editorTextFocus" },
 
+// Extension xulion.codescope
 // Cscope: https://github.com/xulion/scope4code
 //{ "key": "ctrl+d ctrl+b",         "command": "extension.build", "when": "editorTextFocus" },
 //{ "key": "ctrl+d ctrl+d",         "command": "extension.findDefinition", "when": "editorTextFocus" },
@@ -256,18 +259,13 @@
 //{ "key": "ctrl+d ctrl+g",         "command": "extension.findText", "when": "editorTextFocus" },
 //{ "key": "ctrl+d ctrl+i",         "command": "extension.findInclude", "when": "editorTextFocus" },
 
-// Tags
-// https://stackoverflow.com/questions/50725243/vscode-how-to-keybind-an-external-command/50749571#50749571
-// https://stackoverflow.com/questions/52786022/shortcut-for-running-terminal-command-in-vs-code
-{ "key": "ctrl+alt+b",            "command": "workbench.action.terminal.sendSequence", "args": { "text": "mkalltags . \u000D" }},
-
 // Extension tomhultonharrop.switch-corresponding
 // { "key": "ctrl+b ctrl+b",         "command": "extension.switch_corresponding_same_workspace", "when": "editorTextFocus" },
 
-// Extension edit with shell (run shell command on selection)
+// Extension edit with shell (ryu1kn.edit-with-shell)
 { "key": "ctrl+i",                "command": "editWithShell.runCommand" },
 
-// Extension AutoHide
+// Extension AutoHide (sirmspencer.vscode-autohide)
 { "key": "ctrl+alt+shift+b",      "command": "autoHide.toggleHideSideBar" },
 { "key": "ctrl+alt+shift+p",      "command": "autoHide.toggleHidePanel" },
 
