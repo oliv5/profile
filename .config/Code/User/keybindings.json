@@ -200,11 +200,11 @@
 { "key": "f5",                    "command": "workbench.action.debug.start", "when": "debuggersAvailable && !inDebugMode" },
 { "key": "f5",                    "command": "workbench.action.debug.continue", "when": "debuggersAvailable && inDebugMode" },
 { "key": "f5",                    "command": "extension.multiCommand.execute", "when": "debuggersAvailable && debugState == 'running'", "args":
-    { "sequence": [ "workbench.action.debug.pause", { "command": "workbench.action.tasks.runTask", "args": "Pause" } ] } },
+    { "sequence": [ { "command": "workbench.action.tasks.runTask", "args": "Pause" }, "workbench.action.debug.pause" ] } },
 { "key": "shift+f5",              "command": "extension.multiCommand.execute", "when": "debuggersAvailable", "args":
-    { "sequence": [ "workbench.action.debug.stop", { "command": "workbench.action.tasks.runTask", "args": "Stop" } ] } },
+    { "sequence": [ { "command": "workbench.action.tasks.runTask", "args": "Stop" }, "workbench.action.debug.stop" ] } },
 { "key": "ctrl+f5",               "command": "extension.multiCommand.execute", "when": "debuggersAvailable && inDebugMode", "args":
-    { "sequence": [ "workbench.action.debug.restart", { "command": "workbench.action.tasks.runTask", "args": "Stop" } ] } },
+    { "sequence": [ { "command": "workbench.action.tasks.runTask", "args": "Stop" }, "workbench.action.debug.restart" ] } },
 { "key": "ctrl+shift+f5",         "command": "workbench.action.debug.selectandstart", "when": "debuggersAvailable && !inDebugMode" },
 { "key": "f10",                   "command": "workbench.action.debug.stepOver", "when": "debuggersAvailable && inDebugMode" },
 { "key": "shift+f10",             "command": "editor.debug.action.runToCursor", "when": "debuggersAvailable && inDebugMode" },
