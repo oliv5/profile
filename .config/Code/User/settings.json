@@ -16,7 +16,7 @@
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.editor.openPositioning": "right",
     "workbench.colorCustomizations": {},
-    "workbench.colorTheme": "Aramok's GLX Black",
+    // "workbench.colorTheme": "Aramok's GLX Black",
     "workbench.startupEditor": "none",
 
     // Explorer pane sidebar
@@ -61,6 +61,7 @@
     "debug.terminal.clearBeforeReusing": true,
     "debug.console.closeOnEnd": false,
     "debug.onTaskErrors": "showErrors",
+    "debug.autoExpandLazyVariables": true,
 
     // Terminal
     "terminal.integrated.profiles.linux": {
@@ -89,6 +90,13 @@
     "terminal.integrated.altClickMovesCursor": false,
     "terminal.integrated.tabs.enabled": false,
 
+    // Outline view
+    "outline.collapseItems": "alwaysExpand",
+    "outline.icons": true,
+    "outline.problems.badges": true,
+    "outline.problems.colors": true,
+    "outline.problems.enabled": true,
+
     // Misc
     "extensions.autoUpdate": false,
     "update.mode": "manual",
@@ -99,7 +107,7 @@
 
     // Extensions
     "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
-    "C_Cpp.errorSquiggles": "disabled",
+    "C_Cpp.errorSquiggles": "enabledIfIncludesResolve",
     "scope4code.databasePath": "${workspaceRoot}/",
     "scope4code.executablePath": "/usr/bin/cscope",
     "scope4code.engineCommands": {
