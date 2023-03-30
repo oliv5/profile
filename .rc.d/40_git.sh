@@ -1044,6 +1044,11 @@ git_ls_bin() {
   fi
 }
 
+# List all ignored files search patterns
+git_ls_ignored() {
+  find . ~/.gitignore .git/info/exclude -name '*gitignore' -exec cat {} + 2>/dev/null | less
+}
+
 # Cat a file
 git_cat() {
   #git show ${1:-HEAD}:"$2"
