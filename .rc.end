@@ -136,10 +136,14 @@ alias b='cdb'
 alias f='cdf'
 alias p='cd ..'
 
+# Root folder helper
+get_root() { command -v _rfind >/dev/null && _rfind "$@"; }
+cd_root() { local DIR="$(getroot "$@")" && test -n "$DIR" && cd "$DIR"; }
+
 # Cd helper
 cdrp() { cd "$(realpath "$@")"; }
-cdroot() { local DIR="$(command -v _rfind >/dev/null && _rfind "$@")"; test -n "$DIR" && cd "$DIR"; }
-alias r='cdroot'
+alias cdr='cd_root'
+alias r='cd_root'
 
 # Vim & co
 alias v='${VI:-false}'
