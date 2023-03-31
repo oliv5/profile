@@ -37,7 +37,7 @@
 			ShowChangemarks="1"
 			ShowBookmarks="1"
 			PreserveFileCase="1"
-			TileForLinks="1"
+			TileForLinks="0"
 			ShowReadOnlyFileMarks="1"
 			SpaceWidthChar="1"
 			DelimWidthChar="1"
@@ -48,7 +48,7 @@
 			Gradients="1"
 			VisualThemes="1"
 			CompressLineHeights="1"
-			Animations="1"
+			Animations="0"
 			TrimFilePaths="1"
 			CascadeNewWindows="1"
 			ShowProjectInWorkspace="1"
@@ -121,7 +121,7 @@
 		TabReplacesSelection="1"
 		IndentPreprocStatments="0"
 		UseSmartPaste="1"
-		SelectLinesAfterPaste="1"
+		SelectLinesAfterPaste="0"
 		SelectAfterPaste="End"
 		UseAutoComplete="1"
 		AutoCompleteDetailMode="1"
@@ -431,6 +431,8 @@
 	</Menus>
 	<Keymaps>
 		<Main>
+			<item Command="Symbol Info..." Keycode="(CS)BackSpace" />
+			<item Command="Browse Project Symbols..." Keycode="(C)BackSpace" />
 			<item Command="Function Up" Keycode="(CA)Up" />
 			<item Command="Function Down" Keycode="(CA)Down" />
 			<item Command="Select Block" Keycode="(C)W" />
@@ -639,11 +641,6 @@
 			<item
 				Command="Create Bookmarks from Relation Items"
 				Keycode="(C)F1"
-				/>
-			<item Command="Symbol Info..." Keycode="(C)BackSpace" />
-			<item
-				Command="Activate Project Symbol List"
-				Keycode="(CS)BackSpace"
 				/>
 			<item
 				Command="Activate Project Symbol List"
@@ -1036,7 +1033,7 @@
 			Language="Search Results"
 			ParsePattern="^\(.*\)\w+"
 			WordWrap="0"
-			ExpandTabs="0"
+			ExpandTabs="1"
 			EnterKeyIsEOL="1"
 			StatusbarMode="0"
 			AddToProject="1"
@@ -1052,7 +1049,7 @@
 			UseOverview="0"
 			AllowAutocomplete="1"
 			AllowSmartPaste="0"
-			AllowSnippets="1"
+			AllowSnippets="0"
 			ShowRefHighlights="0"
 			TabWidth="4"
 			MarginWidth="120"
@@ -1765,7 +1762,7 @@
 			VisibleTabs="0"
 			VisibleSpaces="0"
 			VisibleEOL="0"
-			ShowLineNumbers="0"
+			ShowLineNumbers="1"
 			ShowRightMargin="0"
 			ShowPageBreaks="0"
 			UseSymbolPane="1"
@@ -7608,8 +7605,8 @@
 			<Search
 				RegexType="Perl Compatible"
 				IgnoreCase="1"
-				UseRegexp="1"
-				WrapAround="0"
+				UseRegexp="0"
+				WrapAround="1"
 				SelectMatch="1"
 				FindNonMatch="0"
 				FindOnePerLine="0"
@@ -8202,10 +8199,10 @@
 	</FileCompareWindow>
 	<ProjectFileWindow
 		IsLocked="0"
-		ShowFileDate="1"
-		ShowFileSize="1"
+		ShowFileDate="0"
+		ShowFileSize="0"
 		ShowDirName="1"
-		ShowMetrics="1"
+		ShowMetrics="0"
 		CodeMetricsType="1"
 		SortColumn="0"
 		>
@@ -8246,7 +8243,7 @@
 		</ListDisplay>
 	</ProjectFolderWindow>
 	<ProjectSymbolWindow
-		ShowMetrics="1"
+		ShowMetrics="0"
 		ShowFile="1"
 		Metric="Lines of Code"
 		>
@@ -8266,20 +8263,16 @@
 			<Type Name="Enum Constant" />
 			<Type Name="Function Prototype" />
 			<Type Name="#-Directive" />
-			<Type Name="Search Result" />
 			<Type Name="Label" />
 			<Type Name="Data Member" />
 			<Type Name="Interface" />
 			<Type Name="Resource" />
-			<Type Name="File" />
-			<Type Name="Directory" />
 			<Type Name="Function Template" />
 			<Type Name="Class Template" />
 			<Type Name="Package" />
 			<Type Name="Namespace" />
 			<Type Name="Token Macro" />
 			<Type Name="Code Block" />
-			<Type Name="Parameter" />
 			<Type Name="Parsing Error" />
 			<Type Name="HTML or XML Element" />
 			<Type Name="HTML Title" />
@@ -8287,8 +8280,6 @@
 			<Type Name="IDL Module" />
 			<Type Name="IDL Library" />
 			<Type Name="IDL Interface" />
-			<Type Name="C++ Template" />
-			<Type Name="Template Parameter" />
 			<Type Name="CSS Rule Selector" />
 			<Type Name="C# Class Property" />
 			<Type Name="C# Indexer" />
@@ -8298,15 +8289,9 @@
 			<Type Name="VHDL Component" />
 			<Type Name="VHDL Process" />
 			<Type Name="VHDL Configuration" />
-			<Type Name="Type Reference" />
 			<Type Name="External Variable" />
 			<Type Name="Alias" />
-			<Type Name="Alias Target" />
-			<Type Name="Type Parameter" />
 			<Type Name="Macro Event" />
-			<Type Name="Captured Variable" />
-			<Type Name="Clip" />
-			<Type Name="Snippet" />
 			<Type Name="Editor Macro Function" />
 		</SymbolTypes>
 		<Sort SortType="6" Invert="0" />
@@ -8412,7 +8397,7 @@
 				<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
 			</ListOptions>
 			<GraphOptions
-				LayoutStyle="2"
+				LayoutStyle="1"
 				NodeStyle="1"
 				LineWeight="1"
 				LineEndType="1"
