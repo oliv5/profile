@@ -89,6 +89,8 @@
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.altClickMovesCursor": false,
     "terminal.integrated.tabs.enabled": false,
+    "terminal.integrated.copyOnSelection": true,
+    "terminal.integrated.rightClickBehavior": "paste",
 
     // Outline view
     "outline.collapseItems": "alwaysExpand",
@@ -98,8 +100,8 @@
     "outline.problems.enabled": true,
 
     // Misc
-    "extensions.autoUpdate": false,
     "update.mode": "manual",
+    "extensions.autoUpdate": false,
     "settingsSync.keybindingsPerPlatform": false,
     "telemetry.telemetryLevel": "off",
     "http.systemCertificates": false,
@@ -108,6 +110,8 @@
     // Extensions
     "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
     "C_Cpp.errorSquiggles": "enabledIfIncludesResolve",
+    // "C_Cpp.intelliSenseEngine": "Tag Parser",
+    "C_Cpp.intelliSenseEngine": "default",
     "scope4code.databasePath": "${workspaceRoot}/",
     "scope4code.executablePath": "/usr/bin/cscope",
     "scope4code.engineCommands": {
