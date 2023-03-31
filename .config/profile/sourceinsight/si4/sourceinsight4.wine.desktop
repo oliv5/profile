@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=sourceinsight4
+Comment=Using system wine
+Type=Application
+Exec=env WINEPREFIX="$HOME/.wine-sourceinsight4" /usr/bin/wine "c:\Program Files\Source Insight 4.0\sourceinsight4.exe" %F
+Icon=/home/ola/.config/profile/sourceinsight/si4/ico.png
+Name[fr_FR]=sourceinsight4
+StartupWMClass=sourceinsight4.exe
+Categories=

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=sourceinsight4
+Comment=Using PlayOnLinux
+Type=Application
+Exec=/usr/share/playonlinux/playonlinux --run "sourceinsight4" %F
+Icon=/home/ola/.config/profile/sourceinsight/si4/ico.png
+Name[fr_FR]=sourceinsight4
+StartupWMClass=sourceinsight4.exe
+Categories=
