@@ -228,10 +228,13 @@
 { "key": "ctrl+f6",               "command": "workbench.action.tasks.test", "when": "!inDebugMode" },
 { "key": "ctrl+shift+f6",         "command": "workbench.action.tasks.runTask", "when": "!inDebugMode" },
 
-// Tags
+// Terminal
 // https://stackoverflow.com/questions/50725243/vscode-how-to-keybind-an-external-command/50749571#50749571
 // https://stackoverflow.com/questions/52786022/shortcut-for-running-terminal-command-in-vs-code
 { "key": "ctrl+alt+b",            "command": "workbench.action.terminal.sendSequence", "args": { "text": "mkalltags . \u000D" }},
+// { "key": "ctrl+c",                "command": "workbench.action.terminal.sendSequence", "args": { "text": "\u0003" }, "when": "terminalFocus" },
+// { "key": "ctrl+c",                "command": "workbench.action.terminal.copySelection", "when": "terminalFocus" },
+{ "key": "ctrl+v",                "command": "workbench.action.terminal.paste", "when": "terminalFocus" },
 
 //////////////////////////////////////////////////
 // Extensions
