@@ -138,7 +138,7 @@ alias p='cd ..'
 
 # Root folder helper
 get_root() { command -v _rfind >/dev/null && _rfind "$@"; }
-cd_root() { local DIR="$(getroot "$@")" && test -n "$DIR" && cd "$DIR"; }
+cd_root() { local DIR="$(get_root "$@")" && test -n "$DIR" && cd "$DIR"; }
 
 # Cd helper
 cdrp() { cd "$(realpath "$@")"; }
