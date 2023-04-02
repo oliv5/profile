@@ -38,6 +38,9 @@ adb_toggle() {
         adb_stop
     fi
 }
+adb_running() {
+    test [ "$(getprop persist.service.adb.enable)" != "0" ]
+}
 
 # Lock/unlock screen
 unlock() { keyevent 82; }
