@@ -158,9 +158,10 @@ alias sse='ss | cut -c 9- | xargs ${GEDITOR:-false}'
 alias gse='gs | grep modified | cut -d : -f 2 | xargs ${GEDITOR:-false}'
 
 # Source insight
-alias si='WINEPREFIX="$HOME/.wineprefix/sourceinsight" sourceinsight'
-alias si2='WINEPREFIX="$HOME/.wineprefix/sourceinsight2" sourceinsight'
-alias si3='WINEPREFIX="$HOME/.wineprefix/sourceinsight3" sourceinsight'
+alias si3='sourceinsight3'
+alias si3-2='sourceinsight3 2'
+alias si4='sourceinsight4'
+alias si4-2='sourceinsight4 2'
 
 # File manager
 alias n='${FMANAGER:-false} >/dev/null 2>&1'
