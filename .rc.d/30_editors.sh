@@ -74,17 +74,23 @@ if command -v nvim-qt >/dev/null; then
 fi
 
 #########################
-# Source insight via wine
-if command -v wine >/dev/null; then
-  sourceinsight() {
-    local WINEPREFIX="${WINEPREFIX:-$HOME/.wineprefix/sourceinsight}"
-    local DIR="$WINEPREFIX/drive_c/Program Files (x86)/Source Insight 3"
-    if [ ! -d "$DIR" ]; then
-      DIR="$WINEPREFIX/drive_c/Program Files/Source Insight 3"
-    fi
-    WINEPREFIX="$WINEPREFIX" wine "$DIR/Insight3.exe" "$@" 2>/dev/null &
-  }
-fi
+# Source insight using desktop file
+sourceinsight3() {
+  if command -v gtk-launch >/dev/null; then 
+    for P in "si3${1:+-$1}" "sourceinsight3${1:+-$1}"; do
+      gtk-launch "$P" 2>/dev/null
+    done
+  fi
+}
+
+# Source insight using desktop file
+sourceinsight4() {
+  if command -v gtk-launch >/dev/null; then 
+    for P in "si4${1:+-$1}" "sourceinsight4${1:+-$1}"; do
+      gtk-launch "$P" 2>/dev/null
+    done
+  fi
+}
 
 #########################
 # File manager
