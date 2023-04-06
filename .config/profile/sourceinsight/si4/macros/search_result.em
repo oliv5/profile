@@ -105,6 +105,34 @@ macro SameHeaderCompact(hbuf) {
 	}
 }
 
+macro FlattenPathAndTrim(hbuf) {
+	numLines = GetBufLineCount(hbuf)
+	if (numLines < 2)
+		return nil
+	i = 1
+	while(i < numLines) {
+		link = GetSourceLink(hbuf, i)
+		if (link != "") {
+			line_text = GetBufLine(hbuf, i)
+			pos = _strstr_backward(line_text, " : ")
+			if (pos != -1) {
+				line_text = _strltrim(strmid(line_text, pos+2, strlen(line_text)))
+				line_text = link.file # ":" # (link.ln+1) # " : " # line_text
+				PutBufLine(hbuf, i, line_text)
+			}
+		}
+		i = i + 1
+	}
+	projRoot = GetProjDir(GetCurrentProj())
+	ReplaceInBuf(hbuf, projRoot # "\\", "", 1, numLines+1, false/*matchcase*/, false/*regexp*/, false/*wholeword*/, false/*confirm*/)
+}
+
+macro FlattenPath(hbuf) {
+	numLines = GetBufLineCount(hbuf)
+	ReplaceInBuf(hbuf, "^\\(.*\\) (\\(.*\\)) line \\([0-9]+\\) : \\(.*\\)$", "\\2\\\\\\1:\\3:    \\4", 1, numLines+1, true/*matchcase*/, true/*regexp*/, false/*wholeword*/, false/*confirm*/)
+	ReplaceInBuf(hbuf, "^\\(.*\\) line \\([0-9]+\\) : \\(.*\\)$", "\\1:\\2:    \\3", 1, numLines+1, true/*matchcase*/, true/*regexp*/, false/*wholeword*/, false/*confirm*/)
+}
+
 macro RemoveErrors(hbuf) {
 	numLines = GetBufLineCount(hbuf)
 	sel = SearchInBuf(hbuf, "^---- .* Search Errors Encountered (.*) ----.*", 0, 0, true/*matchcase*/, true/*regexp*/, false/*wholeword*/)
@@ -124,7 +152,7 @@ event DocumentChanged(sFile) {
 		if (!IsBufDirty(hbuf)) // Prevent rentry
 			stop
 		RemoveErrors(hbuf)
-		SameHeaderCompact(hbuf)
+		FlattenPath(hbuf)
 		SaveBuf(hbuf)
 	}
 }
