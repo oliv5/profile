@@ -3,7 +3,9 @@
 [
 
 //////////////////////////////////////////////////
-// Default keymaps
+// Show internal values
+// { "key":  "alt+q",                "command": "workbench.action.terminal.sendSequence", "args": {
+    // "text" : "echo file = '${file}' : workspaceFolder = '${workspaceFolder}' : user = '${env:USERNAME}'\u000D" } },
 
 // Disable defaults
 { "key": "ctrl+q",                "command": "" },
