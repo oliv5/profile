@@ -676,8 +676,7 @@ git_bundle() {
     return 2
   fi
   echo "Bundle into $OUT"
-  git fetch --all || true
-  # --all should be equivalent to --branches --tags --remotes
+  # Bundle option --all should be equivalent to --branches --tags --remotes
   if [ $(git_version) -le $(git_version 2.20.1) ]; then
     git bundle create "$OUT" ${@:---all}
   else
