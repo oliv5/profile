@@ -75,7 +75,7 @@ set noerrorbells            " No bells (!!)
 set novisualbell            " No visual bells too
 set updatetime=1000         " Swap file write / event CursorHold delay (in ms)
 set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
-set timeoutlen=100          " keymappings timeout
+set timeoutlen=500          " keymappings timeout
 "set ttimeoutlen=100         " key codes timeout (see :set <left>?, keep it small unless on slow systems)
 
 " Set directories - old-school setup, may be overwritten later
