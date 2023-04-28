@@ -749,6 +749,19 @@ git_bundle_import_remote_refs() {
   done
 }
 
+# Git bundle recursive
+# https://github.com/xeyownt/git-subundle/blob/master/git-subundle
+git_recbundle() {
+  find ./ -name .git -print0 | xargs -r0 -- sh -c '
+    . ~/.rc.d/40_git.sh
+    for DIR; do
+      cd "$HOME/.vim/bundle/$(dirname "$DIR")"
+      pwd
+      git_bundle "$HOME/.vim/bundle/"
+    done
+  ' _
+}
+
 ########################################
 
 # Git upkeep
