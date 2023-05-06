@@ -967,7 +967,7 @@ annex_upkeep() {
       u) SYNC=1; NO_PUSH="";;
       t) SYNC=1; CONTENT="--content";;
       n) SYNC=1;;
-      l) UNUSED=1;;
+      l) UNUSED="--unused";;
       m) MSG="${OPTARG}";;
       # UL/DL
       g) GET=1;;
@@ -1028,39 +1028,27 @@ annex_upkeep() {
   fi
   # Unused
   if [ -n "$UNUSED" ]; then
-    $DBG git annex unused
+    $DBG git annex unused || return $?
   fi
   # Send
   if [ -n "$SEND" ]; then
     for REMOTE in ${REMOTES}; do
-      $DBG git annex copy --to "$REMOTE" ${FAST} . || return $?
-      if [ -n "$UNUSED" ]; then
-        $DBG git annex copy --to "$REMOTE" --unused || return $?
-      fi
+      $DBG git annex copy --to "$REMOTE" ${UNUSED:-${FAST} .} || return $?
     done
   fi
   # Move
   if [ -n "$MOVE" ]; then
-    # Loop over all but the last remote
+    # Copy over all but the last remote
     for REMOTE in ${REMOTES% *}; do
-      $DBG git annex move --to "$REMOTE" ${FAST} . || return $?
-      if [ -n "$UNUSED" ]; then
-        $DBG git annex move --to "$REMOTE" --unused || return $?
-      fi
+      $DBG git annex copy --to "$REMOTE" ${UNUSED:-${FAST} .} || return $?
     done
-    # Process the last remote
+    # Move to the last remote
     REMOTE="${REMOTES##* }"
-    $DBG git annex move --to "$REMOTE" ${FAST} . || return $?
-    if [ -n "$UNUSED" ]; then
-      $DBG git annex copy --to "$REMOTE" --unused || return $?
-    fi
+    $DBG git annex move --to "$REMOTE" ${UNUSED:-${FAST} .} || return $?
   fi
   # Drop
   if [ -n "$DROP" ]; then
-    $DBG git annex drop . || return $?
-    if [ -n "$UNUSED" ]; then
-      $DBG git annex drop --unused || return $?
-    fi
+    $DBG git annex drop ${UNUSED:-${FAST} .} || return $?
   fi
   return 0
 }
