@@ -945,14 +945,16 @@ annex_upkeep() {
   local NO_PUSH="--no-push"
   local CONTENT=""
   local DROP=""
+  local UNUSED=""
   # Copy options
   local GET=""
   local SEND=""
+  local MOVE=""
   local FAST="--all"
   local REMOTES=""
   # Get arguments
   OPTIND=1
-  while getopts "adoscpunm:gexfti:v:w:zh" OPTFLAG; do
+  while getopts "adoscputnlm:gevxfz" OPTFLAG; do
     case "$OPTFLAG" in
       # Add
       a) ADD=1;;
@@ -965,26 +967,31 @@ annex_upkeep() {
       u) SYNC=1; NO_PUSH="";;
       t) SYNC=1; CONTENT="--content";;
       n) SYNC=1;;
+      l) UNUSED=1;;
       m) MSG="${OPTARG}";;
       # UL/DL
       g) GET=1;;
       e) SEND=1;;
+      v) MOVE=1;;
       x) DROP=1;;
       f) FAST="--fast";;
       # Misc
       z) set -vx; DBG="true";;
-      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-o] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-x] [-f] [-z] [remote1 remote2 ...] "
+      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-o] [-s] [-c] [-p] [-u] [-t] [-n] [-l] [-m 'msg'] [-g] [-e] [-x] [-f] [-z] [remote1 remote2 ...] "
          echo >&2 "-a (a)dd files"
          echo >&2 "-d commit (d)eleted files"
          echo >&2 "-o f(o)rce add/delete files"
          echo >&2 "-s (s)ync, similar to -cpu"
-         echo >&2 "-t sync conten(t)"
          echo >&2 "-c (c)ommit"
          echo >&2 "-p (p)ull"
          echo >&2 "-u p(u)sh"
+         echo >&2 "-t sync conten(t)"
+         echo >&2 "-n sy(n)c, push, pull"
+         echo >&2 "-l list unused"
          echo >&2 "-m (m)essage"
          echo >&2 "-g (g)et"
          echo >&2 "-e s(e)nd to remotes"
+         echo >&2 "-v mo(v)e files"
          echo >&2 "-x drop files"
          echo >&2 "-f (f)ast get/send"
          echo >&2 "-z simulate operations"
@@ -1017,17 +1024,43 @@ annex_upkeep() {
   fi
   # Get
   if [ -n "$GET" ]; then
-      $DBG git annex get ${FAST} || return $?
+    $DBG git annex get ${FAST} || return $?
+  fi
+  # Unused
+  if [ -n "$UNUSED" ]; then
+    $DBG git annex unused
   fi
   # Send
   if [ -n "$SEND" ]; then
     for REMOTE in ${REMOTES}; do
       $DBG git annex copy --to "$REMOTE" ${FAST} . || return $?
+      if [ -n "$UNUSED" ]; then
+        $DBG git annex copy --to "$REMOTE" --unused || return $?
+      fi
     done
+  fi
+  # Move
+  if [ -n "$MOVE" ]; then
+    # Loop over all but the last remote
+    for REMOTE in ${REMOTES% *}; do
+      $DBG git annex move --to "$REMOTE" ${FAST} . || return $?
+      if [ -n "$UNUSED" ]; then
+        $DBG git annex move --to "$REMOTE" --unused || return $?
+      fi
+    done
+    # Process the last remote
+    REMOTE="${REMOTES##* }"
+    $DBG git annex move --to "$REMOTE" ${FAST} . || return $?
+    if [ -n "$UNUSED" ]; then
+      $DBG git annex copy --to "$REMOTE" --unused || return $?
+    fi
   fi
   # Drop
   if [ -n "$DROP" ]; then
     $DBG git annex drop . || return $?
+    if [ -n "$UNUSED" ]; then
+      $DBG git annex drop --unused || return $?
+    fi
   fi
   return 0
 }
