@@ -157,6 +157,7 @@ endif
 
 " *******************************************************
 " } Syntax omnicompletion {
+" https://github.com/vim-scripts/SyntaxComplete
 " *******************************************************
 if !exists('g:syntax_complete_loaded')
 	" Enable completion
@@ -172,6 +173,7 @@ endif
 
 " *******************************************************
 " } OmniCpp completion {
+" https://github.com/vim-scripts/OmniCppComplete
 " *******************************************************
 if !exists('g:omnicpp_complete_loaded')
 	" Enable completion
@@ -201,6 +203,7 @@ endif
 
 " *******************************************************
 " } Clang omnicompletion {
+" https://github.com/Rip-Rip/clang_complete
 " *******************************************************
 if !exists('g:clang_complete_loaded')
 	" Options
@@ -234,6 +237,7 @@ endif
 
 " *******************************************************
 " } Project plugin {
+" https://github.com/vim-scripts/project.vim
 " *******************************************************
 if !exists('g:loaded_project')
 	" Options
@@ -250,6 +254,7 @@ endif
 
 " *******************************************************
 " } Taglist plugin {
+" https://github.com/vim-scripts/taglist.vim
 " *******************************************************
 if !exists('g:loaded_taglist')
 	" Options
@@ -274,6 +279,7 @@ endif
 
 " *******************************************************
 " } SrcExplorer plugin {
+" https://github.com/wenlongche/SrcExpl
 " *******************************************************
 if !exists('g:loaded_srcexpl')
 	" Options
@@ -296,6 +302,7 @@ endif
 
 " *******************************************************
 " } NERDTree plugin {
+" https://github.com/preservim/nerdtree
 " *******************************************************
 if !exists('g:loaded_nerd_tree')
 	" Options
@@ -314,6 +321,8 @@ endif
 
 " *******************************************************
 " } MiniBufExplorer plugin {
+" https://github.com/fholgado/minibufexpl.vim
+" https://github.com/weynhamz/vim-plugin-minibufexpl
 " *******************************************************
 if !exists('g:loaded_minibufexplorer')
 	" Options
@@ -359,6 +368,7 @@ endif
 
 " *******************************************************
 " } CCVext plugin {
+" https://github.com/vim-scripts/CCVext.vim
 " *******************************************************
 if !exists('g:ccvext_version')
 	" Options
@@ -372,6 +382,7 @@ endif
 
 " *******************************************************
 " } Yaifa plugin {
+" https://github.com/vim-scripts/yaifa.vim
 " *******************************************************
 if !exists('g:loaded_yaifa')
 	" Options
@@ -387,6 +398,7 @@ endif
 
 " *******************************************************
 " } Yankring plugin {
+" https://github.com/vim-scripts/YankRing.vim
 " *******************************************************
 if !exists('g:loaded_yankring')
 	" Options
@@ -403,6 +415,7 @@ endif
 
 " *******************************************************
 " } CCTree plugin {
+" https://github.com/vim-scripts/cctree
 " *******************************************************
 if !exists('g:loaded_cctree')
 	" Options
@@ -446,6 +459,7 @@ endif
 
 " *******************************************************
 " } Command-T plugin {
+" https://github.com/vim-scripts/command-t
 " *******************************************************
 if !exists('g:command_t_loaded')
 	" Options
@@ -459,7 +473,8 @@ endif
 
 
 " *******************************************************
-" } CTRLP plugin {
+" } ctrl-p plugin {
+" https://github.com/kien/ctrlp.vim
 " *******************************************************
 if !exists('g:loaded_ctrlp')
 	" See https://github.com/kien/ctrlp.vim/blob/master/doc/ctrlp.txt
@@ -495,6 +510,7 @@ endif
 
 " *******************************************************
 " } Tagbar plugin {
+" https://github.com/vim-scripts/tagbar
 " *******************************************************
 if !exists('g:loaded_tagbar')
 	" Options
@@ -536,6 +552,7 @@ endif
 
 " *******************************************************
 " } buftabs plugin {
+" https://github.com/vim-scripts/buftabs
 " *******************************************************
 if !exists('g:loaded_buftabs') " Unused by the plugin !
 	" Options
@@ -552,6 +569,7 @@ endif
 
 " *******************************************************
 " } bufline plugin {
+" https://github.com/vim-scripts/BufLine
 " *******************************************************
 if !exists('g:loaded_bufline')
 	let g:bufline_left_arrow = ' ◀ '
@@ -570,6 +588,7 @@ endif
 
 " *******************************************************
 " } DirDiff plugin {
+" https://github.com/will133/vim-dirdiff
 " *******************************************************
 if !exists('g:loaded_dirdiff')
 	" Options
@@ -591,6 +610,7 @@ endif
 
 " *******************************************************
 " } Easytags plugin {
+" https://github.com/xolox/vim-easytags
 " *******************************************************
 if !exists('g:loaded_easytags')
 	" Options
@@ -608,6 +628,7 @@ endif
 
 " *******************************************************
 " } vim-commentary plugin {
+" https://github.com/tpope/vim-commentary
 " *******************************************************
 if !exists('loaded_commentary')
 	" Options
@@ -621,6 +642,7 @@ endif
 
 " *******************************************************
 " } Vim IDE plugins {
+" https://github.com/WolfgangMehner/vim-plugins
 " *******************************************************
 if !exists('g:C_Version')
 	" Options
@@ -630,6 +652,7 @@ endif
 
 " *******************************************************
 " } Highlight.vim plugin {
+" https://github.com/vim-scripts/highlight.vim
 " *******************************************************
 if !exists('loaded_highlight')
 	let g:loaded_highlight = 1
@@ -642,6 +665,7 @@ endif
 
 " *******************************************************
 " } Multisearch plugin {
+" https://github.com/vim-scripts/MultipleSearch.git
 " *******************************************************
 if !exists('loaded_multiplesearch')
 	" see https://github.com/vim-scripts/MultipleSearch.git
@@ -783,7 +807,7 @@ endif
 
 " *******************************************************
 " } YouCompleteMe {
-" https://github.com/Valloric/YouCompleteMe
+" https://github.com/ycm-core/YouCompleteMe.git
 " *******************************************************
 if !exists('g:loaded_youcompleteme')
 	" Options from https://clangd.llvm.org/installation.html#project-setup
@@ -836,8 +860,14 @@ if !exists('g:did_coc_loaded') && !empty(glob(expand("~/.vim/bundle/coc.nvim")))
 	"      \ coc#pum#visible() ? coc#pum#next(1) :
 	"      \ CheckBackspace() ? "\<Tab>" :
 	"      \ coc#refresh()
-
 endif
+
+
+" *******************************************************
+" } XML edit {
+" https://github.com/sukima/xmledit
+" *******************************************************
+" Nothing
 
 
 " *******************************************************
