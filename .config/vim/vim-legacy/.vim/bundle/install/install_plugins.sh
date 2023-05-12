@@ -67,11 +67,32 @@ remove_git_subfolder() {
 
 setup_youcompleteme() {
     cd ~/.vim/bundle/plugins/YouCompleteMe
-    #~ ./install.py --all
+    #./install.py --all
     ./install.py --clang-completer --clangd-completer 
 }
 
+setup_coc() {
+    if [ "$1" = "global_conf" ]; then
+	ln -s ~/.vim/bundle/config/coc-settings.json ~/.vim/ # for gvim
+	ln -s ~/.vim/bundle/config/coc-settings.json ~/.config/neovim/ # for neovim
+    else
+	vim -c 'CocInstall -sync coc-json coc-html coc-clangd|q'
+	vim -c 'CocUpdateSync|q'
+    fi
+}
+
 # Main
-download
-remove_git_subfolder
-#(setup_youcompleteme)
+case "$1" in
+    download|update)
+	download
+	remove_git_subfolder
+    ;;
+    setup_youcompleteme)
+	shift
+	(setup_youcompleteme "$@")
+    ;;
+    setup_coc)
+	shift
+	(setup_coc "$@")
+    ;;
+esac
