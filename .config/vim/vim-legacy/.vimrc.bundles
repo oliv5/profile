@@ -1,7 +1,8 @@
 " *******************************************************
 " } Select plugins and options {
 " *******************************************************
-" Disable specific plugins entirely or configuration of plugins only
+" Skip plugin configuration, required when they change key mappings or "set nocompatible"
+" This also disables some plugins entirely, depending on the plugin itself
 "let g:loaded_bbye = 1
 let g:loaded_project = 1 " warning: has side effects with 'set nocompatible'
 "let g:loaded_taglist = 1
@@ -13,6 +14,7 @@ let g:loaded_nerd_tree = 1
 "let g:loaded_yankring = 1
 "let g:loaded_cctree = 1
 "let g:command_t_loaded = 1
+let g:loaded_dirdiff = 1
 "let g:loaded_minibufexplorer = 1
 "let g:loaded_yaifa = 1
 "let g:loaded_ctrlp = 1
@@ -31,7 +33,7 @@ let g:loaded_uncrustify = 1
 "let g:loaded_gutentags = 1
 let b:done_vimsnippets = 1  " works with ultisnips
 let did_plugin_ultisnips = 1 " works with vimsnippets
-let g:loaded_youcompleteme = 1
+let g:loaded_youcompleteme = 1 " Unused by the plugin, configuration only !
 "let g:did_coc_loaded = 1
 
 " Use tabs when there is no graphical UI
@@ -794,8 +796,45 @@ endif
 " } coc {
 " https://github.com/neoclide/coc.nvim
 " *******************************************************
-if !exists('g:did_coc_loaded')
-	" Nothing yet here
+if !exists('g:did_coc_loaded') && !empty(glob(expand("~/.vim/bundle/coc.nvim")))
+
+	" *****
+	" Map <CR> to confirm completion
+	"inoremap <expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+
+	" Map <CR> select the first completion item and confirm the completion when no item has been selected
+	" Note: \<C-g>u is used to break undo level
+	"inoremap <silent><expr> <CR> coc#pum#visible() ? coc#_select_confirm() : "\<C-g>u\<CR>"
+
+	" Map <CR> on code formating
+	"inoremap <silent><expr> <CR> coc#pum#visible() ? coc#_select_confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+	" Map <CR> to coc#pum#info() if you need to confirm completion, only when there's selected complete item
+	inoremap <silent><expr> <CR> coc#pum#visible() && coc#pum#info()['index'] != -1 ? coc#pum#confirm() : "\<C-g>u\<CR>"
+
+	" *****
+	" Map <c-space> for trigger completion
+	inoremap <silent><expr> <C-Space> coc#refresh()
+
+	" *****
+	" Map <Tab> and <S-Tab> to confirm completion
+	inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#confirm() : "\<Tab>"
+	inoremap <expr> <S-Tab> coc#pum#visible() ? coc#pum#confirm() : "\<S-Tab>"
+
+	" Map <Tab> and <S-Tab> to navigate the completion list
+	"inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+	"inoremap <expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
+
+	" Map <Tab> to trigger completion and navigate to the next complete item
+	"function! CheckBackspace() abort
+	"  let col = col('.') - 1
+	"  return !col || getline('.')[col - 1]  =~# '\s'
+	"endfunction
+	"inoremap <silent><expr> <Tab>
+	"      \ coc#pum#visible() ? coc#pum#next(1) :
+	"      \ CheckBackspace() ? "\<Tab>" :
+	"      \ coc#refresh()
+
 endif
 
 
