@@ -19,16 +19,20 @@ let g:loaded_nerd_tree = 1
 "let g:loaded_easytags = 1
 let g:c_complete_loaded = 1 " Not clear where it comes from (?)
 let g:syntax_complete_loaded = 1 " Officially included in vim, configuration only !
-"let g:omnicpp_complete_loaded = 1
+let g:omnicpp_complete_loaded = 1
 let g:clang_complete_loaded = 1
 "let g:loaded_commentary = 1
 "let g:loaded_bufline = 1
 let g:loaded_buftabs = 1 " Unused by the plugin, configuration only !
 "let g:loaded_scratch = 1
 "let g:loaded_ansiesc = 1
-"let g:loaded_uncrustify = 1
+let g:loaded_uncrustify = 1
 "let g:loaded_vimautotag = 1
 "let g:loaded_gutentags = 1
+let b:done_vimsnippets = 1  " works with ultisnips
+let did_plugin_ultisnips = 1 " works with vimsnippets
+let g:loaded_youcompleteme = 1
+"let g:did_coc_loaded = 1
 
 " Use tabs when there is no graphical UI
 if !has("gui_running") && !has("nvim")
@@ -760,16 +764,39 @@ endif
 " https://github.com/SirVer/ultisnips.git
 " https://github.com/honza/vim-snippets.git
 " *******************************************************
+if !exists('did_plugin_ultisnips')
+	" Trigger configuration. You need to change this to something other than <tab> if you use one of the following:
+	" - https://github.com/Valloric/YouCompleteMe
+	" - https://github.com/nvim-lua/completion-nvim
+	let g:UltiSnipsExpandTrigger="<C-space>"
+	let g:UltiSnipsJumpForwardTrigger="<tab>"
+	let g:UltiSnipsJumpBackwardTrigger="<S-tab>"
 
-" Trigger configuration. You need to change this to something other than <tab> if you use one of the following:
-" - https://github.com/Valloric/YouCompleteMe
-" - https://github.com/nvim-lua/completion-nvim
-let g:UltiSnipsExpandTrigger="<C-space>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsJumpBackwardTrigger="<S-tab>"
+	" If you want :UltiSnipsEdit to split your window.
+	"let g:UltiSnipsEditSplit="vertical"
+endif
 
-" If you want :UltiSnipsEdit to split your window.
-"let g:UltiSnipsEditSplit="vertical"
+
+" *******************************************************
+" } YouCompleteMe {
+" https://github.com/Valloric/YouCompleteMe
+" *******************************************************
+if !exists('g:loaded_youcompleteme')
+	" Options from https://clangd.llvm.org/installation.html#project-setup
+	" Let clangd fully control code completion
+	let g:ycm_clangd_uses_ycmd_caching = 0
+	" Use installed clangd, not YCM-bundled clangd which doesn't get updates.
+	let g:ycm_clangd_binary_path = exepath("clangd")
+endif
+
+
+" *******************************************************
+" } coc {
+" https://github.com/neoclide/coc.nvim
+" *******************************************************
+if !exists('g:did_coc_loaded')
+	" Nothing yet here
+endif
 
 
 " *******************************************************
