@@ -31,6 +31,7 @@ let g:loaded_buftabs = 1 " Unused by the plugin, configuration only !
 let g:loaded_uncrustify = 1
 "let g:loaded_vimautotag = 1
 "let g:loaded_gutentags = 1
+"let g:gutentags_dont_load = 1
 let b:done_vimsnippets = 1  " works with ultisnips
 let did_plugin_ultisnips = 1 " works with vimsnippets
 let g:loaded_youcompleteme = 1 " Unused by the plugin, configuration only !
@@ -735,6 +736,7 @@ if !exists('g:loaded_gutentags')
 	let g:gutentags_modules = []
 
 	let g:gutentags_project_root = [ '.tags', '.cscope.out' ]
+	let g:gutentags_project_root += [ '.tags.path', '.ctags.path', '.cscope.path' ]
 	let g:gutentags_add_default_project_roots = 0
 	let g:gutentags_exclude_project_root = []
 
