@@ -4,37 +4,37 @@
 " Skip plugin configuration, required when they change key mappings or "set nocompatible"
 " This also disables some plugins entirely, depending on the plugin itself
 "let g:loaded_bbye = 1
-let g:loaded_project = 1 " warning: has side effects with 'set nocompatible'
+"let g:loaded_project = 1 " warning: has side effects with 'set nocompatible'
 "let g:loaded_taglist = 1
 "let g:loaded_tagbar = 1
 "let g:loaded_srcexpl = 1
-let g:loaded_nerd_tree = 1
+"let g:loaded_nerd_tree = 1
 "let g:loaded_trinity = 1
 "let g:ccvext_version = 1
 "let g:loaded_yankring = 1
 "let g:loaded_cctree = 1
 "let g:command_t_loaded = 1
-let g:loaded_dirdiff = 1
+"let g:loaded_dirdiff = 1
 "let g:loaded_minibufexplorer = 1
 "let g:loaded_yaifa = 1
 "let g:loaded_ctrlp = 1
 "let g:loaded_easytags = 1
-let g:c_complete_loaded = 1 " Not clear where it comes from (?)
-let g:syntax_complete_loaded = 1 " Officially included in vim, configuration only !
-let g:omnicpp_complete_loaded = 1
-let g:clang_complete_loaded = 1
+"let g:c_complete_loaded = 1 " Not clear where it comes from (?)
+"let g:syntax_complete_loaded = 1 " Officially included in vim, configuration only !
+"let g:omnicpp_complete_loaded = 1
+"let g:clang_complete_loaded = 1
 "let g:loaded_commentary = 1
 "let g:loaded_bufline = 1
-let g:loaded_buftabs = 1 " Unused by the plugin, configuration only !
+"let g:loaded_buftabs = 1 " Unused by the plugin, configuration only !
 "let g:loaded_scratch = 1
 "let g:loaded_ansiesc = 1
-let g:loaded_uncrustify = 1
+"let g:loaded_uncrustify = 1
 "let g:loaded_vimautotag = 1
 "let g:loaded_gutentags = 1
 "let g:gutentags_dont_load = 1
-let b:done_vimsnippets = 1  " works with ultisnips
-let did_plugin_ultisnips = 1 " works with vimsnippets
-let g:loaded_youcompleteme = 1 " Unused by the plugin, configuration only !
+"let b:done_vimsnippets = 1  " works with ultisnips
+"let did_plugin_ultisnips = 1 " works with vimsnippets
+"let g:loaded_youcompleteme = 1 " Unused by the plugin, configuration only !
 "let g:did_coc_loaded = 1
 
 " Use tabs when there is no graphical UI
@@ -287,16 +287,22 @@ if !exists('g:loaded_srcexpl') && !empty(glob(expand("~/.vim/bundle/SrcExpl")))
 	let g:SrcExpl_refreshTime = 100     " Set 100 ms for refreshing the Source Explorer
 	let g:SrcExpl_jumpKey = "<ENTER>"       " Set key to jump into the exact definition context
 	let g:SrcExpl_gobackKey = "<BACKSPACE>" " Set key for back from the definition context
-	let g:SrcExpl_searchLocalDef = 0    " Enable/Disable the local definition searching (Warning: side effect Ctrl-O/I stop working)
+	let g:SrcExpl_searchLocalDef = 1    " Enable/Disable the local definition searching (Warning: side effect Ctrl-O/I stop working)
 	let g:SrcExpl_isUpdateTags = 0      " Tag update on file opening
 	let g:SrcExpl_updateTagsCmd = ""    " Tag update command
 	let g:SrcExpl_updateTagsKey = ""    " Tag update key
 	let g:SrcExpl_prevDefKey = "<C-S-F5>" " Show prev definition in jump list
 	let g:SrcExpl_nextDefKey = "<C-F5>"   " Show next definition in jump list
 
+	let g:SrcExpl_pluginList = [
+		\ "__Tag_List__",
+		\ "_NERD_tree_",
+		\ "-MiniBufExplorer-",
+		\ "Source_Explorer"
+	\ ]
+
 	" Toggle ON/OFF
-	nmap <localleader>s   :SrcExpl<CR>
-	nmap <localleader>ss  :SrcExplClose<CR>
+	nmap <localleader>ss  :SrcExplToggle<CR>
 endif
 
 
