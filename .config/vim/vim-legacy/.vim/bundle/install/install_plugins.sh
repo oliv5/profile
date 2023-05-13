@@ -42,27 +42,27 @@ download() {
     for URL in $LIST_REPO_SIMPLE; do
 	DST="$HOME/.vim/bundle/plugins/$(basename "$URL" .git)"
 	if [ -d "$DST" ]; then
-	    git clone --no-checkout "$URL" "$DST/.tmp"
-	    mv "$DST/.tmp/.git" "$DST/.git"
-	    rmdir "$DST/.tmp"
+	    git clone --depth 1 --no-checkout "$URL" "$DST/.tmp" &&
+		mv "$DST/.tmp/.git" "$DST/.git" &&
+		rmdir "$DST/.tmp"
 	else
-	    git clone "$URL" "$DST"
+	    git clone --depth 1 "$URL" "$DST"
 	fi
     done
     for URL in $LIST_REPO_RECURSIVE; do
 	DST="$HOME/.vim/bundle/plugins/$(basename "$URL" .git)"
 	if [ -d "$DST" ]; then
-	    git clone --recurse-submodules --no-checkout "$URL" "$DST/.tmp"
-	    mv "$DST/.tmp/.git" "$DST/.git"
-	    rmdir "$DST/.tmp"
+	    git clone --recurse-submodules --shallow-submodules --depth 1 --no-checkout "$URL" "$DST/.tmp" &&
+		mv "$DST/.tmp/.git" "$DST/.git" &&
+		rmdir "$DST/.tmp"
 	else
-	    git clone --recurse-submodules "$URL" "$DST"
+	    git clone --recurse-submodules --shallow-submodules --depth 1 "$URL" "$DST"
 	fi
     done
 }
 
 remove_git_subfolder() {
-    find "$HOME/.vim/bundle/plugins/" -name .git -type d -print0 | xargs -r0 rm -r
+    find "$HOME/.vim/bundle/plugins/" -name .git -print0 | xargs -r0 rm -r
 }
 
 setup_youcompleteme() {
