@@ -67,6 +67,7 @@ remove_git_subfolder() {
 
 setup_youcompleteme() {
     cd ~/.vim/bundle/plugins/YouCompleteMe
+    # Add cmake_args.append( '-DUSE_SYSTEM_ABSEIL=1' ) in GetCmakeArgs() in third_party/ycmd/build.py
     #./install.py --all
     ./install.py --clang-completer --clangd-completer 
 }
@@ -79,6 +80,13 @@ setup_coc() {
 	vim -c 'CocInstall -sync coc-json coc-html coc-clangd|q'
 	vim -c 'CocUpdateSync|q'
     fi
+    # Install nodejs > 14.x
+    sudo curl -o /usr/local/bin/n https://raw.githubusercontent.com/visionmedia/n/master/bin/n
+    sudo chmod +x /usr/local/bin/n
+    sudo n stable
+    # Install clangd
+    sudo apt install clangd-15
+    sudo update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-15 100
 }
 
 # Main
