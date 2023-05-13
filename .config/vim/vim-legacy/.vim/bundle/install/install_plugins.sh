@@ -66,6 +66,7 @@ remove_git_subfolder() {
 }
 
 setup_youcompleteme() {
+    git clone --recurse-submodules --shallow-submodules --depth 1 https://github.com/ycm-core/YouCompleteMe.git ~/.vim/bundle/plugins/YouCompleteMe
     cd ~/.vim/bundle/plugins/YouCompleteMe
     # Add cmake_args.append( '-DUSE_SYSTEM_ABSEIL=1' ) in GetCmakeArgs() in third_party/ycmd/build.py
     #./install.py --all
@@ -73,6 +74,8 @@ setup_youcompleteme() {
 }
 
 setup_coc() {
+    git clone --depth 1 https://github.com/neoclide/coc.nvim ~/.vim/bundle/plugins/coc.nvim
+    cd ~/.vim/bundle/plugins/coc.nvim
     if [ "$1" = "global_conf" ]; then
 	ln -s ~/.vim/bundle/config/coc-settings.json ~/.vim/ # for gvim
 	ln -s ~/.vim/bundle/config/coc-settings.json ~/.config/neovim/ # for neovim
