@@ -65,31 +65,67 @@ remove_git_subfolder() {
     find "$HOME/.vim/bundle/plugins/" -name .git -print0 | xargs -r0 rm -r
 }
 
-setup_youcompleteme() {
-    git clone --recurse-submodules --shallow-submodules --depth 1 https://github.com/ycm-core/YouCompleteMe.git ~/.vim/bundle/plugins/YouCompleteMe
-    cd ~/.vim/bundle/plugins/YouCompleteMe
-    # Add cmake_args.append( '-DUSE_SYSTEM_ABSEIL=1' ) in GetCmakeArgs() in third_party/ycmd/build.py
-    #./install.py --all
-    ./install.py --clang-completer --clangd-completer 
+setup_clangd() {
+    if ! command -v clangd >/dev/null 2>&1; then
+	sudo apt install clangd-15
+	sudo update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-15 100
+    fi
+}
+
+setup_nodejs() {
+    if ! command -v node >/dev/null 2>&1; then
+	# Install nodejs > 14.x
+	sudo curl -o /usr/local/bin/n https://raw.githubusercontent.com/visionmedia/n/master/bin/n
+	sudo chmod +x /usr/local/bin/n
+	sudo n stable
+    fi
+}
+
+setup_yarn() {
+    if ! command -v yarn >/dev/null 2>&1; then
+	sudo apt-get update && sudo apt-get install yarn
+    fi
+}
+    
+setup_esbuild() {
+    # Local install
+    npm install --save-exact esbuild
+}
+
+setup_coc_clangd() {
+    local DST="$HOME/.config/coc/extensions/node_modules/coc-clangd"
+    setup_clangd
+    if [ "$1" = "prebuild" ]; then
+	vim -c 'CocInstall -sync coc-json coc-html coc-clangd|q'
+	vim -c 'CocUpdateSync|q'
+    elif [ "$1" = "manual" ]; then
+	git clone --depth 1 https://github.com/clangd/coc-clangd "$DST"
+	cd "$DST"
+	setup_yarn &&
+	    setup_esbuild &&
+	    yarn install &&
+	    npm run build
+    fi
 }
 
 setup_coc() {
+    setup_nodejs
     git clone --depth 1 https://github.com/neoclide/coc.nvim ~/.vim/bundle/plugins/coc.nvim
     cd ~/.vim/bundle/plugins/coc.nvim
     if [ "$1" = "global_conf" ]; then
 	ln -s ~/.vim/bundle/config/coc-settings.json ~/.vim/ # for gvim
 	ln -s ~/.vim/bundle/config/coc-settings.json ~/.config/neovim/ # for neovim
-    else
-	vim -c 'CocInstall -sync coc-json coc-html coc-clangd|q'
-	vim -c 'CocUpdateSync|q'
     fi
-    # Install nodejs > 14.x
-    sudo curl -o /usr/local/bin/n https://raw.githubusercontent.com/visionmedia/n/master/bin/n
-    sudo chmod +x /usr/local/bin/n
-    sudo n stable
-    # Install clangd
-    sudo apt install clangd-15
-    sudo update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-15 100
+}
+
+setup_youcompleteme() {
+    setup_nodejs
+    setup_clangd
+    git clone --recurse-submodules --shallow-submodules --depth 1 https://github.com/ycm-core/YouCompleteMe.git ~/.vim/bundle/plugins/YouCompleteMe
+    cd ~/.vim/bundle/plugins/YouCompleteMe
+    # Add cmake_args.append( '-DUSE_SYSTEM_ABSEIL=1' ) in GetCmakeArgs() in third_party/ycmd/build.py
+    #./install.py --all
+    ./install.py --clang-completer --clangd-completer 
 }
 
 # Main
@@ -100,10 +136,11 @@ case "$1" in
     ;;
     setup_youcompleteme)
 	shift
-	(setup_youcompleteme "$@")
+	(set -e; setup_youcompleteme "$@")
     ;;
     setup_coc)
 	shift
-	(setup_coc "$@")
+	#(set -e; setup_coc "$@") # Already in profile.git
+	(set -e; setup_coc_clangd "$@")
     ;;
 esac
