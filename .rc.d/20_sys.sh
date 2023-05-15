@@ -44,6 +44,15 @@ xwmid() {
 xwmpid() {
   xprop -id "${1:-$(xwmid)}" | awk '/WM_PID/ {print $3}'
 }
+# My xkill
+command -v xkill >/dev/null ||
+xkill() {
+  xwmid | xargs -r xdotool windowkill
+}
+# Close Xwindow
+xclose() {
+  xwmid | xargs -r xdotool windowclose
+}
 
 ################################
 # Chroot
