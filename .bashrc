@@ -134,8 +134,10 @@ if [ -r "$HOME/.rc" ]; then
   . "$HOME/.rc"
 fi
 
-# Reload ~/.inputrc
-bind -f ~/.inputrc
+# Reload ~/.inputrc in an interactive shell only
+case $- in
+  *i*) bind -f ~/.inputrc ;;
+esac
 
 # Prevent Ctrl-D exit session
 export IGNOREEOF=1
