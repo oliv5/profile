@@ -129,13 +129,11 @@ EOF
 
 # Returns true for interactive shells
 shell_isinteractive() {
-  # Test whether stdin exists
-  [ -t "0" ] || ! [ -p /dev/stdin ]
-  # Alternate method
-  #case $- in
-  #  *i*) return 0;;
-  #  *) return 1;;
-  #esac
+  case $- in
+    *i*) return 0;; # for bash
+    *) return 1;; # for bash
+    "") [ -t "0" ] || ! [ -p /dev/stdin ] # not bash: test whether stdin exists
+  esac
 }
 
 # Returns true for login shells

@@ -59,10 +59,10 @@ fi
 
 # Manage nvim-qt command line options
 if command -v nvim-qt >/dev/null; then
-  alias gnvim="nvim-qt"
-  alias ngvim="nvim-qt"
-  export VI="nvim-qt"
-  nvim-qt() {
+  alias gnvim="nvimqt"
+  alias ngvim="nvimqt"
+  export VI="nvimqt"
+  nvimqt() {
     local ARG
     local ARGS=""
     for ARG; do

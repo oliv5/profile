@@ -71,7 +71,9 @@ fi
 ################################
 # Disable TTY Software Flow Control (XON/XOFF flow control)
 # https://unix.stackexchange.com/questions/72086/ctrl-s-hangs-the-terminal-emulator
-stty -ixon
+if shell_isinteractive; then
+  stty -ixon
+fi
 
 # Renew shell hashes
 hash -r
