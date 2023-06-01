@@ -98,32 +98,17 @@ arg_diff() {
 # https://stackoverflow.com/questions/18186929/differences-between-login-shell-and-interactive-shell
 # http://www.tldp.org/LDP/abs/html/intandnonint.html
 
-# Replace with a fresh shell
+# Replace with a fresh shell; keeps current env variables
 shell_replace() {
-  exec -c "$0" -li
+  exec "${1:-$0}" -li
 }
 
-# Reload the shell entirely
+# Reload the shell entirely; lose env variables
 shell_reload() {
-  umask 077
-  local TMPFILE="$(mktemp)"
-  exec 3<>"$TMPFILE"
-  cat <&3 >/dev/null
-  cat > "$TMPFILE" <<EOF
-rm "$TMPFILE"
-unset ENV
-. "$HOME/.profile"
-if [ -n "$BASH_VERSION" ]; then
-  . "$HOME/.bashrc"
-else
-  . "$HOME/.dashrc"
-fi
-$@
-EOF
   if [ -n "$BASH_VERSION" ]; then
-    exec -c env ENV=/proc/$$/fd/3 bash --posix -i
+    exec env -i bash -li
   else
-    exec env ENV=/proc/$$/fd/3 dash -i
+    exec env -i HOME="$HOME" ENV="$HOME/.rc" $0 -li
   fi
 }
 
