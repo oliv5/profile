@@ -28,19 +28,12 @@ keyevent() {
 
 # Adb
 adb_start() { su root -c 'setprop persist.service.adb.enable 1; start adbd'; }
-adb_stop() { su root -c 'setprop persist.service.adb.enable 0; stop adbd'; }
-adb_toggle() {
-    if [ "$(getprop persist.service.adb.enable)" = "0" ]; then
-        echo "Enable adb"
-        adb_start
-    else
-        echo "Disable adb"
-        adb_stop
-    fi
-}
-adb_running() {
-    test [ "$(getprop persist.service.adb.enable)" != "0" ]
-}
+adb_stop() { su root -c 'setprop persist.service.adb.enable 0; setprop service.adb.tcp.port -1; stop adbd'; }
+adb_toggle() { if adb_running; then echo "Disable adb"; adb_stop; else echo "Enable adb"; adb_start; fi; }
+adb_restart() { adb_stop; adb_start; }
+adb_wifi() { sudo setprop service.adb.tcp.port ${1:-5555}; adb_restart; }
+adb_running() { sudo pgrep adbd >/dev/null; }
+adb_status() { adb_running && echo "running" || echo "off"; }
 
 # Lock/unlock screen
 unlock() { keyevent 82; }
