@@ -937,6 +937,7 @@ annex_upkeep() {
   local ADD=""
   local DEL=""
   local FORCE=""
+  local ALL=""
   # Sync options
   local MSG="annex_upkeep() at $(date)"
   local SYNC=""
@@ -975,9 +976,10 @@ annex_upkeep() {
       v) MOVE=1;;
       x) DROP=1;;
       f) FAST="--fast";;
+      y) ALL="--all";;
       # Misc
       z) set -vx; DBG="true";;
-      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-o] [-s] [-c] [-p] [-u] [-t] [-n] [-l] [-m 'msg'] [-g] [-e] [-x] [-f] [-z] [remote1 remote2 ...] "
+      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-o] [-s] [-c] [-p] [-u] [-t] [-n] [-l] [-m 'msg'] [-g] [-e] [-x] [-f] [-y] [-z] [remote1 remote2 ...] "
          echo >&2 "-a (a)dd files"
          echo >&2 "-d commit (d)eleted files"
          echo >&2 "-o f(o)rce add/delete files"
@@ -994,6 +996,7 @@ annex_upkeep() {
          echo >&2 "-v mo(v)e files"
          echo >&2 "-x drop files"
          echo >&2 "-f (f)ast get/send"
+         echo >&2 "-y all files"
          echo >&2 "-z simulate operations"
          return 1;;
     esac
@@ -1022,35 +1025,68 @@ annex_upkeep() {
   if [ -n "$SYNC" ]; then
     $DBG git annex sync ${NO_COMMIT} ${NO_PULL} ${NO_PUSH} ${CONTENT} ${MSG:+--message="$MSG"} $REMOTES || return $?
   fi
-  # Get
-  if [ -n "$GET" ]; then
-    $DBG git annex get ${FAST} || return $?
-  fi
   # Unused
   if [ -n "$UNUSED" ]; then
     $DBG git annex unused || return $?
   fi
+  # Get
+  if [ -n "$GET" ]; then
+    $DBG git annex get ${FAST} ${ALL:-.} || return $?
+  fi
   # Send
   if [ -n "$SEND" ]; then
     for REMOTE in ${REMOTES}; do
-      $DBG git annex copy --to "$REMOTE" ${UNUSED:-${FAST} .} || return $?
+      $DBG git annex copy --to "$REMOTE" ${UNUSED:-${FAST} ${ALL:-.}} || return $?
     done
   fi
   # Move
   if [ -n "$MOVE" ]; then
     # Copy over all but the last remote
     for REMOTE in ${REMOTES% *}; do
-      $DBG git annex copy --to "$REMOTE" ${UNUSED:-${FAST} .} || return $?
+      $DBG git annex copy --to "$REMOTE" ${UNUSED:-${FAST} ${ALL:-.}} || return $?
     done
     # Move to the last remote
     REMOTE="${REMOTES##* }"
-    $DBG git annex move --to "$REMOTE" ${UNUSED:-${FAST} .} || return $?
+    $DBG git annex move --to "$REMOTE" ${UNUSED:-${FAST} ${ALL:-.}} || return $?
   fi
   # Drop
   if [ -n "$DROP" ]; then
-    $DBG git annex drop ${UNUSED:-${FAST} .} || return $?
+    $DBG git annex drop ${UNUSED:-${FAST} ${ALL:-.}} || return $?
   fi
   return 0
+}
+
+########################################
+# Move files between remotes
+# Ex: ALL= UNUSED=1 FROM="xx" TO="yy" annex_move
+annex_move() {
+  annex_exists && ! annex_bare || return 1
+  # Unused files from other remotes
+  if [ -n "$UNUSED" ]; then
+    for REMOTE in $FROM; do
+        git annex unused --from "$REMOTE" || return $?
+    done
+  fi
+  # Copy from all but the last remote
+  for REMOTE in ${FROM% *}; do
+    git annex copy --from "$REMOTE" ${UNUSED:+--unused} ${ALL:+--all} ${FORCE:+--force} "${@:-.}" || return $?
+  done
+  # Move to the last remote
+  for REMOTE in ${FROM##* }; do
+    git annex move --from "$REMOTE" ${UNUSED:+--unused} ${ALL:+--all} ${FORCE:+--force} "${@:-.}" || return $?
+  done
+  # Local unused files
+  if [ -n "$UNUSED" ]; then
+    git annex unused || return $?
+  fi
+  # Copy to all but the last remote
+  for REMOTE in ${TO% *}; do
+    git annex copy --to "$REMOTE" ${UNUSED:+--unused} ${ALL:+--all} ${FORCE:+--force} "${@:-.}" || return $?
+  done
+  # Move to the last remote
+  for REMOTE in ${TO##* }; do
+    git annex move --to "$REMOTE" ${UNUSED:+--unused} ${ALL:+--all} ${FORCE:+--force} "${@:-.}" || return $?
+  done
 }
 
 ########################################
