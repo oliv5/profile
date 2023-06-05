@@ -649,26 +649,6 @@ annex_enum_special_remotes() {
 }
 
 ########################################
-# Annex upload
-annex_upload() {
-  local ARGS=""
-  local PREV=""
-  local TO=""
-  while [ $# -gt 0 ]; do
-     if [ "$1" = "--to" ]; then
-      TO="${TO:+$TO }$2"
-      shift 2
-     else
-      ARGS="${ARGS:+$ARGS }'$1'"
-      shift
-     fi
-  done
-  for UUID in $(annex_enabled $TO); do
-    eval git annex copy ${ARGS:-.} --to "$UUID"
-  done
-}
-
-########################################
 # Transfer files to the specified repos by chunk of a given size
 # without downloading the whole repo locally at once
 # $FROM is used to selected the origin repo
@@ -917,6 +897,68 @@ _annex_populate() {
 }
 
 ########################################
+# Copy files between remotes
+# Ex: ALL= UNUSED=1 FAST= FROM="xx" TO="yy" annex_copy .
+annex_copy() {
+  local UNUSED="${UNUSED:+--unused}"
+  local FAST="${FAST:+--fast}"
+  local FORCE="${FORCE:+--force}"
+  local ALL="${ALL:+--all}"
+  annex_exists && ! annex_bare || return 1
+  # Copy from remotes
+  for REMOTE in $FROM; do
+    if [ -n "$UNUSED" ]; then
+      git annex unused --from "$REMOTE" || return $?
+    fi
+    git annex copy --from "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+  done
+  # Copy to remotes
+  if [ -n "$UNUSED" ]; then
+    git annex unused || return $?
+  fi
+  for REMOTE in $TO; do
+    git annex copy --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+  done
+}
+
+# Move files between remotes
+# Ex: ALL= UNUSED=1 FAST= FROM="xx" TO="yy" annex_move .
+annex_move() {
+  local UNUSED="${UNUSED:+--unused}"
+  local FAST="${FAST:+--fast}"
+  local FORCE="${FORCE:+--force}"
+  local ALL="${ALL:+--all}"
+  annex_copy "$@" || return 1
+  # Drop from remotes
+  for REMOTE in $FROM; do
+    git annex drop --from "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+  done
+  # Drop from local
+  if [ -n "$TO" ]; then
+   git annex drop ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+  fi
+}
+
+# Annex upload
+annex_upload() {
+  local ARGS=""
+  local PREV=""
+  local TO=""
+  while [ $# -gt 0 ]; do
+     if [ "$1" = "--to" ]; then
+      TO="${TO:+$TO }$2"
+      shift 2
+     else
+      ARGS="${ARGS:+$ARGS }'$1'"
+      shift
+     fi
+  done
+  for UUID in $(annex_enabled $TO); do
+    eval git annex copy ${ARGS:-.} --to "$UUID"
+  done
+}
+
+########################################
 # Drop local files which are in the specified remote repos
 alias annex_drop='git annex drop -N $(annex_enabled | wc -w)'
 annex_drop_fast() {
@@ -1054,39 +1096,6 @@ annex_upkeep() {
     $DBG git annex drop ${UNUSED:-${FAST} ${ALL:-.}} || return $?
   fi
   return 0
-}
-
-########################################
-# Move files between remotes
-# Ex: ALL= UNUSED=1 FROM="xx" TO="yy" annex_move
-annex_move() {
-  annex_exists && ! annex_bare || return 1
-  # Unused files from other remotes
-  if [ -n "$UNUSED" ]; then
-    for REMOTE in $FROM; do
-        git annex unused --from "$REMOTE" || return $?
-    done
-  fi
-  # Copy from all but the last remote
-  for REMOTE in ${FROM% *}; do
-    git annex copy --from "$REMOTE" ${UNUSED:+--unused} ${ALL:+--all} ${FORCE:+--force} "${@:-.}" || return $?
-  done
-  # Move to the last remote
-  for REMOTE in ${FROM##* }; do
-    git annex move --from "$REMOTE" ${UNUSED:+--unused} ${ALL:+--all} ${FORCE:+--force} "${@:-.}" || return $?
-  done
-  # Local unused files
-  if [ -n "$UNUSED" ]; then
-    git annex unused || return $?
-  fi
-  # Copy to all but the last remote
-  for REMOTE in ${TO% *}; do
-    git annex copy --to "$REMOTE" ${UNUSED:+--unused} ${ALL:+--all} ${FORCE:+--force} "${@:-.}" || return $?
-  done
-  # Move to the last remote
-  for REMOTE in ${TO##* }; do
-    git annex move --to "$REMOTE" ${UNUSED:+--unused} ${ALL:+--all} ${FORCE:+--force} "${@:-.}" || return $?
-  done
 }
 
 ########################################
