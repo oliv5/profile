@@ -939,25 +939,6 @@ annex_move() {
   fi
 }
 
-# Annex upload
-annex_upload() {
-  local ARGS=""
-  local PREV=""
-  local TO=""
-  while [ $# -gt 0 ]; do
-     if [ "$1" = "--to" ]; then
-      TO="${TO:+$TO }$2"
-      shift 2
-     else
-      ARGS="${ARGS:+$ARGS }'$1'"
-      shift
-     fi
-  done
-  for UUID in $(annex_enabled $TO); do
-    eval git annex copy ${ARGS:-.} --to "$UUID"
-  done
-}
-
 ########################################
 # Drop local files which are in the specified remote repos
 alias annex_drop='git annex drop -N $(annex_enabled | wc -w)'
@@ -1479,8 +1460,6 @@ alias gane='git annex export'
 alias gand='git annex drop'
 alias gani='git annex info'
 alias ganu='git annex unlock'
-alias ganup='annex_upload'
-alias ganupf='annex_upload --fast'
 alias ganm='annex_missing'
 alias ganwg='annex_wantget'
 alias ganwd='annex_wantdrop'
