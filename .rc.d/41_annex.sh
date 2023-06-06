@@ -898,32 +898,37 @@ _annex_populate() {
 
 ########################################
 # Copy/Move files between remotes
-# Ex: ALL= UNUSED=1 FAST= FROM="xx" TO="yy" DROP= annex_copy .
+# Ex: DBG= ALL= UNUSED=1 FAST= FROM="xx" TO="yy" DROP= annex_copy .
 _annex_copy() {
   local UNUSED="${UNUSED:+--unused}"
   local FAST="${FAST:+--fast}"
   local FORCE="${FORCE:+--force}"
   local ALL="${ALL:+--all}"
+  local DBG="${DBG:+echo}"
   annex_exists && ! annex_bare || return 1
   # Copy from remotes
   for REMOTE in $FROM; do
     if [ -n "$UNUSED" ]; then
-      git annex unused --from "$REMOTE" || return $?
+      $DBG git annex unused --from "$REMOTE" || return $?
     fi
-    git annex copy --from "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
-    if [ -n "$DROP" ]; then
-      git annex drop --from "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+    if [ -n "$DROP" ] && [ "${FROM%% $REMOTE}" != "$FROM" ]; then
+      $DBG git annex move --from "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+    else
+      $DBG git annex copy --from "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
     fi
   done
   # Copy to remotes
-  if [ -n "$UNUSED" ]; then
-    git annex unused || return $?
-  fi
-  for REMOTE in $TO; do
-    git annex copy --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
-  done
-  if [ -n "$DROP" ] && [ -n "$TO" ]; then
-    git annex drop ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+  if [ -n "$TO" ]; then
+    if [ -n "$UNUSED" ]; then
+      $DBG git annex unused || return $?
+    fi
+    for REMOTE in $TO; do
+      if [ -n "$DROP" ] && [ "${TO%% $REMOTE}" != "$TO" ]; then
+        $DBG git annex move --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+      else
+        $DBG git annex copy --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+      fi
+    done
   fi
 }
 annex_copy() { DROP="" _annex_copy "$@"; }
