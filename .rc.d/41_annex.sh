@@ -1130,6 +1130,16 @@ annex_preferred() {
   fi
 }
 
+# Find plain files in annex
+# https://stackoverflow.com/questions/61680637/list-all-files-in-git-repo-not-added-by-git-annex-add
+annex_find_plain() {
+  local TMP1="${1:-$(mktemp)}"
+  local TMP2="${2:-$(mktemp)}"
+  git ls-files > "$TMP1"
+  git annex find > "$TMP2"
+  awk 'FNR==NR {a[$0]++; next} !a[$0]' "$TMP2" "$TMP1"
+}
+
 ########################################
 # Fsck all
 annex_fsck() {
