@@ -933,6 +933,7 @@ _annex_copy() {
 }
 annex_copy() { DROP="" _annex_copy "$@"; }
 annex_move() { DROP=1 _annex_copy "$@"; }
+annex_unload() { UNUSED=1 DROP=1 _annex_copy "$@"; }
 
 ########################################
 # Drop local files which are in the specified remote repos
