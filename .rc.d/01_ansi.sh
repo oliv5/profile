@@ -83,6 +83,9 @@ msg_error() {
 erase_eol() {
   echo -ne "\033[K"
 }
+clear_screen() {
+  echo -ne '\x1b[H\x1b[2J\x1b[3J'
+}
 
 # Move cursor
 cursor_xy() {
