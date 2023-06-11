@@ -1353,7 +1353,6 @@ annex_forget_remote() {
   [ -n "$OK" ] && git annex forget --drop-dead --force
 }
 
-########################################
 # Delete all versions of a file
 # https://git-annex.branchable.com/tips/deleting_unwanted_files/
 annex_purge() {
@@ -1373,6 +1372,19 @@ annex_purge() {
   for R in $(annex_enabled $(annex_exported "$@")); do
     git annex export --fast "$(git_branch)" --to "$R"
   done
+}
+
+# Cleanup annex
+annex_clean() {
+  :${TO:?No repo(s) to move unused files to...}
+  local DBG=${DBG:+echo}
+  local FORCE=${FORCE:+1}
+  local DIR
+  annex_exists || return 1
+  ${DBG} rm -rf .git/annex/tmp/ .git/annex/othertmp/ .git/annex/bad/ .git/annex/transfer/ .git/annex/ssh/ .git/annex/index .git/annex/journal/ .git/annex/export/ .git/annex/export.ex/
+  UNUSED=1 FORCE="$FORCE" TO="$TO" annex_move
+  git annex drop . ${FORCE:+--force}
+  git_gc_prune
 }
 
 ########################################
