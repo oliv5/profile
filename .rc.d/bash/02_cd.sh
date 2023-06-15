@@ -12,7 +12,8 @@ cdb()  { local DIR; pop _CD_SBACK DIR 2>/dev/null && push _CD_SFORW "$PWD" && pk
 cdf()  { local DIR; pop _CD_SFORW DIR 2>/dev/null && push _CD_SBACK "$PWD" && pkeepq _CD_SBACK $_CD_SBACK_MAX && _CD_PUSH=1 cd "$DIR"; }
 
 # Replace cd
-cd() { cda "$@"; }
+alias cd='cda'
+#cd() { cda "$@"; }
 
 # Clean up all custom mappings
 cdu() { unalias cd cda cdb cdf pushd popd 2>/dev/null; unset -f cd cda cdb cdf pushd popd 2>/dev/null; }
@@ -23,5 +24,5 @@ cds() { echo "backward[${#_CD_SBACK[@]}]: ${_CD_SBACK[@]}"; echo "forward[${#_CD
 # Empty stacks
 cdc() { _CD_SBACK=(); _CD_SFORW=(); }
 
-# Make and cd
+# Mkdir and cd
 mkcd () { mkdir -p "$@" && cd "$@"; }
