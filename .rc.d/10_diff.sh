@@ -31,6 +31,7 @@ diffbc() {
 }
 
 # Util fct to pipe 2 commands into one
+# Equivalent to bash process redirection: diff <(cmd1) <(cmd2)
 _diff_pipe() {
   local R="${1:?Reader command not specified...}"
   local W1="${2:?Writer command 1 not specified...}"
@@ -82,7 +83,7 @@ diffhr() {
 }
 
 # Diff a list of files in a root folder
-_diff2() {
+_diffrt() {
   local CMD="${1:?Diff command not specified...}"
   local DIR1="${2:?No folder1 specified...}"
   local DIR2="${3:?No folder2 specified...}"
@@ -91,8 +92,10 @@ _diff2() {
     "$CMD" "$DIR1/$F" "$DIR2/$F"
   done
 }
-diff2() { _diff2 "diff" "$@"; }
-diff2m() { _diff2 "meld" "$@"; }
+diffrt() { _diffrt "diff" "$@"; }
+diffrtm() { _diffrt "meld" "$@"; }
+diffrtl() { _diffrt "diff" . "$@"; }
+diffrtml() { _diffrt "meld" . "$@"; }
 
 #######################
 
