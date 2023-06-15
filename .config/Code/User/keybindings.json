@@ -113,6 +113,12 @@
 { "key": "ctrl++",                "command": "workbench.action.zoomIn" },
 { "key": "ctrl+-",                "command": "workbench.action.zoomOut" },
 
+// Open files
+{ "key": "ctrl+k ctrl+o",         "command": "-workbench.action.files.openFolder", "when": "openFolderWorkspaceSupport" },
+{ "key": "ctrl+k ctrl+o",         "command": "workbench.action.openWorkspace" },
+{ "key": "ctrl+k f",              "command": "workbench.action.files.closeFolder" },
+{ "key": "ctrl+k ctrl+f",         "command": "workbench.action.files.openFolder" },
+
 // Undo/redo
 { "key": "ctrl+z",                "command": "undo", "when": "editorTextFocus" },
 { "key": "ctrl+y",                "command": "redo", "when": "editorTextFocus" },
