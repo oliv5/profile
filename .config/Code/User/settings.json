@@ -88,7 +88,7 @@
     },
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.altClickMovesCursor": false,
-    "terminal.integrated.tabs.enabled": false,
+    "terminal.integrated.tabs.enabled": true,
     "terminal.integrated.copyOnSelection": true,
     "terminal.integrated.rightClickBehavior": "paste",
 

@@ -246,6 +246,8 @@
 // { "key": "ctrl+c",                "command": "workbench.action.terminal.sendSequence", "args": { "text": "\u0003" }, "when": "terminalFocus" },
 // { "key": "ctrl+c",                "command": "workbench.action.terminal.copySelection", "when": "terminalFocus" },
 { "key": "ctrl+v",                "command": "workbench.action.terminal.paste", "when": "terminalFocus" },
+{ "key": "ctrl+tab",              "command": "workbench.action.terminal.focusNext", "when": "terminalFocus" },
+{ "key": "ctrl+shift+tab",        "command": "workbench.action.terminal.focusPrev", "when": "terminalFocus" },
 
 //////////////////////////////////////////////////
 // Extensions
