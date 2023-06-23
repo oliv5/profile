@@ -1716,11 +1716,10 @@ alias gil='git_ignore_list'
 alias gia='git_ignore_add'
 # Commit aliases
 alias gci='git commit'
-alias gcm='git commit -m'
 alias gcim='git commit -m'
-alias gcam='git commit -am'
 alias gcimw='git commit -m "wip on $(git_branch) the $(date)"'
 alias gcims='git commit -m "squash this commit made on $(git_branch) the $(date)"'
+alias gciam='git commit --amend'
 # Misc aliases
 alias grm='git rm'
 alias grmu='git clean -fn'
@@ -1800,9 +1799,6 @@ alias grh2='git reset HEAD~2'
 alias grhh='git reset HEAD --hard'
 alias grt='git reset $(git_tracking)'
 grev() { git reset "$@"; git checkout -- "$@"; }
-# Amend last commit
-alias gam='git commit --amend'
-alias git_amend='git commit --amend'
 # Cherry-pick
 alias gcp='git cherry-pick'
 # Rebase aliases
