@@ -1477,7 +1477,7 @@ alias gane='git annex export'
 alias gand='git annex drop'
 alias gani='git annex info'
 alias ganu='git annex unlock'
-alias ganm='annex_missing'
+alias ganms='annex_missing'
 alias ganwg='annex_wantget'
 alias ganwd='annex_wantdrop'
 # Assistant
