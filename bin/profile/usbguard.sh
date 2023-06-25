@@ -10,7 +10,7 @@ usbguard_allow() {
 }
 
 usbguard_show() {
-    cat /etc/usbguard/rules.conf
+    sudo sh -c 'cat /etc/usbguard/rules.conf'
 }
 
 usbguard_list() {
