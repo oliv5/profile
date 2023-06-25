@@ -464,12 +464,8 @@ git_ls_modified_in_ref() { git_ls_in_ref M "$@"; }
 
 # Get remote names
 git_remotes() {
-  git ${2:+--git-dir="$2"} remote | grep -E "$1" | xargs
-}
-
-# Check remote registration
-git_remote_exists() {
-  git ${2:+--git-dir="$2"} remote | grep -E "$1" >/dev/null
+  #~ git ${2:+--git-dir="$2"} remote -v | awk '$3 ~ /(fetch)/ {print $1}' | grep -E "$1" | xargs sh -c 'test $# -gt 0 && echo "$@"' _
+  git ${2:+--git-dir="$2"} remote -v | awk 'BEGIN {ret=1} $1 ~ /'$1'/ && $3 ~ /(fetch)/ {if (ret==0){printf " "}; printf $1; ret=0} END {exit ret}'
 }
 
 # Is remote a valid git repo ?
@@ -510,29 +506,26 @@ git_detached() {
 
 ########################################
 # Get hash
-alias git_sha1='git_hash'
 git_hash() {
   git ${2:+--git-dir="$2"} rev-parse --revs-only "${1:-HEAD}"
 }
-git_allhash() {
+git_hash_all() {
   git ${2:+--git-dir="$2"} rev-list "${1:-HEAD}"
 }
-alias git_firsthash='git_roothash'
-git_roothash() {
+git_hash_root() {
   git ${2:+--git-dir="$2"} rev-list --max-parents=0 "${1:-HEAD}" 2>/dev/null ||
   git ${2:+--git-dir="$2"} rev-list --parents "${1:-HEAD}" | egrep --color=never "^[a-f0-9]{40}$"
 }
 
-# Get short hash
-alias git_ssha1='git_shorthash'
+# Get short hash (8 characters)
 git_shorthash() {
   git_hash "$@" | cut -c 1-8
 }
-git_allshorthash() {
-  git_allhash "$@" | cut -c 1-8
+git_shorthash_all() {
+  git_hash_all "$@" | cut -c 1-8
 }
-git_rootshorthash() {
-  git_roothash "$@" | cut -c 1-8
+git_shorthash_root() {
+  git_hash_root "$@" | cut -c 1-8
 }
 
 ########################################
@@ -557,6 +550,35 @@ git_extract() {
   local URL="$4"
   mkdir -p "$DST"
   git archive --format=tar ${URL:+--remote="$URL"} "$REF" ${SRC:+-- "$SRC"} | tar xv -C "$DST"
+}
+
+########################################
+# Update local branches without checkout
+git_update_branch() {
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="${2:-$(git_branches_remote "$REMOTE" | awk -F/ '{print $2}')}" # ${2:-$(git_branches)}
+  local CUR_BRANCH="$(git_branch)"
+  for REMOTE in $REMOTES; do
+    for BRANCH in $BRANCHES; do
+      if [ "$BRANCH" != "$CUR_BRANCH" ]; then
+        echo -n "Update local branch $BRANCH from $REMOTE ... "
+        git fetch "$REMOTE" "$BRANCH:$BRANCH" && echo "OK" || echo ""
+      fi
+    done
+  done
+}
+
+# Update remote branches without checkout
+git_update_remote_branch() {
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="${2:-$(git_branches)}"
+  git_update_branch "$@" &&
+    for REMOTE in $REMOTES; do
+      for BRANCH in $BRANCHES; do
+        echo -n "Push to $REMOTE $BRANCH ... "
+        git push "$REMOTE" "$BRANCH"
+      done
+    done
 }
 
 ########################################
