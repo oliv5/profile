@@ -55,6 +55,7 @@ confirmation() {
     [ "$V" = "y" ] || [ "$V" = "Y" ] 
 }
 
+################################
 # Ask for a file
 # ask_file [fd number] [question] [file test] [default value]
 ask_file() {
@@ -134,6 +135,17 @@ repeat() {
   local NUM="${1:?No repeat count specified...}"
   shift
   for NUM in $(seq $NUM); do "$@"; done
+}
+
+
+########################################
+# User sort helper
+usersort() {
+  local NUM="${NUM:-$1}"
+  local REV="${REV:-$2}"
+  local UNIQ="${UNIQ:-$3}"
+  local ZERO="${ZERO:-$4}"
+  eval sort ${UNIQ:+-u} ${ZERO:+-z} ${REV:+-r} ${NUM:+| head ${ZERO:+-z} -n $NUM} </dev/stdin
 }
 
 ########################################
