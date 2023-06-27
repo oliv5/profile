@@ -553,8 +553,37 @@ git_extract() {
 }
 
 ########################################
+
+# Update local branches with checkout
+#~ git_up() {
+  #~ git_exists || return 1
+  #~ git_modified && echo "Cannot run, repo is not clean..." && return 2
+  #~ local REMOTES="${1:-$(git_remotes)}"
+  #~ local BRANCHES="$2"
+  #~ local CURRENT_REF="$(git symbolic-ref --short HEAD 2>/dev/null || git_hash)"
+  #~ for REMOTE in $REMOTES; do
+    #~ if git_remote_valid "$REMOTE"; then
+      #~ echo -n "Pull from $REMOTE: "
+      #~ for BRANCH in ${BRANCHES:-$(git_branches_remote "$REMOTE" | cut -d/ -f2-)}; do
+        #~ if git_branch_exists "$BRANCH"; then
+          #~ if [ "$(git_hash "refs/heads/$BRANCH")" != "$(git_hash "refs/remotes/$REMOTE/$BRANCH")" ]; then
+            #~ git checkout "$BRANCH" &&
+              #~ git_pull --ff-only "$REMOTE" "$BRANCH" || continue
+          #~ else
+            #~ echo "Skip already aligned $REMOTE/$BRANCH ..."
+          #~ fi
+        #~ else
+          #~ git checkout --no-track "$REMOTE/$BRANCH" &&
+            #~ git_pull --ff-only "$REMOTE" "$BRANCH" || continue
+        #~ fi
+      #~ done
+    #~ fi
+  #~ done
+  #~ git checkout "$CURRENT_REF" 2>/dev/null
+#~ }
+
 # Update local branches without checkout
-git_update_branch() {
+git_up() {
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches_remote "$REMOTE" | awk -F/ '{print $2}')}" # ${2:-$(git_branches)}
   local CUR_BRANCH="$(git_branch)"
@@ -569,7 +598,7 @@ git_update_branch() {
 }
 
 # Update remote branches without checkout
-git_update_remote_branch() {
+git_up_remote() {
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   git_update_branch "$@" &&
@@ -602,34 +631,6 @@ git_pull_all() {
       git_pull --ff-only "$REMOTE" "${@:-$(git_branch)}" || break
     fi
   done
-}
-
-# Checkout and update all branches from all remotes
-git_up() {
-  git_exists || return 1
-  git_modified && echo "Cannot run, repo is not clean..." && return 2
-  local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="$2"
-  local CURRENT_REF="$(git symbolic-ref --short HEAD 2>/dev/null || git_hash)"
-  for REMOTE in $REMOTES; do
-    if git_remote_valid "$REMOTE"; then
-      echo -n "Pull from $REMOTE: "
-      for BRANCH in ${BRANCHES:-$(git_branches_remote "$REMOTE" | cut -d/ -f2-)}; do
-        if git_branch_exists "$BRANCH"; then
-          if [ "$(git_hash "refs/heads/$BRANCH")" != "$(git_hash "refs/remotes/$REMOTE/$BRANCH")" ]; then
-            git checkout "$BRANCH" &&
-              git_pull --ff-only "$REMOTE" "$BRANCH" || continue
-          else
-            echo "Skip already aligned $REMOTE/$BRANCH ..."
-          fi
-        else
-          git checkout --no-track "$REMOTE/$BRANCH" &&
-            git_pull --ff-only "$REMOTE" "$BRANCH" || continue
-        fi
-      done
-    fi
-  done
-  git checkout "$CURRENT_REF" 2>/dev/null
 }
 
 ########################################
