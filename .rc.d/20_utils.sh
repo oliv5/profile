@@ -94,7 +94,7 @@ loop() {
     PAUSE=$1
     shift
   fi
-  while true; do eval "$@"; sleep $PAUSE; done
+  while true; do "$@"; sleep $PAUSE; done
 }
 
 # Retry in loop until success
@@ -121,7 +121,7 @@ retry() {
   false; while [ $? -ne 0 ] && [ $LIMIT -le 0 -o $RETRY -ne $LIMIT ]; do
     [ $RETRY -gt 0 ] && sleep $PAUSE
     RETRY=$(($RETRY+1))
-    eval "$@"
+    "$@"
   done
 
   # Done - untrap and exit
