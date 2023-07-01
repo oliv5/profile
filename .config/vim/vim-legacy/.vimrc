@@ -183,6 +183,9 @@ set shortmess+=a      " Use short messages
 set showmode          " Display current mode in the status line
 set showcmd           " Display partially-typed commands
 set mouse=a           " Enable mouse all the time
+if has('nvim')
+	set clipboard^=unnamed,unnamedplus " unnamed = use linux selection; unnamedplus = use system clipboard
+endif
 set nomodeline        " Do not override this .vimrc
 if !exists('g:loaded_vimrc')
 	set nu              " Show line numbers
