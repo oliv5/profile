@@ -148,8 +148,9 @@ alias cdr='cd_root'
 alias r='cd_root'
 
 # Diff/meld & co
-alias mr='diffrtm'
-alias mrl='diffrtml'
+alias m='meld'
+alias dmr='diffrtm'
+alias dmrl='diffrtml'
 
 # Vim & co
 alias v='${VI:-false}'
