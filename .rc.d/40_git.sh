@@ -1432,7 +1432,7 @@ git_tag_delete() {
 }
 
 # Get last created tags
-git_tag_last_created() {
+git_tag_last() {
   git tag --sort=-committerdate -l
 }
 
@@ -1649,7 +1649,7 @@ alias gdt='git diff $(git_tracking)'
 alias gddt='git diff $(git_tracking)'
 alias gdct='git diff --cached $(git_tracking)'
 alias gdmt='git difftool -y $(git_tracking)'
-alias gddl='git diff $(git_tag_last_created | head -n 1)'
+alias gddl='git diff $(git_tag_last | head -n 1)'
 alias gda='git_diff_all'
 alias gdda='git_diff_all'
 alias gdma='git_diffm_all'
@@ -1786,7 +1786,7 @@ alias gta='git tag -a'
 alias gtl='git tag -l'
 alias gtlg='git tag -l | grep'
 alias gtlgi='git tag -l | grep -i'
-alias gtlp='git_tag_list_prev'
+alias gtll='git_tag_last'
 alias gtp='git_tag_prev'
 alias gtd='git tag -d'
 alias gtc='git_tag_create'

@@ -918,18 +918,16 @@ _annex_copy() {
     fi
   done
   # Copy to remotes
-  if [ -n "$TO" ]; then
-    if [ -n "$UNUSED" ]; then
-      $DBG git annex unused || return $?
-    fi
-    for REMOTE in $TO; do
-      if [ -n "$DROP" ] && [ "${TO%% $REMOTE}" != "$TO" ]; then
-        $DBG git annex move --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
-      else
-        $DBG git annex copy --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
-      fi
-    done
+  if [ -n "$TO" ] && [ -n "$UNUSED" ]; then
+    $DBG git annex unused || return $?
   fi
+  for REMOTE in $TO; do
+    if [ -n "$DROP" ] && [ "${TO%% $REMOTE}" != "$TO" ]; then
+      $DBG git annex move --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+    else
+      $DBG git annex copy --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
+    fi
+  done
 }
 annex_copy() { DROP="" _annex_copy "$@"; }
 annex_move() { DROP=1 _annex_copy "$@"; }
