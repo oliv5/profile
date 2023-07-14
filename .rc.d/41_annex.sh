@@ -1374,7 +1374,7 @@ annex_purge() {
 
 # Cleanup annex
 annex_clean() {
-  :${TO:?No repo(s) to move unused files to...}
+  : ${TO:?No repo(s) to move unused files to...}
   local DBG=${DBG:+echo}
   local FORCE=${FORCE:+1}
   local DIR
@@ -1382,7 +1382,7 @@ annex_clean() {
   ${DBG} rm -rf .git/annex/tmp/ .git/annex/othertmp/ .git/annex/bad/ .git/annex/transfer/ .git/annex/ssh/ .git/annex/index .git/annex/journal/ .git/annex/export/ .git/annex/export.ex/
   UNUSED=1 FORCE="$FORCE" TO="$TO" annex_move
   git annex drop . ${FORCE:+--force}
-  git_gc_prune
+  git_gc_purge
 }
 
 ########################################
