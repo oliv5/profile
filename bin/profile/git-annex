@@ -12,4 +12,5 @@ if [ -z "$GIT_ANNEX_ALLOW_GCRYPT" ] && git config -l 2>/dev/null | grep -i gcryp
 fi
 
 # Execute git-annex
-exec /usr/bin/git-annex "$@"
+PRGM="$(which -a git-annex 2>/dev/null | grep -v "$HOME/bin" | head -n 1)"
+exec "${PRGM:-/usr/bin/git-annex}" "$@"
