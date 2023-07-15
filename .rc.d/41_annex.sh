@@ -905,6 +905,8 @@ _annex_copy() {
   local FORCE="${FORCE:+--force}"
   local ALL="${ALL:+--all}"
   local DBG="${DBG:+echo}"
+  local FROM=" ${FROM}" # add space prefix
+  local TO=" ${TO}" # add space prefix
   annex_exists && ! annex_bare || return 1
   # Copy from remotes
   for REMOTE in $FROM; do
@@ -1377,11 +1379,13 @@ annex_clean() {
   : ${TO:?No repo(s) to move unused files to...}
   local DBG=${DBG:+echo}
   local FORCE=${FORCE:+1}
+  local ALL=${ALL:+1}
+  local AUTO=${AUTO:+1}
   local DIR
   annex_exists || return 1
   ${DBG} rm -rf .git/annex/tmp/ .git/annex/othertmp/ .git/annex/bad/ .git/annex/transfer/ .git/annex/ssh/ .git/annex/index .git/annex/journal/ .git/annex/export/ .git/annex/export.ex/
-  UNUSED=1 FORCE="$FORCE" TO="$TO" annex_move
-  git annex drop . ${FORCE:+--force}
+  UNUSED=1 FORCE="$FORCE" TO="$TO" ALL="$ALL" annex_move
+  git annex drop ${AUTO:+--auto} ${ALL:+--all} ${FORCE:+--force}
   git_gc_purge
 }
 
