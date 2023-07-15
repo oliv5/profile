@@ -662,7 +662,7 @@ _annex_transfer() {
   local DBG="${DBG:+echo}"
   local SELECTED=""
   [ $# -le 2 ] && shift $# || shift 2
-  REPOS="$(bash -c "sort <(echo $REPOS | xargs -n1) <(echo $(git_remotes) | xargs -n1) | uniq -d")"
+  REPOS="$(bash -c "sort <(echo $REPOS | xargs -n1) <(echo $(annex_remotes) | xargs -n1) | uniq -d")"
   [ -z "$REPOS" ] && return 0
   [ "$SELECT" = "missing" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--not --in $REPO"; done
   if [ $(annex_version) -ge $(annex_version 9.0) ]; then
