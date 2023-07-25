@@ -54,6 +54,7 @@
 { "key": "ctrl+alt+o",            "command": "workbench.action.output.toggleOutput" },
 { "key": "ctrl+alt+t",            "command": "workbench.action.terminal.toggleTerminal" },
 { "key": "ctrl+alt+e",            "command": "workbench.view.extensions" },
+{ "key": "ctrl+alt+x",            "command": "workbench.view.extensions" },
 { "key": "ctrl+alt+g",            "command": "workbench.view.scm", "when": "workbench.scm.active" },
 { "key": "ctrl+alt+f",            "command": "workbench.view.search" },
 { "key": "ctrl+e",                "command": "extension.multiCommand.execute", "args":
@@ -182,6 +183,9 @@
 // Comments
 { "key": "ctrl+q",                "command": "editor.action.commentLine", "when": "editorTextFocus" },
 { "key": "ctrl+shift+q",          "command": "editor.action.blockComment", "when": "editorTextFocus" },
+
+// Editor misc
+{ "key": "ctrl+shift+x",          "command": "workbench.action.files.toggleActiveEditorReadonlyInSession" },
 
 // Intellisense peek/preview
 { "key": "ctrl+d ctrl+d",         "command": "editor.action.peekDeclaration", "when": "editorHasDeclarationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
