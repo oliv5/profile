@@ -143,7 +143,7 @@ retry() {
 alias sudo_stress='fct_sudo stress'
 stress() {
   trap 'echo Interrupted after $TRIALS trials; trap - INT TERM; exit;' INT TERM
-  rerun "" "$@"
+  rerun "" 0 "$@"
   echo "Ended after $? trial(s)"; trap - INT TERM
 }
 
