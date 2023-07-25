@@ -86,57 +86,66 @@ ask_passwd() {
 }
 
 ################################
-# Loop
-alias sudo_loop='fct_sudo loop'
-loop() {
+# Run command in loop until criteria is met (n times, error code)
+alias sudo_rerun='fct_sudo rerun'
+rerun() {
+  local EXPECTED="" #expected error code to stop
+  local REJECTED="" #error code to avoid
+  local LIMIT="-1" #infinite
   local PAUSE=0
-  if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
-    PAUSE=$1
+  local TRIALS=0
+  local RET
+  if [ -z "$1" ] || expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+    EXPECTED="$1"
     shift
   fi
-  while true; do "$@"; sleep $PAUSE; done
+  if [ -z "$1" ] || expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+    REJECTED="$1"
+    shift
+  fi
+  if [ -z "$1" ] || expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+    LIMIT="${1:--1}"
+    shift
+  fi
+  if [ -z "$1" ] || expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+    PAUSE="${1:-0}"
+    shift
+  fi
+  : ${1:?No command to execute...}
+  while [ "$TRIALS" != "$LIMIT" ]; do
+    TRIALS=$(($TRIALS + 1))
+    "$@"; RET=$?
+    [ "$RET" = "$EXPECTED" ] && break
+    [ "$RET" != "${REJECTED:-$RET}" ] && break
+    [ "$TRIALS" = "$LIMIT" ] && break
+    sleep $PAUSE
+  done
+  return $TRIALS
 }
+
+# Loop forever
+alias sudo_loop='fct_sudo loop'
+loop() { rerun "" "" -1 "$@"; }
+
+# Repeat n times
+alias sudo_repeat='fct_sudo repeat'
+repeat() { rerun "" "" "$@"; }
 
 # Retry in loop until success
 alias sudo_retry='fct_sudo retry'
-retry() {
-  local RETRY=0
-  local LIMIT=-1
-  local PAUSE=0
-
-  # Trap interrupts
-  trap 'echo Interrupted after $RETRY trials; trap - INT TERM; exit;' INT TERM
-
-  # Init - check if $1 is an integer => retry limit
-  if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
-    LIMIT=$1
-    shift
-  fi
-  if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
-    PAUSE=$1
-    shift
-  fi
-
-  # Loop
-  false; while [ $? -ne 0 ] && [ $LIMIT -le 0 -o $RETRY -ne $LIMIT ]; do
-    [ $RETRY -gt 0 ] && sleep $PAUSE
-    RETRY=$(($RETRY+1))
-    "$@"
-  done
-
-  # Done - untrap and exit
-  trap - INT TERM
-  echo "Ended after $RETRY trial(s)"
+retry() { 
+  trap 'echo Interrupted after $TRIALS trials; trap - INT TERM; exit;' INT TERM
+  rerun 0 "" "$@"
+  echo "Ended after $? trial(s)"; trap - INT TERM
 }
 
-# Repeat N times
-alias sudo_repeat='fct_sudo repeat'
-repeat() {
-  local NUM="${1:?No repeat count specified...}"
-  shift
-  for NUM in $(seq $NUM); do "$@"; done
+# Stress run in loop until error
+alias sudo_stress='fct_sudo stress'
+stress() {
+  trap 'echo Interrupted after $TRIALS trials; trap - INT TERM; exit;' INT TERM
+  rerun "" "$@"
+  echo "Ended after $? trial(s)"; trap - INT TERM
 }
-
 
 ########################################
 # User sort helper
