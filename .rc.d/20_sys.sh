@@ -117,6 +117,7 @@ users=$4
 root-users=root
 root-groups=root
 #aliases=default
+#profile=default
 EOF
 ' _ "$CONF" "$NAME" "$(readlink -f "$DIR")" "$USER"
   sudo debootstrap "$DISTR" "$DIR" "$@"
@@ -131,6 +132,20 @@ mkschroot_post_setup() {
     sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
     sudo apt update
   ' _ "$USER"
+}
+
+# Remove schroot
+rmschroot() {
+  local DIRS=""
+  for DIR; do
+    local NAME="$(basename "$DIR")"
+    local CONF="/etc/schroot/chroot.d/$NAME"
+    sudo rm "$CONF" 2>/dev/null
+    DIRS="${DIRS:+$DIRS }$DIR"
+  done
+  if [ -n "$DIRS" ]; then
+    echo "Remove manually the chroot folders using: sudo rm -rI ${DIRS}"
+  fi
 }
 
 ################################
