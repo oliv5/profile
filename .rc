@@ -138,25 +138,26 @@ rc_source() {
   for PATTERN in "${RC_ALL:-$@}"; do
     if [ $# -eq 0 ] && [ -z "$RC_ALL" ] && [ -r "$RC_DIR/.rc.autoload" -o -r "$RC_DIR_LOCAL/.rc.local.autoload" ]; then # Load from list
       rc_sourcelist "$RC_DIR/.rc.autoload" "$RC_DIR_LOCAL/.rc.local.autoload"
+      continue
     elif [ -f "$PATTERN" ] && [ "$PATTERN" != "${PATTERN%%.sh}" ]; then # Load explicit .sh files (absolute path needed)
       rc_sourcefile "$(readlink -f "$PATTERN")"
     elif [ -d "$PATTERN" ]; then # Load explicit directories (absolute path needed)
       rc_sourcemod "$(readlink -f "$PATTERN")/*.sh"
-    else # Load scripts by pattern search
-      rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
-      if [ -n "$BASH_VERSION" ]; then
-        rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.sh"
-      fi
-      if [ -n "$ANDROID_ROOT" ]; then
-        rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
-      fi
-      if [ -d "$RC_DIR_LOCAL" ]; then
-        local DIR="$RC_DIR_LOCAL/.rc.local.d"
-        for LOOP in $(seq 1 5); do
-          rc_sourcemod "$DIR/*$PATTERN*.sh"
-          DIR="$DIR/*/"
-        done
-      fi
+    fi
+    # Load scripts by pattern search
+    rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
+    if [ -n "$BASH_VERSION" ]; then
+      rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.sh"
+    fi
+    if [ -n "$ANDROID_ROOT" ]; then
+      rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
+    fi
+    if [ -d "$RC_DIR_LOCAL" ]; then
+      local DIR="$RC_DIR_LOCAL/.rc.local.d"
+      for LOOP in $(seq 1 5); do
+        rc_sourcemod "$DIR/*$PATTERN*.sh"
+        DIR="$DIR/*/"
+      done
     fi
   done
 
