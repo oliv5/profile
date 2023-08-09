@@ -1,0 +1,8 @@
+{
+  "name": "kbd1",
+  "description": "kbd action #1",
+  "uuid": "kbd1",
+  "shell-version": [
+    "42.9"
+  ]
+}
