@@ -12,15 +12,17 @@ docker_build() {
 
 # Docker run
 docker_run() {
-    local BIN="${1:+--entrypoint='$1'}"
-    local MOUNT="${2:+-v $2}"
-    local NETWORK="${3:+--network=$3}"
-    local NAT="${4:+-p $4}"
-    local PLT="${5:+--platform=$5}"
-    local CAPABILITIES="${6:+--cap-add=$6}"
-    local PRIVILEGED="${7:+--privileged}"
-    shift $(($# > 7 ? 7 : $#))
-    docker run -it $BIN $MOUNT $NETWORK $NAT $PLT $CAPABILITIES $PRIVILEGED "$@"
+    local IMG="${1:?No image specified...}"
+    local BIN="${2:+--entrypoint='$2'}"
+    local MOUNT="${3:+-v $3}"
+    local NETWORK="${4:+--network=$4}"
+    local NAT="${5:+-p $5}"
+    local DEVICE="${6:+--device=$6}"
+    local PLT="${7:+--platform=$7}"
+    local CAPABILITIES="${8:+--cap-add=$8}"
+    local PRIVILEGED="${9:+--privileged}"
+    shift $(($# > 9 ? 9 : $#))
+    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED "$IMG" "$@"
 }
 
 # Setup binfmt in docker
