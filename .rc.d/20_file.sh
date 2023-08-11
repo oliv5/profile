@@ -85,18 +85,33 @@ ssh_cpin() {
 }
 
 ##############################
-# Duplicate file or directory with incremental num
+# Duplicate element with incremental num
 bak() {
-  for FILE; do
-    cp -rv "$FILE" "${FILE}.$(ls -1 "$FILE".* 2>/dev/null | wc -l)"
+  for ELEM; do
+    cp -rv "${ELEM%/}" "${ELEM%/}.$(ls -d1 "${ELEM%/}".* 2>/dev/null | wc -l)"
   done
 }
 
-# Duplicate files or directory with date
+# Move element with incremental num
+bak_mv() {
+  for ELEM; do
+    mv -v "${ELEM%/}" "${ELEM%/}.$(ls -d1 "${ELEM%/}".* 2>/dev/null | wc -l)"
+  done
+}
+
+# Duplicate element with date
 bak_date() {
   local DATE="$(date +%Y%m%d-%H%M%S)"
-  for FILE; do
-    cp -rv "$FILE" "${FILE}.${DATE}.bak"
+  for ELEM; do
+    cp -rv "${ELEM%/}" "${ELEM%/}.${DATE}.bak"
+  done
+}
+
+# Move element with date
+bak_date_mv() {
+  local DATE="$(date +%Y%m%d-%H%M%S)"
+  for ELEM; do
+    mv -v "${ELEM%/}" "${ELEM%/}.${DATE}.bak"
   done
 }
 
