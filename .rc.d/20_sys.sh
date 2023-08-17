@@ -80,14 +80,19 @@ xclose() {
 ################################
 # Chroot
 mkchroot(){
-  local SRC="/dev/${1:?Please specify the root device}"
-  local DST="${2:-/mnt}"
-  mount "$SRC" "$DST"
-  mount --bind "/dev" "$DST/dev"
-  mount --bind "/dev/pts" "$DST/dev/pts"
-  mount -t sysfs "/sys" "$DST/sys"
-  mount -t proc "/proc" "$DST/proc"
-  chroot "$DST"
+  local DIR="${1:?No chroot directory specified...}"
+  local DISTR="${2:?No distribution name specified...}"
+  shift 2
+  sudo debootstrap "$DISTR" "$DIR" "$@"
+}
+
+enterchroot() {
+  local DIR="${1:?No chroot directory specified...}"
+  mount --bind "/dev" "$DIR/dev"
+  mount --bind "/dev/pts" "$DIR/dev/pts"
+  mount -t sysfs "/sys" "$DIR/sys"
+  mount -t proc "/proc" "$DIR/proc"
+  sudo chroot "$DIR"
 }
 
 # Schroot
@@ -126,11 +131,12 @@ EOF
 # https://askubuntu.com/questions/148638/how-do-i-enable-the-universe-repository
 # https://manpages.ubuntu.com/manpages/trusty/man1/add-apt-repository.1.html
 mkschroot_post_setup() {
-  sudo schroot -u root -c "${1:-bionic}" -- sh -c '
+  sudo schroot -u root -c "${1:?No chroot name specified...}" -- sh -c '
     passwd $1
     sudo apt install software-properties-common
-    sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
+    sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main restricted universe multiverse"
     sudo apt update
+    echo "Now disable passwd/shadow files copy in /etc/schroot/<profile>/nssdatabases and select this profile in your /etc/schroot/chroot.d/<config>
   ' _ "$USER"
 }
 
