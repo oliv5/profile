@@ -125,3 +125,35 @@ count_down() {
   [ "$A" -lt "$B" ] && { local C="$A"; A="$B"; B="$C"; }
   count $A $B -1 "$3"
 }
+
+# Resize console
+# https://unix.stackexchange.com/questions/16578/resizable-serial-console-window#283206
+# Inspired from https://wiki.archlinux.org/index.php/working_with_the_serial_console#Resizing_a_terminal
+console_resize() {
+  local old=$(stty -g)
+  stty raw -echo min 0 time 5
+
+  printf '\0337\033[r\033[999;999H\033[6n\0338' > /dev/tty
+  IFS='[;R' read -r _ rows cols _ < /dev/tty
+
+  stty "$old"
+
+  # echo "cols:$cols"
+  # echo "rows:$rows"
+  stty cols "$cols" rows "$rows"
+}
+
+# Inspired from https://github.com/ThomasDickey/xterm-snapshots/blob/master/vttests/resize.sh
+console_resize_v2() {
+  local old=$(stty -g)
+  stty raw -echo min 0 time 5
+
+  printf '\033[18t' > /dev/tty
+  IFS=';t' read -r _ rows cols _ < /dev/tty
+
+  stty "$old"
+
+  # echo "cols:$cols"
+  # echo "rows:$rows"
+  stty cols "$cols" rows "$rows"
+}
