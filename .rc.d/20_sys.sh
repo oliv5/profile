@@ -136,7 +136,7 @@ mkschroot_post_setup() {
     sudo apt install software-properties-common
     sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main restricted universe multiverse"
     sudo apt update
-    echo "Now disable passwd/shadow files copy in /etc/schroot/<profile>/nssdatabases and select this profile in your /etc/schroot/chroot.d/<config>
+    echo "Now disable passwd/shadow files copy in /etc/schroot/<profile>/nssdatabases and select this profile in your /etc/schroot/chroot.d/<config>"
   ' _ "$USER"
 }
 
