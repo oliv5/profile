@@ -96,7 +96,7 @@ enterchroot() {
 }
 
 # Schroot
-mkschroot() {
+mkschroot() { # alternative is: mk-sbuild --target arm64 bionic && schroot -u root -c bionic-amd64-arm64
   local DIR="${1:?No chroot directory specified...}"
   local DISTR="${2:?No distribution name specified...}"
   local NAME="$(basename "$DIR")"

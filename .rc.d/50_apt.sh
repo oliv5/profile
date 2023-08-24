@@ -61,7 +61,7 @@ deb_make() {
   fakeroot debian/rules binary
 }
 
-# Script to get all the PPA installed on a system
+# Script to list all the PPA installed on a system
 # https://askubuntu.com/questions/148932/how-can-i-get-a-list-of-all-repositories-and-ppas-from-the-command-line-into-an
 pkg_ls_ppa() {
   for APT in `find /etc/apt/ -name \*.list`; do
@@ -77,4 +77,17 @@ pkg_ls_ppa() {
           fi
       done
   done
+}
+
+# Permanent --no-install-recommends
+apt_no_recommends() {
+  if [ "$1" = "disable" ]; then
+    sudo rm -v /etc/apt/apt.conf.d/01norecommend
+  else
+    sudo tee /etc/apt/apt.conf.d/01norecommend << EOF
+APT::Install-Recommends "0";
+APT::Install-Suggests "0";
+EOF
+    ls /etc/apt/apt.conf.d/01norecommend
+  fi
 }
