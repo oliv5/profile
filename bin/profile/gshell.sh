@@ -1,26 +1,34 @@
 #!/bin/sh
+# Gnome shell commands
 
+# Reload gnome-shell the hard way
+# Better use: ctrl+F2, r
 gshell_replace() {
-	# Ask question
-	if [ "$1" != "-s" ]; then
-		if command -v zenity >/dev/null; then
-			zenity --question --title "Reset Gnome display ?" --timeout=3
-			[ $? -eq 1 ] && return 1
-		else
-			echo -n "Reset Gnome display (y/n)? "
-			local ANSWER; read ANSWER
-			[ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && return 1
-		fi
-	fi
-	# Kill gnome-shell and restart it (same as "alt-F2 + r")
-	killall -9 gnome-shell 2>/dev/null
-	sleep 1s
-	gnome-shell --replace >/dev/null 2>&1 &
-	# Store the date in a log
-	if [ -w "$HOME/gnome-shell-replace.log" ]; then
-		date >> "$HOME/gnome-shell-replace.log"
-	fi
-	return 0
+  DISPLAY=:0 gnome-shell --replace &
+}
+
+# Restart gnome-shell the hard way
+# Better use: ctrl+F2, r
+gshell_restart() {
+  sudo systemctl restart lightdm 2>/dev/null ||
+    sudo systemctl restart gdm3 2>/dev/null
+}
+
+gshell_install_utils() {
+  local BINDIR="$HOME/.local/bin"
+  wget -O "$BINDIR/gnome-shell-extension-installer" "https://github.com/brunelli/gnome-shell-extension-installer/raw/master/gnome-shell-extension-installer" &&
+    chmod +x "$BINDIR/gnome-shell-extension-installer"
+  git clone https://gitlab.com/thjderjktyrjkt/disable-gnome-extension-update-check.git "$HOME/.local/share/gnome-shell/extensions/disable-gnome-extension-update-check@thjderjktyrjkt.gitlab.com"
+}
+
+# See https://unix.stackexchange.com/questions/86221/how-can-i-lock-my-screen-in-gnome-3-without-gdm#86275
+gnome_lock() {
+  if command -v gnome-screensaver-command >/dev/null; then
+    gnome-screensaver-command --lock
+  else
+    dbus-send --type=method_call --dest=org.gnome.ScreenSaver \
+      /org/gnome/ScreenSaver org.gnome.ScreenSaver.Lock
+  fi
 }
 
 # Execute command when any
