@@ -1,14 +1,23 @@
 #!/bin/sh
 # Gnome shell commands
 
+# Simulate Alt+F2, r
+gshell_replace_auto() {
+  xdotool key "Alt+F2+r" && sleep 0.5 && xdotool key "Return"
+}
+
 # Reload gnome-shell the hard way
-# Better use: ctrl+F2, r
+# Better use: Alt+F2, r
 gshell_replace() {
-  DISPLAY=:0 gnome-shell --replace &
+  DISPLAY=${1:-:0} gnome-shell --replace &
+}
+
+# Send SIGQUIT to gshell
+ghell_sigquit() {
+  killall -SIGQUIT gnome-shell
 }
 
 # Restart gnome-shell the hard way
-# Better use: ctrl+F2, r
 gshell_restart() {
   sudo systemctl restart lightdm 2>/dev/null ||
     sudo systemctl restart gdm3 2>/dev/null
