@@ -17,6 +17,35 @@ alias modinfog='modinfo | grep -i'
 alias dmesgg='dmesg | grep -i'
 
 ################################
+# https://wiki.archlinux.org/title/CPU_frequency_scaling
+# Get/set cpu governor
+cpu_governor() {
+  local DEV="/sys/devices/system/cpu/cpu${2:-*}/cpufreq/scaling_governor"
+  if [ -n "$1" ]; then sudo sh -c "echo '$1' > '$DEV'"; else cat "$DEV"; fi
+}
+alias cpu_governors='cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors'
+alias cpu_powersave='cpu_governor powersave'
+alias cpu_performance='cpu_governor performance'
+alias cpu_ondemand='cpu_governor ondemand'
+alias cpu_conservative='cpu_governor conservative'
+alias cpu_schedutil='cpu_governor schedutil'
+alias cpu_userspace='cpu_governor userspace'
+
+# CPU frequencies
+cpu_curfreq() {
+  local DEV="/sys/devices/system/cpu/cpu${2:-*}/cpufreq/scaling_cur_freq"
+  if [ -n "$1" ]; then sudo sh -c "echo '$1' > '$DEV'"; else cat "$DEV"; fi
+}
+cpu_minfreq() {
+  local DEV="/sys/devices/system/cpu/cpu${2:-*}/cpufreq/scaling_min_freq"
+  if [ -n "$1" ]; then sudo sh -c "echo '$1' > '$DEV'"; else cat "$DEV"; fi
+}
+cpu_maxfreq() {
+  local DEV="/sys/devices/system/cpu/cpu${2:-*}/cpufreq/scaling_max_freq"
+  if [ -n "$1" ]; then sudo sh -c "echo '$1' > '$DEV'"; else cat "$DEV"; fi
+}
+
+################################
 # TTys
 alias tty_list='ps aux|grep /usr/bin/[X]'
 alias tty_active='cat /sys/class/tty/tty0/active'
@@ -129,11 +158,16 @@ sys_iostat() {
 }
 
 sys_stalled() {
-  while true; do ps -eo state,pid,cmd | grep "^D"; echo "—-"; sleep 5; done
+  while true; do ps -eo state,pid,cmd | grep "^D"; echo "—-"; sleep 1; done
 }
 
 sys_cpu() {
   sar ${1:-1} ${2}
+}
+
+# https://stackoverflow.com/questions/666783/how-to-find-out-which-process-is-consuming-wait-cpu-i-e-i-o-blocked
+io_stalled() {
+  while true; do date; ps auxf | awk '{if($8=="D") print $0;}'; sleep 1; done
 }
 
 ################################
