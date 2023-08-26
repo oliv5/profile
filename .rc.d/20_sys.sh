@@ -70,9 +70,11 @@ enterchroot() {
 mkschroot() { # alternative is: mk-sbuild --target arm64 bionic && schroot -u root -c bionic-amd64-arm64
   local DIR="${1:?No chroot directory specified...}"
   local DISTR="${2:?No distribution name specified...}"
+  local ARCH="$3"
+  local PROFILE="${4:-default}"
   local NAME="$(basename "$DIR")"
   local CONF="/etc/schroot/chroot.d/$NAME"
-  shift 2
+  shift $(($# < 4 ? $# : 4))
   sudo mkdir -p "$DIR" || { echo >&2 "Cannot create chroot directory... Abort !" && return 1; }
   sudo mkdir -p "/etc/schroot/chroot.d/" || { echo >&2 "Cannot create schroot config directory... Abort !" && return 2; }
   sudo sh -c '
@@ -92,22 +94,41 @@ directory=$3
 users=$4
 root-users=root
 root-groups=root
+profile=$5
 #aliases=default
-#profile=default
 EOF
-' _ "$CONF" "$NAME" "$(readlink -f "$DIR")" "$USER"
-  sudo debootstrap "$DISTR" "$DIR" "$@"
+' _ "$CONF" "$NAME" "$(readlink -f "$DIR")" "$USER" "$PROFILE"
+  sudo debootstrap "$DISTR" "$DIR" ${ARCH:+--arch="$ARCH"} "$@"
 }
 
 # https://askubuntu.com/questions/148638/how-do-i-enable-the-universe-repository
 # https://manpages.ubuntu.com/manpages/trusty/man1/add-apt-repository.1.html
-mkschroot_post_setup() {
-  sudo schroot -u root -c "${1:?No chroot name specified...}" -- sh -c '
-    passwd $1
-    sudo apt install software-properties-common
-    sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main restricted universe multiverse"
-    sudo apt update
-    echo "Now disable passwd/shadow files copy in /etc/schroot/<profile>/nssdatabases and select this profile in your /etc/schroot/chroot.d/<config>"
+mkschroot_finalize() {
+  local NAME="${1:?No chroot name specified...}"
+
+  # Change the schroot type, create type "custom" if not existing already
+  if ! [ -d /etc/schroot/custom ]; then
+    sudo cp -r /etc/schroot/default /etc/schroot/custom
+    # Stop resetting passwd/group files every time
+    sudo sed -i -e '/passwd/d; /shadow/d' /etc/schroot/custom/copyfiles
+    sudo sed -i -e '/passwd/d; /shadow/d' /etc/schroot/custom/nssdatabases
+  fi
+  sudo sed -i -e 's/profile=.*/profile=custom/ ; s/^union-type=/#union-type=/' "/etc/schroot/chroot.d/$NAME"
+
+  sudo schroot -u root -c "$NAME" -- sh -c '
+    # Upgrade system
+    apt-get update
+    apt-get install software-properties-common
+    add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main restricted universe multiverse"
+    apt-get update
+    apt-get upgrade
+
+    # Install sudo, set main user password and test it
+    apt-get install sudo
+    echo "Set user password for $1..."
+    passwd "$1"
+    echo "Test user password..."
+    sudo echo "OK"
   ' _ "$USER"
 }
 
