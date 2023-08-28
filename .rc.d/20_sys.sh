@@ -134,16 +134,14 @@ mkschroot_finalize() {
 
 # Remove schroot
 rmschroot() {
-  local DIRS=""
-  for DIR; do
-    local NAME="$(basename "$DIR")"
+  local NAME
+  for NAME; do
     local CONF="/etc/schroot/chroot.d/$NAME"
+    [ -r "$CONF" ] || { echo >&2 "Unknown chroot '$NAME'..."; continue; }
+    echo -n "Remove the schroot folder with: sudo rm -rI "
+    awk -F= '/directory=/ {print $2}' "$CONF"
     sudo rm "$CONF" 2>/dev/null
-    DIRS="${DIRS:+$DIRS }$DIR"
   done
-  if [ -n "$DIRS" ]; then
-    echo "Remove manually the chroot folders using: sudo rm -rI ${DIRS}"
-  fi
 }
 
 ################################
