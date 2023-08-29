@@ -363,6 +363,17 @@ log() {
   sudo tail "/var/log/${LOG}" "$@"
 }
 
+# system upgrade
+if [ "$(uname -m)" = "x86_64" ]; then
+alias sysup=' \
+  sudo rm /etc/apt/apt.conf.d/20apt-esm-hook.conf; \
+  sudo systemctl disable ubuntu-advantage; \
+  sudo apt-get update && sudo apt full-upgrade && sudo apt autoremove; \
+  sudo snap refresh; \
+  flatpak upgrade \
+'
+fi
+
 # Misc
 alias mo='mimeopen'
 alias xo='xdg-open'
