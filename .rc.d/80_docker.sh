@@ -31,6 +31,21 @@ docker_setup_binfmt() {
     docker run --rm --privileged multiarch/qemu-user-static --reset -p yes -c yes
 }
 
+# Stop container by image name
+docker_stop_cont_by_img() {
+    for IMG; do
+        docker stop $(docker ps -q --filter ancestor="$IMG")
+    done
+}
+
+# Delete image
+docker_rm_img() {
+    docker_stop_cont_by_img "$@"
+    for IMG; do
+        docker rmi -f "$IMG"
+    done
+}
+
 # Aliases
 alias docker_ls_img='docker images'
 alias docker_ls_cont='docker container ls'

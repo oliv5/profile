@@ -53,8 +53,10 @@ xclose() {
 mkchroot(){
   local DIR="${1:?No chroot directory specified...}"
   local DISTR="${2:?No distribution name specified...}"
-  shift 2
-  sudo debootstrap "$DISTR" "$DIR" "$@"
+  local ARCH="$3"
+  local PKG_COMPONENTS="${4:-main}" # Ubuntu: main,restricted,universe,multiverse Debian: contrib,non-free
+  shift $(($# < 4 ? $# : 4))
+  sudo debootstrap ${ARCH:+--arch="$ARCH" --foreign} ${components:+--components="$PKG_COMPONENTS"} "$DISTR" "$DIR" "$@"
 }
 
 enterchroot() {
@@ -72,13 +74,13 @@ mkschroot() { # alternative is: mk-sbuild --target arm64 bionic && schroot -u ro
   local DISTR="${2:?No distribution name specified...}"
   local ARCH="$3"
   local PROFILE="${4:-default}"
+  local PKG_COMPONENTS="${5:-main}" # Ubuntu: main,restricted,universe,multiverse Debian: contrib,non-free
   local NAME="$(basename "$DIR")"
   local CONF="/etc/schroot/chroot.d/$NAME"
   shift $(($# < 4 ? $# : 4))
   sudo mkdir -p "$DIR" || { echo >&2 "Cannot create chroot directory... Abort !" && return 1; }
   sudo mkdir -p "/etc/schroot/chroot.d/" || { echo >&2 "Cannot create schroot config directory... Abort !" && return 2; }
-  sudo sh -c '
-cat > "$1" <<EOF
+  sudo tee "$CONF" <<EOF
 # schroot chroot definitions.
 # See schroot.conf(5) for complete documentation of the file format.
 #
@@ -87,55 +89,80 @@ cat > "$1" <<EOF
 # to your system.  They will only have root access inside the chroot,
 # but that is enough to cause malicious damage.
 #
-[$2]
-description=Chroot for $2
+[$NAME]
+description=Chroot for $NAME
 type=directory
-directory=$3
-users=$4
+directory=$(readlink -f "$DIR")
+users=$(whoami)
 root-users=root
 root-groups=root
-profile=$5
+profile=$PROFILE
 #aliases=default
 EOF
-' _ "$CONF" "$NAME" "$(readlink -f "$DIR")" "$USER" "$PROFILE"
-  sudo debootstrap "$DISTR" "$DIR" ${ARCH:+--arch="$ARCH"} "$@"
+  sudo debootstrap ${ARCH:+--arch="$ARCH" --foreign} ${components:+--components="$PKG_COMPONENTS"} "$@" "$DISTR" "$DIR"
 }
 
 # https://askubuntu.com/questions/148638/how-do-i-enable-the-universe-repository
 # https://manpages.ubuntu.com/manpages/trusty/man1/add-apt-repository.1.html
-mkschroot_finalize() {
+mkschroot_stage2() {
   local NAME="${1:?No chroot name specified...}"
+  local CONF="/etc/schroot/chroot.d/$NAME"
+  local DIR="$(awk -F= '/directory=/ {print $2}' "$CONF")"
 
   # Change the schroot type, create type "custom" if not existing already
   if ! [ -d /etc/schroot/custom ]; then
     sudo cp -r /etc/schroot/default /etc/schroot/custom
     # Stop resetting passwd/group files every time
-    sudo sed -i -e '/passwd/d; /shadow/d' /etc/schroot/custom/copyfiles
-    sudo sed -i -e '/passwd/d; /shadow/d' /etc/schroot/custom/nssdatabases
+    sudo sed -i -e '/passwd/d; /shadow/d; /group/d; /gshadow/d' /etc/schroot/custom/copyfiles
+    sudo sed -i -e '/passwd/d; /shadow/d; /group/d; /gshadow/d' /etc/schroot/custom/nssdatabases
   fi
   sudo sed -i -e 's/profile=.*/profile=custom/ ; s/^union-type=/#union-type=/' "/etc/schroot/chroot.d/$NAME"
+  # Copy the passwd/group files once
+  sudo cp -v /etc/passwd /etc/shadow /etc/group /etc/gshadow "$DIR/etc/"
 
-  sudo schroot -u root -c "$NAME" -- sh -c '
-    # Upgrade system
-    apt-get update
-    apt-get install software-properties-common
-    add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main restricted universe multiverse"
-    apt-get update
-    apt-get upgrade
+  # Case using qemu user emulation
+  local ARCH="$(sudo schroot -u root -c "$NAME" -- uname -m)"
+  if [ -n "$ARCH" ] && [ "$ARCH" != "$(uname -m)" ]; then
+    # See https://wiki.ubuntu.com/ARM/RootfsFromScratch/QemuDebootstrap
+    # Copy qemu binary
+    if [ "$ARCH" != "aarch64" ]; then
+      sudo cp -v /usr/bin/qemu-arm-static "$DIR/usr/bin/"
+    else
+      echo >&2 "Not supported: You must add the relevant qemu binary copy in this script..."
+      return 1
+    fi
+    # Run second stage
+    sudo schroot -u root -c "$NAME" -- /debootstrap/debootstrap --second-stage
+  fi
 
-    # Install sudo, set main user password and test it
-    apt-get install sudo
+  # Finalize
+  sudo schroot -u root -c "$NAME" -- sh -c ':; set -e
+    # Set main user password and test it with sudo
     echo "Set user password for $1..."
     passwd "$1"
     echo "Test user password..."
-    sudo echo "OK"
-  ' _ "$USER"
+    su "$1" -c "echo OK"
+  ' _ "$(whoami)"
+
+  # Allow sudo with no password in foreign architectures
+  if [ -n "$ARCH" ] && [ "$ARCH" != "$(uname -m)" ]; then
+    sudo schroot -u root -c "$NAME" -- sh -c ':; set -e
+      echo "Allow user sudo without password because of issue with tty/askpass..."
+      echo "NOTE: an incomplete alternative is to use sudo -S"
+      echo "$1 ALL = NOPASSWD: ALL" | EDITOR="tee" visudo "/etc/sudoers.d/$1"
+      echo "Test sudo without password..."
+      sudo echo "OK"
+    ' _ "$(whoami)"
+  fi
+
 }
 
 # Remove schroot
 rmschroot() {
   local NAME
+  schroot --all-session --end-session
   for NAME; do
+    NAME="$(echo $NAME | cut -d: -f2)"
     local CONF="/etc/schroot/chroot.d/$NAME"
     [ -r "$CONF" ] || { echo >&2 "Unknown chroot '$NAME'..."; continue; }
     echo -n "Remove the schroot folder with: sudo rm -rI "
