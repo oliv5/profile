@@ -34,7 +34,7 @@ docker_setup_binfmt() {
 # Stop container by image name
 docker_stop_cont_by_img() {
     for IMG; do
-        docker stop $(docker ps -q --filter ancestor="$IMG")
+        docker ps -q --filter ancestor="$IMG" | xargs -r docker stop
     done
 }
 
@@ -49,4 +49,4 @@ docker_rm_img() {
 # Aliases
 alias docker_ls_img='docker images'
 alias docker_ls_cont='docker container ls'
-alias docker_rmi_dangling='docker rmi -f $(docker images -qa -f "dangling=true")'
+alias docker_rmi_dangling='docker images -qa -f "dangling=true" | xargs -r docker rmi -f'
