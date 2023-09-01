@@ -32,15 +32,20 @@ docker_setup_binfmt() {
 }
 
 # Stop container by image name
-docker_stop_cont_by_img() {
+docker_stopc_by_img() {
     for IMG; do
         docker ps -q --filter ancestor="$IMG" | xargs -r docker stop
     done
 }
+docker_rmc_by_img() {
+    for IMG; do
+        docker container ls -q --filter ancestor="$IMG" | xargs -r docker container rm -f
+    done
+}
 
 # Delete image
-docker_rm_img() {
-    docker_stop_cont_by_img "$@"
+docker_rmi() {
+    docker_stopc_by_img "$@"
     for IMG; do
         docker rmi -f "$IMG"
     done
@@ -49,4 +54,5 @@ docker_rm_img() {
 # Aliases
 alias docker_ls_img='docker images'
 alias docker_ls_cont='docker container ls'
-alias docker_rmi_dangling='docker images -qa -f "dangling=true" | xargs -r docker rmi -f'
+alias docker_rmi_dangling='docker image prune || { docker images -qa -f "dangling=true" | xargs -r docker rmi -f; }'
+alias docker_rmc_dangling='docker container prune || { docker container ls -a | cut -f1 | tail -n +2 | xargs -r docker rm -f; }'
