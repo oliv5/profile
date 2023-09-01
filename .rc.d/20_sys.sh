@@ -29,6 +29,40 @@ alias keyb_list='grep ^[^#] /etc/locale.gen'
 alias keyb_set='setxkbmap -layout'
 alias keyb_setfr='setxkbmap -layout fr'
 
+# Fix Alt-Fxx keys
+# Immediate but not persistent fix: sudo kbd_mode -s
+# Immediate but not persistent fix: sudo dumpkeys | grep -Pv '^\s+alt(gr)?\s+keycode\s+\d+\s+=\s+(Console_|Incr_Console|Decr_Console)'|sudo loadkeys
+# Permanent fix: 
+keyb_fix_altF_keys() {
+  sudo tee -a /etc/console-setup/remap.inc <<EOF
+# OLA++
+# https://askubuntu.com/questions/805793/how-can-i-disable-the-virtual-terminal-switching-shortcut-keys-in-x/1059609#1059609
+# Immediate but not persistent fix: sudo kbd_mode -s
+# Immediate but non persistent fix: sudo dumpkeys | grep -Pv '^\s+alt(gr)?\s+keycode\s+\d+\s+=\s+(Console_|Incr_Console|Decr_Console)'|sudo loadkeys
+# This is a permanent fix. Apply + `sudo dpkg-reconfigure console-setup -phigh` + reboot
+# Remap alt+Fxx key to void to avoid terminal switching
+alt     keycode  67 = VoidSymbol
+alt     keycode  68 = VoidSymbol
+alt     keycode  69 = VoidSymbol
+alt     keycode  70 = VoidSymbol
+alt     keycode  71 = VoidSymbol
+alt     keycode  72 = VoidSymbol
+alt     keycode  73 = VoidSymbol
+alt     keycode  74 = VoidSymbol
+alt     keycode  75 = VoidSymbol
+alt     keycode  76 = VoidSymbol
+alt     keycode  77 = VoidSymbol
+alt     keycode  78 = VoidSymbol
+# Also remove mapping for alt left arrow and right arrow
+alt     keycode 113 = VoidSymbol
+alt     keycode 114 = VoidSymbol
+EOF
+  sudo dpkg-reconfigure console-setup -phigh
+  echo "Need a reboot... apply a temporary not persistent fix"
+  sudo dumpkeys | grep -Pv '^\s+alt(gr)?\s+keycode\s+\d+\s+=\s+(Console_|Incr_Console|Decr_Console)' | sudo loadkeys
+  echo "done!"
+}
+
 ################################
 # Get XWindow ID
 xwmid() {
