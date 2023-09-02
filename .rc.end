@@ -36,7 +36,7 @@ test_locales() {
 # Setup path
 [ -n "${HOME##*/}" ] && path_prepend "$HOME/.local/bin" "$HOME/bin" "$HOME/go/bin"
 path_append /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin
-[ -n "${HOME##*/}" ] && path_append "$HOME/bin/profile" "$HOME/bin/profile/wrappers"
+[ -n "${HOME##*/}" ] && path_append "$HOME/bin/profile" "$HOME/bin/profile/$([ -n "$ANDROID_ROOT" ] && echo "android" || echo "desktop")" "$HOME/bin/profile/wrappers"
 path_cleanup
 path_remove_absent
 
