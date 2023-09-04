@@ -104,6 +104,15 @@ pwr_sav_disable() { selinux_wrapper settings put global low_power 0; }
 pwr_sav_get_lvl() { selinux_wrapper settings get global low_power_trigger_level; }
 pwr_sav_set_lvl() { selinux_wrapper settings put global low_power_trigger_level; }
 
+# Manipulate charger
+# https://blog.testproject.io/2021/08/10/useful-adb-commands-for-android-testing/
+charger_force_ac_on() { sudo dumpsys battery set ac 1; }
+charger_force_ac_off() { sudo dumpsys battery set ac 0; }
+charger_force_usb_on() { sudo dumpsys battery set usb 1; }
+charger_force_usb_off() { sudo dumpsys battery set usb 0; }
+charger_force_lvl() { sudo dumpsys battery set level "${1:?No battery level specified...}"; }
+charger_reset() { sudo dumpsys battery reset; }
+
 # Airplane mode
 # https://stackoverflow.com/questions/10506591/turning-airplane-mode-on-via-adb/40271379
 airplane_enable() { selinux_wrapper "settings put global airplane_mode_on 1 ; am broadcast -a android.intent.action.AIRPLANE_MODE"; }
@@ -170,6 +179,10 @@ svc_stop(){ am stopservice "${1:?No package name specified...}" ${3:+--user "$3"
 clipboard_status() { cmd appops query-op --user 0 READ_CLIPBOARD allow; }
 clipboard_disable() { for PKG; do cmd appops set "$PKG" READ_CLIPBOARD ignore; done; }
 clipboard_enable() { for PKG; do cmd appops set "$PKG" READ_CLIPBOARD allow; done; }
+
+# Record
+screen_shot() { sudo screencap "${1:?No screenshot specified...}"; }
+screen_record() { sudo screenrecord "${1:?No avi record file specified...}"; }
 
 # Process monitoring
 alias pg='pgrep -fl'
