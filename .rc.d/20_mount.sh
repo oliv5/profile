@@ -249,12 +249,12 @@ setup_dmcrypt() {
   local NAME="$(basename "$IMG" .img)"
   local MAP="/dev/mapper/$NAME"
   if [ -e "$IMG" ]; then
-	echo "Error: image file $IMG exists already..."
-	return 1
+    echo "Error: image file $IMG exists already..."
+    return 1
   fi
   if [ -e "$MAP" ]; then
-	echo "Error: map device $MAP exists already..."
-	return 1
+    echo "Error: map device $MAP exists already..."
+    return 1
   fi
   mkdir -p "$(dirname "$IMG")"
   fallocate -l "$SIZE" "$IMG"
@@ -265,13 +265,24 @@ setup_dmcrypt() {
 mount_dmcrypt() {
   local IMG="${1:?Missing image source file...}"
   local DST="${2:?Missing dest directory...}"
+  local SUDO_NOPASSWD="$3"
   local NAME="$(basename "$IMG" .img)"
   local MAP="/dev/mapper/$NAME"
   mkdir -p "$DST"
   if ! [ -e "$MAP" ]; then
-	sudo cryptsetup open "$IMG" "$NAME"
+    sudo cryptsetup open "$IMG" "$NAME"
   fi
   sudo mount "$MAP" "$DST"
+  if [ -n "$SUDO_NOPASSWD" ]; then
+    local USER="$(id -nu)"
+    local GROUP="$(id -ng)"
+    cat | sudo env EDITOR="tee" visudo -f "/etc/sudoers.d/cryptsetup-$NAME-$USER" <<EOF
+$USER%$GROUP ALL=(root) NOPASSWD: $(command -v cryptsetup) open "$IMG" "$NAME"
+$USER%$GROUP ALL=(root) NOPASSWD: $(command -v cryptsetup) close "$NAME"
+$USER%$GROUP ALL=(root) NOPASSWD: $(command -v mount) "$MAP" "$DST"
+$USER%$GROUP ALL=(root) NOPASSWD: $(command -v umount) "$DST"
+EOF
+  fi
 }
 umount_dmcrypt() {
   local IMG="${1:?Missing image source file...}"
@@ -290,7 +301,7 @@ setup_private_dmcrypt() {
 mount_private_dmcrypt() {
   local IMG="${1:-$HOME/.private/private.img}"
   local DST="${2:-$HOME/private}"
-  mount_dmcrypt "$IMG" "$DST"
+  mount_dmcrypt "$IMG" "$DST" "$3"
 }
 umount_private_dmcrypt() {
   local IMG="${1:-$HOME/.private/private.img}"
