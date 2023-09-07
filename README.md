@@ -4,9 +4,9 @@ This is the core user profile I use on all my different setups (home laptop, nas
 
 It defines all the common shell functions I use. For short scripts, I prefer using shell functions then shell scripts.
 
-It is divided in 2 parts: one set of general purpose functions, one specific to each machine or setup. This repo contains the first one and propose hooks to load the second one. This is particularily useful to separate my environement for work, to my environement for my nas or my android phone.
+It is divided in 2 parts: one set of general purpose functions, one specific to each machine or setup. This repo contains the first one and propose hooks to load the second one. This is particularily useful to separate my common profile from my local one (work, nas or android phone).
 
-## Principle
+## Organization
 
 The common functions are spread in multiple small scripts in folder "~/.rc.d". The main entry point is function "rc_source" in script "~/.rc".
 
@@ -14,7 +14,7 @@ Called without argument, the "rc_source" function loads all executable scripts i
 
 Called with an argument, the "rc_source" function loads all scripts in "~/.rc.d" whose name matches partially the argument, whether it is executable or not.
 
-File "~/.rc.list" is useful on filesystems where files cannot be made executable, like Android sdcard.
+File "~/.rc.list" is useful on filesystems where files cannot be made executable, like Android sdcard. It is a list of files to load automatically.
 
 The user/machine specific extension set of scripts is loaded through scripts ".rc.local" and ".rc.local.end".
 
@@ -30,6 +30,25 @@ $HOME/
 ```
 
 ## Bootstrapping the environment
+
+```
+# Install the needed tools
+sudo apt-get update
+sudo apt-get install vcsh git
+
+# Backup few files
+[ -e .profile ] && mv .profile .profile.bak
+[ -e .bashrc ] && mv .bashrc .bashrc.bak
+[ -e .bash_logout ] && mv .bash_logout .bash_logout.bak
+
+# Clone this repo
+vcsh clone https://github.com/oliv5/profile.bak.git profile
+
+# Load environment now
+source .rc
+```
+
+## Loading the environment
 
 The environment is loaded with:
 ```
@@ -47,6 +66,15 @@ When ".rc" is loaded, the function "rc_source" (alias "rc") is made available, a
     2. all flagged files in folder ".rc.d/" (see section "autoloaded scripts")
     2. file '.rc.end'
     3. file '.rc.local.end', if it exists.
+
+To reload the environment later, issue:
+```
+rc_source
+```
+or
+```
+rc
+```
 
 ## Select autoloaded scripts
 
