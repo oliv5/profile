@@ -157,3 +157,8 @@ console_resize_v2() {
   # echo "rows:$rows"
   stty cols "$cols" rows "$rows"
 }
+
+# Find non-ascii characters
+ansi_find_not_ascii() {
+  grep --color='auto' -P -n '[^\x00-\x7F]' "$@"
+}
