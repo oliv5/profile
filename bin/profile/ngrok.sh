@@ -39,11 +39,11 @@ if [ -z "\$CUR_TUNNEL" ]; then
     echo >&2 "ERROR: no local tunnel found, cannot publish..."
     exit 2
 elif [ "\$PUB_TUNNEL" != "\$CUR_TUNNEL" ]; then
-    echo "Old public tunnel : \$PUB_TUNNEL"
-    echo "Publish new tunnel : \$CUR_TUNNEL"
+    echo "Old tunnel : \$PUB_TUNNEL"
+    echo "New tunnel : \$CUR_TUNNEL"
     curl -d "\$CUR_TUNNEL" "https://ntfy.sh/$NTFY_TOPIC"
 else
-    echo "Published tunnel up-to-date: \$PUB_TUNNEL"
+    echo "Tunnel up-to-date: \$PUB_TUNNEL"
 fi
 EOF
     sudo chmod +x /usr/local/bin/ngrok-publish-ip.sh
