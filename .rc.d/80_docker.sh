@@ -10,19 +10,30 @@ docker_build() {
     docker build -t "$NAME:$TAG" -f "$DOCKERFILE" "$DIR"
 }
 
-# Docker run
+# Docker run a fresh container from a specific image
 docker_run() {
     local IMG="${1:?No image specified...}"
-    local BIN="${2:+--entrypoint='$2'}"
-    local MOUNT="${3:+-v $3}"
-    local NETWORK="${4:+--network=$4}"
-    local NAT="${5:+-p $5}"
-    local DEVICE="${6:+--device=$6}"
-    local PLT="${7:+--platform=$7}"
-    local CAPABILITIES="${8:+--cap-add=$8}"
-    local PRIVILEGED="${9:+--privileged}"
-    shift $(($# > 9 ? 9 : $#))
-    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED "$IMG" "$@"
+    local BIN="${BIN:+--entrypoint='$BIN'}"
+    local MOUNT="${MOUNT:+-v $MOUNT}"
+    local NETWORK="${NETWORK:+--network=$NETWORK}"
+    local NAT="${NAT:+-p $NAT}"
+    local DEVICE="${DEVICE:+--device=$DEVICE}"
+    local PLT="${PLT:+--platform=$PLT}"
+    local CAPABILITIES="${CAPABILITIES:+--cap-add=$CAPABILITIES}"
+    local PRIVILEGED="${PRIVILEGED:+--privileged}"
+    local USER="${USER:+-u $USER}"
+    local WORKDIR="${WORKDIR:+--workdir $WORKDIR}"
+    shift
+    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $USER $WORKDIR "$IMG" "$@"
+}
+
+# Docker run inside an existing container
+docker_exec() {
+    local CONTAINER="${1:?No container specified...}"
+    local PRIVILEGED="${PRIVILEGED:+--privileged}"
+    local USER="${USER:+-u $USER}"
+    shift
+    docker exec -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $USER "$CONTAINER" "$@"
 }
 
 # Setup binfmt in docker
