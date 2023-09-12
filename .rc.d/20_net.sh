@@ -653,3 +653,11 @@ fail2ban_winners() {
   sudo fail2ban-client status recidive
   true
 }
+
+############################
+# nmap
+alias nmap_quick_scan='nmap -sn'
+alias nmap_scan='nmap -Pn'
+
+# arp
+alias arp_show='arp -a -n'
