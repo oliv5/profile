@@ -597,3 +597,18 @@ shell_getopts() {
   set +o
   shopt -p 2>/dev/null
 }
+
+################################
+# Dash array exemples & positional parameters save/restore
+#~ shell_array_exemple() {
+  #~ local SAVE=$(printf '%q ' "$@")
+  #~ local NUM=$#
+  #~ set --
+  #~ echo "Clear all $# : $@"
+  #~ eval set -- $SAVE
+  #~ echo "params $# : $@"
+  #~ for P in $(seq $NUM); do
+    #~ echo "param #$P : $1"
+    #~ shift
+  #~ done
+#~ }
