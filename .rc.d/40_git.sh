@@ -145,8 +145,8 @@ git_fetch_inc() {
 ########################################
 # Get git version
 git_version() {
-  local VERSION="${1:-$(git --version 2>/dev/null | cut -d' ' -f 3)}"
-  echo "$VERSION" | awk -F'.' '{r=sprintf("%.d%.2d%.2d%.2d",$1,$2,$3,$4); sub("^0+","0",r); print r}'
+  GIT_VERSION="${GIT_VERSION:-$(git --version 2>/dev/null | cut -d' ' -f 3)}"
+  echo "${1:-$GIT_VERSION}" | awk -F'.' '{r=sprintf("%.d%.2d%.2d%.2d",$1,$2,$3,$4); sub("^0+","0",r); print r}'
 }
 
 # Check repo exists

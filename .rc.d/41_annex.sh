@@ -2,11 +2,8 @@
 
 # Get annex version
 annex_version() {
-  if [ $# -gt 0 ]; then
-    echo "$@" | awk -F'.' '{printf "%.d%.8d\n",$1,$2$3$4}'
-  else
-    git annex version | awk -F'[ .]' '/git-annex version:/ {printf "%.d%.8d\n",$3,$4}'
-  fi
+  ANNEX_VERSION="${ANNEX_VERSION:-$(git annex version 2>/dev/null | awk -F': ' '/git-annex version:/ {print $2}')}"
+  echo "${1:-$ANNEX_VERSION}" | awk -F'.' '{printf "%.d%.8d\n",$1,$2$3$4}'
 }
 annex_repo_version() {
   git config --get annex.version 2>/dev/null || echo 0
