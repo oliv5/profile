@@ -829,6 +829,8 @@ endif
 " https://github.com/neoclide/coc.nvim
 " *******************************************************
 if !exists('g:did_coc_loaded') && !empty(glob(expand("~/.vim/bundle/coc.nvim")))
+	" Hide initial loading error message
+	let g:coc_disable_startup_warning = 1
 
 	" *****
 	" Map <CR> to confirm completion

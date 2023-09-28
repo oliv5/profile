@@ -601,6 +601,8 @@ command! -nargs=1 -bar IRGrep      call <SID>Grep('iref\ $*', g:FindRootDir(), <
 command! -nargs=1 -bar IRGrepCount call <SID>GrepCount('iref', g:FindRootDir(), <q-args>)
 command! -nargs=1 -bar Grep        call <SID>Grep('grep\ -nH\ $*', expand('%'), <q-args>)
 command! -nargs=1 -bar GrepCount   call <SID>GrepCount('grep -nH', expand('%'), <q-args>)
+command! -nargs=1 -bar IGrep       call <SID>Grep('grep\ -niH\ $*', expand('%'), <q-args>)
+command! -nargs=1 -bar IGrepCount  call <SID>GrepCount('grep -niH', expand('%'), <q-args>)
 
 " Key mappings
 silent! unmap gx
