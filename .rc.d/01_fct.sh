@@ -36,7 +36,7 @@ fct_content() {
 alias_content() {
   for ALIAS; do
     #alias "$ALIAS" 2>/dev/null | awk -F= "{gsub(/'/,\"\"); print \$2}"
-    type "$FCT" 2>/dev/null | awk -F '« | »' '/alias/{print $2}'
+    type "$ALIAS" 2>/dev/null | awk -F '«.|.»' '/alias/{print $2}'
   done
 }
 
