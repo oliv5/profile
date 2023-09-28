@@ -141,8 +141,8 @@ rc_source() {
       continue
     elif [ -f "$PATTERN" ] && [ "$PATTERN" != "${PATTERN%%.sh}" ]; then # Load explicit .sh files (absolute path needed)
       rc_sourcefile "$(readlink -f "$PATTERN")"
-    elif [ -d "$PATTERN" ]; then # Load explicit directories (absolute path needed)
-      rc_sourcemod "$(readlink -f "$PATTERN")/*.sh"
+    #elif [ -d "$PATTERN" ]; then # Load explicit directories (absolute path needed)
+    #  rc_sourcemod "$(readlink -f "$PATTERN")/*.sh"
     fi
     # Load scripts by pattern search
     rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
