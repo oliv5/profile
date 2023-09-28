@@ -175,6 +175,20 @@ set guioptions-=m     " Remove menu bar
 set guioptions-=T     " Remove toolbar
 set guioptions+=aA    " Enable autoselect (autocopy)
 
+" Autoselect option (a.k.a auto-copy on select)
+if has('nvim')
+    " Should work directly with guioptions+=aA but it doesn't...
+	" Workaround: https://github.com/neovim/neovim/issues/2325
+	" https://superuser.com/questions/624231/in-vim-what-is-the-difference-between-and-registers
+	set mouse=a
+	vnoremap <LeftRelease> "*ygv
+	noremap <2-LeftMouse> viw"*ygv
+	" https://neovim.io/doc/user/provider.html
+	set clipboard^=unnamed,unnamedplus " unnamed = use linux selection; unnamedplus = use system clipboard
+else
+	set clipboard+=autoselect
+endif
+
 set hlsearch          " Highlight searches
 set history=50        " History length
 set wildmode=list:longest,full    " Command line completion with Tabs & cycling
@@ -183,9 +197,6 @@ set shortmess+=a      " Use short messages
 set showmode          " Display current mode in the status line
 set showcmd           " Display partially-typed commands
 set mouse=a           " Enable mouse all the time
-if has('nvim')
-	set clipboard^=unnamed,unnamedplus " unnamed = use linux selection; unnamedplus = use system clipboard
-endif
 set nomodeline        " Do not override this .vimrc
 if !exists('g:loaded_vimrc')
 	set nu              " Show line numbers
