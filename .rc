@@ -72,10 +72,10 @@ rc_source() {
 }
 
   # Source module '*.sh' after expension
-  # Note: use 'set -- $@' with no double-quotes below
+  # Note: don't quote $@ below, we want shell expension
   rc_sourcemod() {
-    set -- $@
-    rc_sourcefiles "$@"
+    local IFS=$'\n'
+    rc_sourcefiles $@
   }
 
   ##############
@@ -136,27 +136,30 @@ rc_source() {
     if [ $# -eq 0 ] && [ -z "$RC_ALL" ] && [ -r "$RC_DIR/.rc.autoload" -o -r "$RC_DIR_LOCAL/.rc.local.autoload" ]; then # Load from list
       rc_sourcelist "$RC_DIR/.rc.autoload" "$RC_DIR_LOCAL/.rc.local.autoload"
       continue
-    elif [ -f "$PATTERN" ] && [ "$PATTERN" != "${PATTERN%%.sh}" ]; then # Load explicit .sh files
+    elif [ -f "$PATTERN" ] && [ -z "${PATTERN%%*.sh}" ]; then # Load explicit .sh files
       rc_sourcefiles "$(readlink -f "$PATTERN")"
+    elif [ -f "${PATTERN}.sh" ]; then # Load explicit .sh files
+      rc_sourcefiles "$(readlink -f "${PATTERN}.sh")"
     elif [ -d "$PATTERN" ] && [ -z "${PATTERN%%*/}" ]; then # Load explicit directories (ending with /)
       rc_sourcemod "$(readlink -f "$PATTERN")/*.sh"
-    fi
-    # Load scripts by pattern search
-    if [ -d "$RC_DIR" ]; then
-      rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
-      if [ -n "$BASH_VERSION" ]; then
-        rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.sh"
+    else
+      # Load scripts by pattern search
+      if [ -d "$RC_DIR" ]; then
+        rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
+        if [ -n "$BASH_VERSION" ]; then
+          rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.sh"
+        fi
+        if [ -n "$ANDROID_ROOT" ]; then
+          rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
+        fi
       fi
-      if [ -n "$ANDROID_ROOT" ]; then
-        rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
+      if [ -d "$RC_DIR_LOCAL" ]; then
+        local DIR="$RC_DIR_LOCAL/.rc.local.d"
+        for LOOP in $(seq 1); do
+          rc_sourcemod "$DIR/*$PATTERN*.sh"
+          DIR="$DIR/*/"
+        done
       fi
-    fi
-    if [ -d "$RC_DIR_LOCAL" ]; then
-      local DIR="$RC_DIR_LOCAL/.rc.local.d"
-      for LOOP in $(seq 1); do
-        rc_sourcemod "$DIR/*$PATTERN*.sh"
-        DIR="$DIR/*/"
-      done
     fi
   done
 
