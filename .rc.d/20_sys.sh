@@ -30,15 +30,15 @@ alias keyb_set='setxkbmap -layout'
 alias keyb_setfr='setxkbmap -layout fr'
 
 # Fix Alt-Fxx keys
-# Immediate but not persistent fix: sudo kbd_mode -s
-# Immediate but not persistent fix: sudo dumpkeys | grep -Pv '^\s+alt(gr)?\s+keycode\s+\d+\s+=\s+(Console_|Incr_Console|Decr_Console)'|sudo loadkeys
-# Permanent fix: 
+# https://bugs.launchpad.net/ubuntu/+source/console-setup/+bug/520546
+# https://unix.stackexchange.com/questions/146060/how-to-disable-alt-arrow-switching-of-virtual-consoles#186016
+# https://askubuntu.com/questions/805793/how-can-i-disable-the-virtual-terminal-switching-shortcut-keys-in-x/1059609#1059609
 keyb_fix_altF_keys() {
   sudo tee -a /etc/console-setup/remap.inc <<EOF
 # OLA++
-# https://askubuntu.com/questions/805793/how-can-i-disable-the-virtual-terminal-switching-shortcut-keys-in-x/1059609#1059609
 # Immediate but not persistent fix: sudo kbd_mode -s
-# Immediate but non persistent fix: sudo dumpkeys | grep -Pv '^\s+alt(gr)?\s+keycode\s+\d+\s+=\s+(Console_|Incr_Console|Decr_Console)'|sudo loadkeys
+# Immediate but non persistent fix: sudo sh -c "dumpkeys | grep -Pv '^\s+alt(gr)?\s+keycode\s+\d+\s+=\s+(Console_|Incr_Console|Decr_Console)' | loadkeys"
+# Immediate but not persistent fix: sudo sh -c 'dumpkeys | grep -v cr_Console | loadkeys'
 # This is a permanent fix. Apply + `sudo dpkg-reconfigure console-setup -phigh` + reboot
 # Remap alt+Fxx key to void to avoid terminal switching
 alt     keycode  67 = VoidSymbol
