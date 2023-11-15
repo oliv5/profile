@@ -1607,6 +1607,15 @@ git_repair() {
 }
 
 ########################################
+# Get hook samples
+git_hook_samples() {
+  local TMPDIR="$(mktemp -d)"
+  git --git-dir="$TMPDIR" --bare init >/dev/null 2>&1
+  echo "ls $TMPDIR/hooks"
+  ls "$TMPDIR/hooks"
+}
+
+########################################
 # Status aliases
 alias gt='git status -uno'
 alias gtu='gstu'
