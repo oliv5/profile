@@ -267,6 +267,10 @@ git_set_tracking() {
   local BRANCH="${2:-$(git_branch)}"
   if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
     git ${3:+--git-dir="$3"} branch --set-upstream-to "$REMOTE/$BRANCH" "$BRANCH"
+  else
+    echo >&2 "Remote branch $REMOTE/$BRANCH does not exist. Push and set tracking branch at once with:"
+    echo >&2 "git push -u $REMOTE $BRANCH"
+    return 1
   fi
 }
 else
@@ -275,6 +279,10 @@ git_set_tracking() {
   local BRANCH="${2:-$(git_branch)}"
   if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
     git ${3:+--git-dir="$3"} branch --set-upstream "$BRANCH" "$REMOTE/$BRANCH"
+  else
+    echo >&2 "Remote branch $REMOTE/$BRANCH does not exist. Push and set tracking branch at once with:"
+    echo >&2 "git push -u $REMOTE $BRANCH"
+    return 1
   fi
 }
 fi
