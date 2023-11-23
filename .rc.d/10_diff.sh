@@ -88,8 +88,11 @@ _diffrt() {
   local DIR1="${2:?No folder1 specified...}"
   local DIR2="${3:?No folder2 specified...}"
   shift 3
-  for F; do
+  [ -d "$DIR1" ] || { echo "ERROR: not a folder '$DIR1'..."; return 1; }
+  [ -d "$DIR2" ] || { echo "ERROR: not a folder '$DIR2'..."; return 1; }
+  for F in "${@:-}"; do
     "$CMD" "$DIR1/$F" "$DIR2/$F"
+    sleep 1 # for ctrl-c
   done
 }
 diffrt() { _diffrt "diff" "$@"; }
