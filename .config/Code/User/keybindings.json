@@ -83,6 +83,8 @@
 { "key": "ctrl+up",               "command": "workbench.action.navigateUp" },
 { "key": "ctrl+down",             "command": "workbench.action.navigateDown" },
 { "key": "ctrl+j",                "command": "workbench.action.gotoLine" },
+{ "key": "alt+end",               "command": "editor.action.jumpToBracket" },
+{ "key": "alt+home",              "command": "editor.action.jumpToBracket" },
 
 // Views (a.k.a windows) management
 { "key": "ctrl+w up",             "command": "views.moveViewUp" },
