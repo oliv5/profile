@@ -324,24 +324,24 @@ git_branch_set_ref() {
   git symbolic-ref "${2:?No ref specified...}" "refs/heads/${1:?No branch specified...}"
 }
 
+# List remote branches without network access
+git_branch_remote() {
+  git for-each-ref ${2:+--git-dir="$2"} --format='%(refname:short)' refs/remotes${1:+/$1}
+}
+
+# List remote branches with network access
+git_branch_ls_remote() {
+  git ls-remote --heads | awk '{print substr($2,12)}'
+}
+
 # Delete local untracked branch (safely)
-git_branch_delete() {
+git_branch_delete_local() {
   for REFS; do
     local BRANCH="${REFS#*/}"
     echo "Delete local branch '$BRANCH'"
     git tag "$(git_name deleted.local)" "refs/head/$BRANCH" &&
       git branch -d "$BRANCH"
   done
-}
-
-# List remote branches without network access
-git_branches_remote() {
-  git for-each-ref ${2:+--git-dir="$2"} --format='%(refname:short)' refs/remotes${1:+/$1}
-}
-
-# List remote branches with network access
-git_branches_ls_remote() {
-  git ls-remote --heads | awk '{print substr($2,12)}'
 }
 
 # Delete remote untracked branch (safely)
@@ -359,21 +359,18 @@ git_branch_delete_remote() {
 # Delete local and remote branches
 git_branch_delete_both() {
   for REFS; do
-    git_branch_delete "$REFS"
+    git_branch_delete_local "$REFS"
     git_branch_delete_remote "$REFS"
   done
 }
 
 # Rename remote branch
+# https://stackoverflow.com/questions/30590083/how-do-i-rename-both-a-git-local-and-remote-branch-name#30590238
 git_branch_rename_remote() {
   local OLD="${1:?No old branch name specified...}"
   local NEW="${2:?No new branch name specified...}"
   local REMOTE="${3:-origin}"
-  git checkout "$OLD" &&
-  git pull --ff-only &&
-  git branch -m "$OLD" "$NEW" &&
-  git push "$REMOTE" --delete "refs/heads/$OLD" &&
-  git push "$REMOTE" "$NEW"
+  git push "$REMOTE" "$REMOTE/$OLD":"refs/heads/$NEW" :"$OLD"
 }
 
 # Get merged branches
@@ -572,7 +569,7 @@ git_extract() {
   #~ for REMOTE in $REMOTES; do
     #~ if git_remote_valid "$REMOTE"; then
       #~ echo -n "Pull from $REMOTE: "
-      #~ for BRANCH in ${BRANCHES:-$(git_branches_remote "$REMOTE" | cut -d/ -f2-)}; do
+      #~ for BRANCH in ${BRANCHES:-$(git_branch_remote "$REMOTE" | cut -d/ -f2-)}; do
         #~ if git_branch_exists "$BRANCH"; then
           #~ if [ "$(git_hash "refs/heads/$BRANCH")" != "$(git_hash "refs/remotes/$REMOTE/$BRANCH")" ]; then
             #~ git checkout "$BRANCH" &&
@@ -593,7 +590,7 @@ git_extract() {
 # Update local branches without checkout
 git_up() {
   local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches_remote "$REMOTE" | awk -F/ '{print $2}')}" # ${2:-$(git_branches)}
+  local BRANCHES="${2:-$(git_branch_remote "$REMOTE" | awk -F/ '{print $2}')}" # ${2:-$(git_branches)}
   local CUR_BRANCH="$(git_branch)"
   for REMOTE in $REMOTES; do
     for BRANCH in $BRANCHES; do
