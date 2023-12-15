@@ -890,9 +890,9 @@ endif
 " *******************************************************
 if !exists('g:loaded_visual_multi')
 	" Mouse mapping (similar to let g:VM_mouse_mappings = 1)
-	nmap <C-LeftMouse>     <Plug>(VM-Mouse-Cursor)
-	nmap <C-RightMouse>    <Plug>(VM-Mouse-Word)
-	nmap <M-C-RightMouse>  <Plug>(VM-Mouse-Column)
+	nmap <C-S-LeftMouse>   <Plug>(VM-Mouse-Cursor)
+	nmap <C-S-RightMouse>  <Plug>(VM-Mouse-Word)
+	nmap <C-M-RightMouse>  <Plug>(VM-Mouse-Column)
 
 	" Key mapping (similar to let g:VM_mouse_mappings = 1)
 	let g:VM_maps = {}
