@@ -829,12 +829,12 @@ endif
 " } coc {
 " https://github.com/neoclide/coc.nvim
 " *******************************************************
-" Disable coc when 
-if !executable('node')
-	echom "Disable coc because nodejs executable not found!"
-	let g:did_coc_loaded=1
-endif
 if !exists('g:did_coc_loaded') && !empty(glob("~/.vim/bundle/coc.nvim"))
+	" Search for nodejs executable when not found
+	if !executable('node')
+		let g:coc_node_path = substitute(system('command -v node'), '\n', '', '')
+	endif
+
 	" Hide initial loading error message
 	let g:coc_disable_startup_warning = 1
 
