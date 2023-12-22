@@ -63,7 +63,7 @@ docker_rmi() {
 }
 
 # Aliases
-alias docker_ls_img='docker images'
-alias docker_ls_cont='docker container ls'
+alias docker_lsi='docker images'
+alias docker_lsc='docker container ls'
 alias docker_rmi_dangling='docker image prune || { docker images -qa -f "dangling=true" | xargs -r docker rmi -f; }'
 alias docker_rmc_dangling='docker container prune || { docker container ls -a | cut -f1 | tail -n +2 | xargs -r docker rm -f; }'
