@@ -7,9 +7,9 @@ snap_allow_home() {
   done
 }
 
-# Remove disabled snap
+# Remove disabled snap (a.k.a cleanup)
 # https://www.linuxuprising.com/2019/04/how-to-remove-old-snap-versions-to-free.html
-snap_rm_disabled() {
+snap_cleanup() {
   ( set -eu
   LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' |
     while read NAME REV; do
