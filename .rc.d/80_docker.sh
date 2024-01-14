@@ -15,7 +15,7 @@ docker_run() {
     local IMG="${1:?No image specified...}"
     local BIN="${BIN:+--entrypoint='$BIN'}"
     local MOUNT="${MOUNT:+-v $MOUNT}"
-    local NETWORK="${NETWORK:+--network=$NETWORK}"
+    local NETWORK="${NETWORK:+--network=$NETWORK}" # NETWORK=host to allow all accesses
     local NAT="${NAT:+-p $NAT}"
     local DEVICE="${DEVICE:+--device=$DEVICE}"
     local PLT="${PLT:+--platform=$PLT}"
@@ -23,8 +23,9 @@ docker_run() {
     local PRIVILEGED="${PRIVILEGED:+--privileged}"
     local USER="${USER:+-u $USER}"
     local WORKDIR="${WORKDIR:+--workdir $WORKDIR}"
+    local REMOVE_CONT="${REMOVE_CONT:+--rm}"
     shift
-    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $USER $WORKDIR "$IMG" "$@"
+    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $USER $WORKDIR $REMOVE_CONT "$IMG" "$@"
 }
 
 # Docker run inside an existing container
