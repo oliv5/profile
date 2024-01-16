@@ -318,13 +318,21 @@ alias primerun='DRI_PRIME=1'
 
 ################################
 # inotify helpers
-alias notify_write='notify close_write'
-alias notify_read='notify close_read'
-alias notify_rw='notify "close_read,close_write"'
-alias notify_create='notify create'
-alias notify_mv='notify moved_to'
-alias notify='inotify_loop'
+alias inotify_open='inotifywait -e open'
+alias inotify_close='inotifywait -e close'
+alias inotify_write='inotifywait -e close_write'
+alias inotify_read='inotifywait -e close_nowrite'
+alias inotify_rw='inotifywait -e close'
+alias inotify_create='inotifywait -e create'
+alias inotify_delete='inotifywait -e delete,delete_self'
+alias inotify_mv='inotifywait -e moved_to,moved_from'
 
+inotify() {
+  inotifywait "$@"
+  [ $# -le 1 ] # 0=matched only the expected event; 1=matched the expected event, plus others; 2=error
+}
+
+# inotify helpers
 # Basic notification method with a loop
 # Pros: file move is captured
 # Cons: may miss event, high system resource consumption on large directories
