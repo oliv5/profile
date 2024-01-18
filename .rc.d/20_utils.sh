@@ -124,15 +124,15 @@ rerun() {
 }
 
 # Loop forever
-alias sudo_loop='fct_sudo loop'
+alias sudo_loop='fct_sudo2 rerun loop'
 loop() { rerun "" "" -1 "$@"; }
 
 # Repeat n times
-alias sudo_repeat='fct_sudo repeat'
+alias sudo_repeat='fct_sudo2 rerun repeat'
 repeat() { rerun "" "" "$@"; }
 
 # Retry in loop until success
-alias sudo_retry='fct_sudo retry'
+alias sudo_retry='fct_sudo2 rerun retry'
 retry() { 
   trap 'echo Interrupted after $TRIALS trials; trap - INT TERM; exit;' INT TERM
   rerun 0 "" "$@"
@@ -140,7 +140,7 @@ retry() {
 }
 
 # Stress run in loop until error
-alias sudo_stress='fct_sudo stress'
+alias sudo_stress='fct_sudo2 rerun stress'
 stress() {
   trap 'echo Interrupted after $TRIALS trials; trap - INT TERM; exit;' INT TERM
   rerun "" 0 "$@"
