@@ -1,4 +1,8 @@
 #!/bin/sh
+# Few SSH scripts exemples
+# ssh "$ADDR" sh -s /home/bin/script.sh
+# ssh "$ADDR" sh -s /dev/stdin
+# ssh "$ADDR" <<-EOF ...
 
 ############################
 # Network monitors
