@@ -28,8 +28,8 @@ fi
 # Get proxy address and port from SSH config. Looks for "host" and "proxycommand" statements
 if [ -z "$PROXY_ADDR" ]; then
 	PROXY_ADDR="$(awk '
-		BEGIN{IGNORECASE=1}
-		match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
+		BEGIN{IGNORECASE=1; found=0}
+		found==0 && match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
 		found==1 && match($0,/^(match )?host\s?/){exit(0)}
 		found==1 && /proxycommand/ && match($0,/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/,groups) {print groups[1]; exit(0)}
 	' "$SSH_CONFIG")"
@@ -41,20 +41,21 @@ fi
 
 if [ -z "$PROXY_PORT" ]; then
 	PROXY_PORT="$(awk '
-		BEGIN{IGNORECASE=1}
-		match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
+		BEGIN{IGNORECASE=1; found=0}
+		found==0 && match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
 		found==1 && match($0,/^(match )?host\s?/){exit(0)}
 		found==1 && /proxycommand/ && match($0,/-p ([0-9]*)/,groups) {print groups[1]; exit(0)}
 	' "$SSH_CONFIG")"
-	# Default
-	PROXY_PORT="${PROXY_PORT:-22}"
+	if [ -z "$PROXY_PORT" ]; then
+		PROXY_PORT=22
+	fi
 fi
 
 # Get target address from SSH config. Looks for "host" and "hostname" statements
 if [ -z "$TGT_ADDR" ]; then
 	TGT_ADDR="$(awk '
-		BEGIN{IGNORECASE=1}
-		match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
+		BEGIN{IGNORECASE=1; found=0}
+		found==0 && match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
 		found==1 && match($0,/^(match )?host\s?/){exit(0)}
 		found==1 && /hostname/ && match($0,/hostname (.*)/,groups) {print groups[1]; exit(0)}
 	' "$SSH_CONFIG")"
