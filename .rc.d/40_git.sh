@@ -1874,6 +1874,7 @@ alias git_noignore_changes='git update-index --no-assume-unchanged'
 # gitk aliases
 alias gk='gitk'
 alias gkt='gitk HEAD $(git_tracking)'
+alias gkh='gitk HEAD'
 # ls aliases
 alias gls='git_ls'
 alias glsg='git_ls | grep'
