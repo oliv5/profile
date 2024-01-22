@@ -11,7 +11,7 @@
 #  - target packages: ssh mosh
 #
 # Drawbacks
-#  - the regex extracting the proxy address from the SSH config file is looking for IPv4 address only; it does not recognize host names or IPv6
+#  - the awk-based regex extracting the proxy address is looking for IPv4 address only; it does not recognize host names or IPv6. Fixed with sed.
 #  - socat inactivity timeout does not work, so we have to kill socat processes (our user only) on the proxy machine during mosh shutdown
 #
 REMOTE="${1:-${REMOTE}}"
@@ -27,12 +27,13 @@ fi
 
 # Get proxy address and port from SSH config. Looks for "host" and "proxycommand" statements
 if [ -z "$PROXY_ADDR" ]; then
-	PROXY_ADDR="$(awk '
-		BEGIN{IGNORECASE=1; found=0}
-		found==0 && match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
-		found==1 && match($0,/^(match )?host\s?/){exit(0)}
-		found==1 && /proxycommand/ && match($0,/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/,groups) {print groups[1]; exit(0)}
-	' "$SSH_CONFIG")"
+	#~ PROXY_ADDR="$(awk '
+		#~ BEGIN{IGNORECASE=1; found=0}
+		#~ found==0 && match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
+		#~ found==1 && match($0,/^(match )?host\s?/){exit(0)}
+		#~ found==1 && /proxycommand/ && match($0,/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/,groups) {print groups[1]; exit(0)}
+	#~ ' "$SSH_CONFIG")" # Warning: this matches IPv4 only
+	PROXY_ADDR="$(sed -n 's/^\s*//;s/#.*$//;/host '$REMOTE'/,/host /{/proxycommand/I{s/ssh\|proxycommand\|-[^ ]\+ [^ ]\+\|[^ ]*%[^ ]*//gI;s/\s*//g;p;q}}' "$SSH_CONFIG")"
 	if [ -z "$PROXY_ADDR" ]; then
 		echo >&2 "got no proxy address..."
 		exit 1
@@ -40,12 +41,13 @@ if [ -z "$PROXY_ADDR" ]; then
 fi
 
 if [ -z "$PROXY_PORT" ]; then
-	PROXY_PORT="$(awk '
-		BEGIN{IGNORECASE=1; found=0}
-		found==0 && match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
-		found==1 && match($0,/^(match )?host\s?/){exit(0)}
-		found==1 && /proxycommand/ && match($0,/-p ([0-9]*)/,groups) {print groups[1]; exit(0)}
-	' "$SSH_CONFIG")"
+	#~ PROXY_PORT="$(awk '
+		#~ BEGIN{IGNORECASE=1; found=0}
+		#~ found==0 && match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
+		#~ found==1 && match($0,/^(match )?host\s?/){exit(0)}
+		#~ found==1 && /proxycommand/ && match($0,/-p ([0-9]*)/,groups) {print groups[1]; exit(0)}
+	#~ ' "$SSH_CONFIG")"
+	PROXY_PORT="$(sed -n 's/^\s*//;s/#.*$//;/host '$REMOTE'/,/host /{/proxycommand/I{/-p [0-9]*/{s/.*-p \([0-9]\+\).*/\1/;p;q}}}' "$SSH_CONFIG")"
 	if [ -z "$PROXY_PORT" ]; then
 		PROXY_PORT=22
 	fi
@@ -53,12 +55,13 @@ fi
 
 # Get target address from SSH config. Looks for "host" and "hostname" statements
 if [ -z "$TGT_ADDR" ]; then
-	TGT_ADDR="$(awk '
-		BEGIN{IGNORECASE=1; found=0}
-		found==0 && match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
-		found==1 && match($0,/^(match )?host\s?/){exit(0)}
-		found==1 && /hostname/ && match($0,/hostname (.*)/,groups) {print groups[1]; exit(0)}
-	' "$SSH_CONFIG")"
+	#~ TGT_ADDR="$(awk '
+		#~ BEGIN{IGNORECASE=1; found=0}
+		#~ found==0 && match($0,/^(match )?host '$REMOTE'\s?/){found=1; next}
+		#~ found==1 && match($0,/^(match )?host\s?/){exit(0)}
+		#~ found==1 && /hostname/ && match($0,/hostname (.*)/,groups) {print groups[1]; exit(0)}
+	#~ ' "$SSH_CONFIG")"
+	TGT_ADDR="$(sed -n 's/^\s*//;s/#.*$//;/host '$REMOTE'/,/host /{/proxycommand/I{n; s/.*hostname \(.\+\)/\1/I;p;q}}' "$SSH_CONFIG")"
 	if [ -z "$TGT_ADDR" ]; then
 		echo >&2 "got no target address..."
 		exit 1
