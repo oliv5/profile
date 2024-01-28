@@ -354,7 +354,7 @@ alias x0='xargs -r0'
 
 # batcat
 if command -v batcat >/dev/null; then
-alias bat='batcat'
+  alias bat='batcat'
 fi
 
 # syslog
@@ -368,13 +368,18 @@ log() {
 
 # system upgrade
 if [ "$(uname -m)" = "x86_64" ]; then
-alias sysup=' \
-  sudo rm /etc/apt/apt.conf.d/20apt-esm-hook.conf; \
-  sudo systemctl disable ubuntu-advantage; \
-  sudo apt-get update && sudo apt full-upgrade && sudo apt autoremove; \
-  sudo snap refresh; \
-  flatpak upgrade \
-'
+  alias sysup=' \
+    sudo rm /etc/apt/apt.conf.d/20apt-esm-hook.conf; \
+    sudo systemctl disable ubuntu-advantage; \
+    sudo apt-get update && sudo apt full-upgrade && sudo apt autoremove; \
+    sudo snap refresh; \
+    flatpak upgrade \
+  '
+fi
+
+# KDEconnect/GSconnect
+if [ -f "$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js" ]; then
+  alias gsconnect='"$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js"'
 fi
 
 # Misc
