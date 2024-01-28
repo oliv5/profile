@@ -56,7 +56,7 @@ _path_remove() {
   local DIR
   eval local RES="\$$VAR"
   for DIR; do
-    RES="$(echo $RES | sed -r "s;${DIR}:;;g")"
+    RES="$(echo $RES | sed -r "s;${DIR}:?;;g ; s/^:// ; s/:$//")"
   done
   eval export $VAR="$RES"
 }
