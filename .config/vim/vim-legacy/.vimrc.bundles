@@ -906,5 +906,20 @@ endif
 
 
 " *******************************************************
+" } clang-format {
+" https://clang.llvm.org/docs/ClangFormat.html
+" *******************************************************
+if filereadable('/usr/share/vim/addons/syntax/clang-format.py')
+	if has('python')
+		map <C-L> :pyf <path-to-this-file>/clang-format.py<CR>
+		imap <C-L> <c-o>:pyf <path-to-this-file>/clang-format.py<CR>
+	elseif has('python3')
+		map <C-L> :py3f <path-to-this-file>/clang-format.py<CR>
+		imap <C-L> <c-o>:py3f <path-to-this-file>/clang-format.py<CR>
+	endif
+endif
+
+
+" *******************************************************
 " } The end
 " *******************************************************
