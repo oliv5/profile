@@ -31,3 +31,9 @@ bash_completion() {
   complete -o bashdefault -o default -o nospace -F "$2" "$1" 2>/dev/null \
   || complete -o default -o nospace -F "$2" "$1"
 }
+
+################################
+# Auto-quote current line
+# https://superuser.com/questions/1531395/how-can-i-single-quote-or-escape-the-whole-command-line-in-bash-conveniently
+_quote_all() { READLINE_LINE="${READLINE_LINE@Q}"; READLINE_POINT=0; }
+bind -x '"\C-x\C-x":_quote_all'
