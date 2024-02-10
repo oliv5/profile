@@ -1498,7 +1498,7 @@ git_tag_date() {
 ########################################
 # Easy amend of previous commit
 git_squash() {
-  local COMMIT="${1:-HEAD~1}"
+  local COMMIT="${1:-HEAD~2}"
   local LOG="$(git log --format=%B --reverse $COMMIT..HEAD)"
   git reset --soft "$COMMIT" &&
     git commit --edit -m "$LOG"
