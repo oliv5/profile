@@ -3,11 +3,6 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
-# Load .profile when not already done
-if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
-  . "$HOME/.profile"
-fi
-
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 case $- in
@@ -15,13 +10,20 @@ case $- in
     *) return;;
 esac
 
+# Load .profile when not already done
+if [ -z "$ENV_PROFILE" ] && [ -z "$ENV_BASHRC" ] && [ -r ~/.profile ]; then
+  export ENV_BASHRC=1 # no re-entrance
+  . ~/.profile
+  export ENV_BASHRC=0
+fi
+
 # execute system wide bashrc
-#~ if [ -f /etc/bashrc ]; then
-  #~ . /etc/bashrc
-#~ fi
-#~ if [ -f /etc/bash.bashrc ]; then
-  #~ . /etc/bash.bashrc
-#~ fi
+#if [ -f /etc/bashrc ]; then
+#  . /etc/bashrc
+#fi
+#if [ -f /etc/bash.bashrc ]; then
+#  . /etc/bash.bashrc
+#fi
 
 # don't put duplicate lines in the history. See bash(1) for more options
 # ... or force ignoredups and ignorespace
@@ -130,14 +132,16 @@ if [ -r "$RC_DIR_LOCAL/.bashrc.local" ]; then
 fi
 
 # Bootstrap user profile
-if [ -r "$HOME/.rc" ]; then
-  . "$HOME/.rc"
+if [ -r ~/.rc ]; then
+  . ~/.rc
 fi
 
 # Reload ~/.inputrc in an interactive shell only
-case $- in
-  *i*) bind -f ~/.inputrc ;;
-esac
+if [ -f ~/.inputrc ]; then
+  case $- in
+    *i*) bind -f ~/.inputrc ;;
+  esac
+fi
 
 # Prevent Ctrl-D exit session
 export IGNOREEOF=1
