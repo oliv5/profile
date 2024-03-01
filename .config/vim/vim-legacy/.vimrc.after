@@ -390,13 +390,22 @@ function! s:Space2Tab() range
 endfunction
 
 " Intelligent tab to spaces
+" https://vim.fandom.com/wiki/Super_retab
 function! s:Tabfix() abort
 	if &expandtab==0
-		call s:Tab2Space()
 		set expandtab
+		if exists(':retab')
+			normal! :retab
+		else
+			call s:Tab2Space()
+		endif
 	else
-		call s:Space2Tab()
 		set noexpandtab
+		if exists(':retab')
+			normal! :retab
+		else
+			call s:Space2Tab()
+		endif
 	endif
 	update
 	if exists(':YAIFAMagic')
