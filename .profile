@@ -3,12 +3,12 @@
 
 # the default umask is set in /etc/profile; for setting the umask
 # for ssh logins, install and configure the libpam-umask package.
-#umask 022
+umask 022
 
 # Execute system wide profile
-#~ if [ -f /etc/profile ]; then
-  #~ . /etc/profile
-#~ fi
+#if [ -f /etc/profile ]; then
+#  . /etc/profile
+#fi
 
 # Misc variables
 [ -z "$USER" ] && export USER="$({ id -un 2>/dev/null || id -u; } | awk '{print $1; exit}')"
