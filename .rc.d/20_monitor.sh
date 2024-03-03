@@ -157,17 +157,35 @@ sys_iostat() {
   iostat -x 2
 }
 
-sys_stalled() {
-  while true; do ps -eo state,pid,cmd | grep "^D"; echo "—-"; sleep 1; done
-}
-
 sys_cpu() {
   sar ${1:-1} ${2}
 }
 
+# I/O wait-state stalled processes
 # https://stackoverflow.com/questions/666783/how-to-find-out-which-process-is-consuming-wait-cpu-i-e-i-o-blocked
-io_stalled() {
+# https://serverfault.com/questions/155882/wa-waiting-for-i-o-from-top-command-is-big
+# `ps faux` (marked as D = sleeping), `iotop`, `atop -dD`, `vmstat 1`, `iostat 1`, `strace -e trace=open <application>`, `strace -e trace=open -p <pid>`
+io_stalled_1() {
   while true; do date; ps auxf | awk '{if($8=="D") print $0;}'; sleep 1; done
+}
+io_stalled_2() {
+  while true; do ps -eo state,pid,cmd | grep "^D"; echo "—-"; sleep 1; done
+}
+io_stalled_3() {
+  iostat 1
+}
+io_stalled_4() {
+  vmstat 1
+}
+io_stalled_5() {
+  iotop
+}
+io_stalled_6() {
+  if isint "$1"; then
+    strace -e trace=open -p "$1"
+  else
+    strace -e trace=open "$1"
+  fi
 }
 
 ################################
