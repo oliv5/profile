@@ -125,6 +125,20 @@ ppidn() {
   echo "$PID"
 }
 
+# Current subshell PID. !! Beware of pitfalls !!
+# https://stackoverflow.com/questions/20725925/get-pid-of-current-subshell#20726041
+# Test  OK: echo $$; ( :; bash -c 'echo $PPID' )
+# Test  OK: echo $$; ( dash -c 'echo $PPID'; : )
+# Test NOK: echo $$; ( bash -c 'echo $PPID' )
+# Test NOK: echo $$; ( bash -c 'echo $PPID'; : )
+# Test NOK: echo $$; ( :; dash -c 'echo $PPID' )
+# Test NOK: echo $$; ( dash -c 'echo $PPID' )
+# Test NOK: echo $$ $!; (echo $$ $!; (sleep 10) & echo $$ $!); echo $$ $!
+spid() {
+  # Returns the PPID of the sh process, hence the current PID
+  sh -c 'echo $PPID' && :
+}
+
 # List of zombies
 #http://www.noah.org/wiki/Kill_-9_does_not_work
 psz() {
@@ -286,6 +300,24 @@ kill_top_mem() {
   local NUM=$((${1:-1} + 1))
   shift $(min 1 $#)
   ps a --sort -rss | awk 'NR>1 && NR<=$NUM {print $1;}' | xargs -r kill "$@"
+}
+
+################################
+# List tree of processes, root included when -1 is the first parameter
+list_tree() {
+  local ECHO PID
+  if [ "$1" = "-1" ]; then ECHO=1; shift; fi
+  for PID; do
+    list_tree -1 $(ps -o pid= --ppid "$PID")
+    if [ -n "$ECHO" ]; then echo "$PID"; fi
+  done
+}
+# Kill tree of processes, root included when -1 is the first parameter
+kill_tree() {
+  list_tree "$@" | xargs -r kill
+}
+kill9_tree() {
+  list_tree "$@" | xargs -r kill -9
 }
 
 ################################
