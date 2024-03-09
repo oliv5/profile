@@ -1508,6 +1508,10 @@ git_fixup() {
   git_modified && git commit --fixup="$COMMIT" # Like --squash=
   git rebase --interactive --autosquash "${COMMIT}~2"
 }
+git_fixany() {
+  command -v fzf >/dev/null &&
+    git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup
+}
 
 ########################################
 # Test if remote is using gcrypt
@@ -1663,6 +1667,7 @@ alias gdt='git diff $(git_tracking)'
 alias gdtc='git diff --cached $(git_tracking)'
 alias gdmt='git difftool -y $(git_tracking)'
 alias gdtl='git diff $(git_tag_last 1)'
+alias gdtlm='git difftool -y $(git_tag_last 1)'
 alias gda='git_diff_all'
 alias gdda='git_diff_all'
 alias gdma='git_diffm_all'
@@ -1861,8 +1866,7 @@ alias gpua='git_push_all'
 alias gpunc='git push -o ci.skip'
 alias gup='git_pull'
 alias gupa='git_pull_all'
-alias gfa='git fetch --all'
-alias gfat='git fetch --all --tags'
+alias gfa='git fetch --all --tags'
 # Config aliases
 alias gcg='git config --get'
 alias gcs='git config --set'
