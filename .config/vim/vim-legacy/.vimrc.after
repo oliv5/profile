@@ -33,6 +33,9 @@ FnNoremap <F12>     :source! ~/.vimdata/vimsession<CR>
 " latex conceallevel (:help conceallevel)
 let g:tex_conceal = ""
 
+" git commit first line limited to 72 chars
+autocmd Filetype gitcommit setlocal spell textwidth=72
+
 
 " *******************************************************
 " } Scrolling {
