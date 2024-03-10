@@ -1508,9 +1508,13 @@ git_fixup() {
   git_modified && git commit --fixup="$COMMIT" # Like --squash=
   git rebase --interactive --autosquash "${COMMIT}~2"
 }
-git_fixany() {
-  command -v fzf >/dev/null &&
-    git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup
+git_fixme() {
+  if command -v fzf >/dev/null; then
+    git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -ro sh -c '
+      git commit --fixup "$1"
+      git rebase --interactive --autosquash "${1}~2"
+    ' _
+  fi
 }
 
 ########################################
@@ -1852,13 +1856,14 @@ grev() { git reset "$@"; git checkout -- "$@"; }
 alias gcp='git cherry-pick'
 # Rebase aliases
 alias grb='git rebase'
-alias grbi='git rebase -i'
-alias grbi1='git rebase -i HEAD~1'
-alias grbi2='git rebase -i HEAD~2'
-alias grbi3='git rebase -i HEAD~3'
-alias grbi4='git rebase -i HEAD~4'
-alias grbi5='git rebase -i HEAD~5'
-alias grbit='git rebase -i $(git_tracking)'
+alias grbi='git rebase -i --autosquash'
+alias grbi1='git rebase -i --autosquash HEAD~1'
+alias grbi2='git rebase -i --autosquash HEAD~2'
+alias grbi3='git rebase -i --autosquash HEAD~3'
+alias grbi4='git rebase -i --autosquash HEAD~4'
+alias grbi5='git rebase -i --autosquash HEAD~5'
+alias grbi10='git rebase -i --autosquash HEAD~10'
+alias grbit='git rebase -i --autosquash $(git_tracking)'
 # Fetch/pull/push aliases
 alias gpu='git push'
 alias gpuu='git push -u'
