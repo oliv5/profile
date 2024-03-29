@@ -48,6 +48,8 @@ cat <<EOF
   # Push (either simple, upstream or current)
   git config --global --unset-all push.default
   git config --global --add push.default current
+  # Pull
+  git config --global pull.rebase preserve
   # Diff
   git config --global --unset-all diff.tool
   git config --global --unset-all difftool
@@ -1373,6 +1375,17 @@ git_log_modified() {
   git diff --name-only --diff-filter=M "${@:-HEAD~1..HEAD}"
 }
 
+# Select a commit using fzf
+git_log_fzf() {
+  local NUM="${1:-50}"
+  local DEFAULT="${2:-HEAD}"
+  if command -v fzf >/dev/null && [ $# -le 2 ]; then
+    git log -n "$NUM" --pretty=format:'%h %s' --no-merges | fzf --no-sort | cut -c -7
+  else
+    echo "${3:-$DEFAULT}"
+  fi
+}
+
 ########################################
 # Find git repo
 git_find0_repo() {
@@ -1498,23 +1511,42 @@ git_tag_date() {
 ########################################
 # Easy amend of previous commit
 git_squash() {
-  local COMMIT="${1:-HEAD~2}"
-  local LOG="$(git log --format=%B --reverse $COMMIT..HEAD)"
-  git reset --soft "$COMMIT" &&
-    git commit --edit -m "$LOG"
+  git_modified && return 1
+  git_log_fzf 50 HEAD~2 "$@" | xargs -ro sh -c '
+    LOG="$(git log --format=%B --reverse ${1}..HEAD)"
+    git reset --soft "$1" &&
+      git commit --edit -m "$LOG"
+  ' _
 }
 git_fixup() {
-  local COMMIT="${1:-HEAD}"
-  git_modified && git commit --fixup="$COMMIT" # Like --squash=
-  git rebase --interactive --autosquash "${COMMIT}~2"
+  git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
+    { ! git diff --quiet || ! git diff --cached --quiet; } &&
+      git commit --fixup="$1" # Like --squash=
+    git rebase --interactive --autosquash "${1}~2"
+  ' _
 }
-git_fixme() {
-  if command -v fzf >/dev/null; then
-    git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -ro sh -c '
-      git commit --fixup "$1"
-      git rebase --interactive --autosquash "${1}~2"
-    ' _
+
+########################################
+# Rebasing
+# https://stackoverflow.com/questions/15915430/what-exactly-does-gits-rebase-preserve-merges-do-and-why/50555740#50555740
+git_rebase() {
+  # Base options
+  local OPTS="--rebase-merges"
+  if [ $(git_version) -lt $(git_version 2.18) ]; then
+    OPTS="--preserve-merges"
   fi
+  # Add more options from command line
+  while [ "${1##--}" != "$1" ]; do
+    OPTS="${OPTS:+$OPTS }$1"
+    shift
+  done
+  # Main
+  git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
+    git rebase $1 ${2}~1
+  ' _ "$OPTS"
+}
+git_rebase_interactive() {
+  git_rebase --interactive "$@"
 }
 
 ########################################
@@ -1855,15 +1887,8 @@ grev() { git reset "$@"; git checkout -- "$@"; }
 # Cherry-pick
 alias gcp='git cherry-pick'
 # Rebase aliases
-alias grb='git rebase'
-alias grbi='git rebase -i --autosquash'
-alias grbi1='git rebase -i --autosquash HEAD~1'
-alias grbi2='git rebase -i --autosquash HEAD~2'
-alias grbi3='git rebase -i --autosquash HEAD~3'
-alias grbi4='git rebase -i --autosquash HEAD~4'
-alias grbi5='git rebase -i --autosquash HEAD~5'
-alias grbi10='git rebase -i --autosquash HEAD~10'
-alias grbit='git rebase -i --autosquash $(git_tracking)'
+alias grb='git_rebase'
+alias grbi='git_rebase_interactive'
 # Fetch/pull/push aliases
 alias gpu='git push'
 alias gpuu='git push -u'
