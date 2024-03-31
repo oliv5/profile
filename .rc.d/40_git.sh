@@ -1512,9 +1512,9 @@ git_tag_date() {
 # Easy amend of previous commit
 git_squash() {
   git_modified && return 1
-  git_log_fzf 50 HEAD~2 "$@" | xargs -ro sh -c '
-    LOG="$(git log --format=%B --reverse ${1}..HEAD)"
-    git reset --soft "$1" &&
+  git_log_fzf 50 HEAD~1 "$@" | xargs -ro sh -c '
+    LOG="$(git log --format=%B --reverse ${1}~1..HEAD)"
+    git reset --soft "$1~1" &&
       git commit --edit -m "$LOG"
   ' _
 }
