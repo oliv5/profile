@@ -300,17 +300,26 @@ rdpipe() {
 # https://unix.stackexchange.com/questions/14270/get-exit-status-of-process-thats-piped-to-another
 command -v mispipe >/dev/null 2>&1 ||
 mispipe() {
-  # Ex: ( exec 4>&1; ERR=$({ { (echo 'toto titi'; false); echo $? >&3; } | grep toto; } 3>&1 >&4); exec 4>&-; echo "Errcode=$ERR" )
+  # Ex: ( exec 4>&1 5>&2; ERR=$({ { (echo 'toto titi'; false); echo $? >&3; } | grep toto; } 3>&1 >&4 2>&5); exec 4>&- 5>&-; echo "Errcode=$ERR" )
   # Ex: { { { { someprog; echo $? >&3; } | filter >&4; } 3>&1; } | { read xs; exit $xs; } } 4>&1
   local CMD1="${1:?No command 1 specified...}"
   local CMD2="${2:?No command 2 specified...}"
   local PIPE1="${3:-3}"
   local PIPE2="${4:-4}"
-  eval "exec ${PIPE2}>&1"
-  local ERR=$(eval "{ { ("$CMD1"); echo \$? >&${PIPE1}; } | "$CMD2"; } ${PIPE1}>&1 >&${PIPE2}")
-  eval "exec ${PIPE2}>&-"
+  local PIPE3="${5:-5}"
+  eval "exec ${PIPE2}>&1 ${PIPE3}>&2"
+  local ERR=$(eval "{ { { "$CMD1"; }; echo \$? >&${PIPE1}; } | { "$CMD2"; }; } ${PIPE1}>&1 >&${PIPE2} 2>&${PIPE3}")
+  eval "exec ${PIPE2}>&- ${PIPE3}>&-"
   return $ERR
 }
+#mispipe() {
+#    local CMD1="${1:?No command 1 specified...}"
+#    local CMD2="${2:?No command 2 specified...}"
+#    exec 4>&1 5>&1
+#    local ERR=$({ { { $CMD1; }; echo $? >&3; } | { $CMD2; }; } 3>&1 >&4 2>&5)
+#    exec 4>&- 5>&-
+#    return $ERR
+#}
 
 # Filter stderr using unamed pipes
 # https://unix.stackexchange.com/questions/3514/how-to-grep-standard-error-stream-stderr
