@@ -1522,7 +1522,7 @@ git_fixup() {
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
     { ! git diff --quiet || ! git diff --cached --quiet; } &&
       git commit --fixup="$1" # Like --squash=
-    git rebase --interactive --autosquash "${1}~2"
+    git rebase --interactive --autosquash "${1}~1"
   ' _
 }
 
