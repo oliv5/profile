@@ -28,6 +28,12 @@ docker_run() {
     docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $USER $WORKDIR $REMOVE_CONT "$IMG" "$@"
 }
 
+# Docker start an existing container & attach
+docker_resume() {
+    docker start "$@"
+    docker attach "$@"
+}
+
 # Docker run inside an existing container
 docker_exec() {
     local CONTAINER="${1:?No container specified...}"
