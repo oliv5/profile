@@ -132,6 +132,8 @@ alias lln='ls -laF | awk "\$5==0 {print \$0}"'
 alias llN='ls -laF | awk "\$5!=0 {print \$0}"'
 alias lsg='ls | grep'
 alias llg='ll | grep'
+alias sla='sudo ls -A'
+alias sll='sudo ls -laF'
 
 # Alias cd/back
 alias b='cdb'
