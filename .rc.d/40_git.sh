@@ -1529,7 +1529,7 @@ git_fixup() {
 ########################################
 # Rebasing
 # https://stackoverflow.com/questions/15915430/what-exactly-does-gits-rebase-preserve-merges-do-and-why/50555740#50555740
-git_rebase() {
+_git_rebase() {
   # Base options
   local OPTS="--rebase-merges"
   if [ $(git_version) -lt $(git_version 2.18) ]; then
@@ -1545,8 +1545,8 @@ git_rebase() {
     git rebase $1 ${2}~1
   ' _ "$OPTS"
 }
-git_rebase_interactive() {
-  git_rebase --interactive "$@"
+git_rebase() {
+  _git_rebase --interactive "$@"
 }
 
 ########################################
