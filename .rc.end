@@ -47,8 +47,13 @@ cmd_unset which find grep awk sed xargs cut
 # Load plugins
 # https://github.com/junegunn/fzf
 if command -v fzf >/dev/null 2>&1; then
-  if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/bin/profile/fzf/.fzf.bash" ]; then
-    if ! complete -p | grep _fzf_ >/dev/null; then
+  if [ -n "$BASH_VERSION" ] && ! complete -p | grep _fzf_ >/dev/null; then
+    if fzf --bash >/dev/null 2>&1; then
+      eval "$(fzf --bash)"
+    elif [ -r "/usr/share/bash-completion/completions/fzf" ] && [ -r "/usr/share/doc/fzf/examples/key-bindings.bash" ]; then
+      source /usr/share/bash-completion/completions/fzf
+      source /usr/share/doc/fzf/examples/key-bindings.bash
+    elif [ -r "$RC_DIR/bin/profile/fzf/.fzf.bash" ]; then
       source "$RC_DIR/bin/profile/fzf/.fzf.bash"
     fi
   fi
@@ -328,13 +333,11 @@ alias snh='sudo nethogs'
 
 # History
 export HISTIGNORE="sudo -S*" # ignore "sudo -S"
-alias hi='history'
 alias hg='history | grep'
 alias hgi='history | grep -i'
-alias hc='history -c; rm "$HOME/.bash_history"'
-alias hs='export HISTSIZE=0'
-alias noh='export HISTSIZE=0'
-alias nohist='export HISTSIZE=0'
+alias hist_clear='rm "$HOME/.bash_history"; history -c;'
+hist_size() { export HISTSIZE="${1:-500}"; }
+alias nohist='export HISTSIZE=0;'
 
 # Re-execute commands
 alias hr='fc -s'
