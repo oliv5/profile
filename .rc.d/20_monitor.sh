@@ -21,7 +21,7 @@ alias dmesgg='dmesg | grep -i'
 # Get/set cpu governor
 cpu_governor() {
   local DEV="/sys/devices/system/cpu/cpu${2:-*}/cpufreq/scaling_governor"
-  if [ -n "$1" ]; then sudo sh -c "echo '$1' > '$DEV'"; else cat "$DEV"; fi
+  if [ -n "$1" ]; then sudo sh -c ":; for CPU; do echo '$1' > \$CPU; done" _ $DEV; else cat $DEV; fi
 }
 alias cpu_governors='cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors'
 alias cpu_powersave='cpu_governor powersave'
