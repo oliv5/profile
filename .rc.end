@@ -53,7 +53,12 @@ if command -v fzf >/dev/null 2>&1; then
     elif [ -r "/usr/share/bash-completion/completions/fzf" ] && [ -r "/usr/share/doc/fzf/examples/key-bindings.bash" ]; then
       source /usr/share/bash-completion/completions/fzf
       source /usr/share/doc/fzf/examples/key-bindings.bash
-    elif [ -r "$RC_DIR/bin/profile/fzf/.fzf.bash" ]; then
+    fi
+    # Override with my configuration
+    if [ -r "$RC_DIR/bin/profile/fzf/shell/completion.bash" ]; then
+      source "$RC_DIR/bin/profile/fzf/shell/completion.bash"
+    fi
+    if [ -r "$RC_DIR/bin/profile/fzf/.fzf.bash" ]; then
       source "$RC_DIR/bin/profile/fzf/.fzf.bash"
     fi
   fi
