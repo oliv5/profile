@@ -74,22 +74,22 @@ annex_config_rm_remotes() { local REMOTE; for REMOTE in $(git_remotes "$1"); do 
 annex_mixed_content() {
   local SIZE="${1:-nothing}"
   if [ "$SIZE" = "remove" ] || [ "$SIZE" = "rm" ]; then
-    _rm_config annex.gitaddtoannex
-    _rm_config annex.addsmallfiles
-    _rm_config annex.largefiles
+    git_config_rm annex.gitaddtoannex
+    git_config_rm annex.addsmallfiles
+    git_config_rm annex.largefiles
   elif [ "$SIZE" = "anything" ] || [ "$SIZE" = "all" ]; then
-    _set_config annex.gitaddtoannex "true"
-    _set_config annex.addsmallfiles "true"
-    _set_config annex.largefiles "anything"
+    git_config_set annex.gitaddtoannex "true"
+    git_config_set annex.addsmallfiles "true"
+    git_config_set annex.largefiles "anything"
   elif [ "$SIZE" = "nothing" ] || [ "$SIZE" = "none" ]; then
-    _set_config annex.gitaddtoannex "false"
-    _set_config annex.addsmallfiles "false"
-    #_set_config annex.largefiles "nothing"
-    _rm_config annex.largefiles
+    git_config_set annex.gitaddtoannex "false"
+    git_config_set annex.addsmallfiles "false"
+    #git_config_set annex.largefiles "nothing"
+    git_config_rm annex.largefiles
   else
-    _set_config annex.gitaddtoannex "false"
-    _set_config annex.addsmallfiles "false"
-    _set_config annex.largefiles "$SIZE"
+    git_config_set annex.gitaddtoannex "false"
+    git_config_set annex.addsmallfiles "false"
+    git_config_set annex.largefiles "$SIZE"
   fi
 }
 
