@@ -73,14 +73,6 @@ annex_config_rm_remotes() { local REMOTE; for REMOTE in $(git_remotes "$1"); do 
 # https://git-annex.branchable.com/forum/lets_discuss_git_add_behavior/#comment-37e0ecaf8e0f763229fd7b8ee9b5a577
 annex_mixed_content() {
   local SIZE="${1:-nothing}"
-  local INREMOTE="$2"
-  if [ -z "$INREMOTE" ]; then
-    _set_config() { git_config_set "$@"; }
-    _rm_config() { git_config_rm "$1"; }
-  else
-    _set_config() { annex_config_set "$@"; }
-    _rm_config() { annex_config_rm "$1"; }
-  fi
   if [ "$SIZE" = "remove" ] || [ "$SIZE" = "rm" ]; then
     _rm_config annex.gitaddtoannex
     _rm_config annex.addsmallfiles
