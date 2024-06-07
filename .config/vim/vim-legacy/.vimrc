@@ -86,18 +86,22 @@ set directory=$XDG_CACHE_HOME/vim/vimswap
 set undodir=$XDG_CACHE_HOME/vim/vimundo
 silent !mkdir -p "$XDG_CACHE_HOME/vim/vimbackup" "$XDG_CACHE_HOME/vim/vimview" "$XDG_CACHE_HOME/vim/vimswap" "$XDG_CACHE_HOME/vim/vimundo" >/dev/null 2>&1
 
-" Save/restore part of edit session
-"  /10  :  search items
-"  '10  :  marks in 10 previously edited files
-"  r/mnt/zip,r/mnt/floppy : excluded locations
-"  "100 :  100 lines for each register
-"  :20  :  20 lines of command-line history
-"  %    :  buffer list
-"  n... :  viminfo file location
-if has('nvim')
-	set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/nviminfo
-elseif filewritable($XDG_CACHE_HOME . "/vim")
-	set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
+if filewritable($XDG_CACHE_HOME."/vim")
+	" Save/restore part of edit session
+	"  /10  :  search items
+	"  '10  :  marks in 10 previously edited files
+	"  r/mnt/zip,r/mnt/floppy : excluded locations
+	"  "100 :  100 lines for each register
+	"  :20  :  20 lines of command-line history
+	"  %    :  buffer list
+	"  n... :  viminfo file location
+  if has('nvim')
+	  set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/nviminfo
+  elseif filewritable($XDG_CACHE_HOME . "/vim")
+	  set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
+  endif
+else
+  set viminfo=
 endif
 
 " Force write with sudo after opening the file
