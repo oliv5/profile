@@ -162,3 +162,15 @@ console_resize_v2() {
 ansi_find_not_ascii() {
   grep --color='auto' -P -n '[^\x00-\x7F]' "$@"
 }
+
+# Show all unicode chars
+# https://unix.stackexchange.com/questions/337980/how-can-i-print-utf-8-and-unicode-tables-from-the-terminal/337989#337989
+show_unicode_chars() {
+  for y in $(seq 0 524287); do
+    for x in $(seq 0 7); do
+      a=$(expr $y \* 8 + $x)
+      echo -ne "$a \\u$a "
+    done
+    echo
+  done
+}
