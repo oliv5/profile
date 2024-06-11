@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Ansi codes
+# https://tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
 # http://man7.org/linux/man-pages/man4/console_codes.4.html
 # https://en.wikipedia.org/wiki/ANSI_escape_code
 #Black        0;30     Dark Gray     1;30
@@ -16,6 +17,8 @@
 ## export NC='\033[0m' # No Color
 ## echo -e "I ${RED}love${NC} Stack Overflow"
 ## printf "I ${RED}love${NC} Stack Overflow\n"
+## echo -en "\033[s\033[7A\033[1;32m 7 lines up green \033[u\033[0m"
+## echo -en "\033[s\033[7B\033[1;34m 7 lines down violet \033[u\033[0m"
 ansi_export_codes() {
   export NC='\033[0m' # No Color
   export BLACK='\033[0;30m'
@@ -66,8 +69,12 @@ ansi_printf() {
   printf "$(ansi_codes "$CODE")$*$(ansi_codes "NC")"
 }
 
-# Strip ANSI codes
+# Remove/strip ANSI codes
 alias ansi_strip='sed "s/\x1b\[[0-9;]*m//g"'
+alias ansi_rm='sed -i "s/\x1b\[[0-9;]*m//g"'
+
+# Find non-ascii characters
+alias ansi_show_non_ascii='grep --color="auto" -P -n "[^\x00-\x7F]"'
 
 # Success display function
 msg_success() {
@@ -156,11 +163,6 @@ console_resize_v2() {
   # echo "cols:$cols"
   # echo "rows:$rows"
   stty cols "$cols" rows "$rows"
-}
-
-# Find non-ascii characters
-ansi_find_not_ascii() {
-  grep --color='auto' -P -n '[^\x00-\x7F]' "$@"
 }
 
 # Show all unicode chars

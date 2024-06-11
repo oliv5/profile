@@ -69,8 +69,10 @@ if [ -n "$force_color_prompt" ]; then
 fi
 
 if [ "$color_prompt" = yes ]; then
-  #PS1='$(if [ $? -eq 0 ]; then echo -e "\[\033[01;32m\]\\u2736\[\033[m\]"; else echo -e "\[\033[01;31m\]\\u2736\[\033[m\]"; fi) ${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]: \[\033[01;34m\]\w\[\033[00m\]\$ '
-  PS1='${debian_chroot:+($debian_chroot)}\[\033[01;$(($? == 0 ? 32 : 31))m\]\u@\h\[\033[00m\]: \[\033[01;34m\]\w\[\033[00m\]\$ '
+  # Original: PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]: \[\033[01;34m\]\w\[\033[00m\]\$ '
+  # Show coloured status star char: PS1='$(echo -ne "\[\033[01;$(($? == 0 ? 32 : 31))m\]\\u2737\[\033[m\]") ${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]: \[\033[01;34m\]\w\[\033[00m\]\$ '
+  # Show coloured status user@hostname: PS1='${debian_chroot:+($debian_chroot)}\[\033[01;$(($? == 0 ? 32 : 31))m\]\u@\h\[\033[00m\]: \[\033[01;34m\]\w\[\033[00m\]\$ '
+  PS1='$(echo -ne "\[\033[01;$(($? == 0 ? 32 : 31))m\]\\u2737\[\033[m\]") ${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]: \[\033[01;34m\]\w\[\033[00m\]\$ '
 else
   PS1='${debian_chroot:+($debian_chroot)}\u@\h: \w\$ '
 fi
