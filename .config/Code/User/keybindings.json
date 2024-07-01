@@ -192,9 +192,11 @@
 // Intellisense peek/preview
 { "key": "ctrl+d ctrl+d",         "command": "editor.action.peekDeclaration", "when": "editorHasDeclarationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
 { "key": "ctrl+d ctrl+e",         "command": "editor.action.peekDefinition", "when": "editorHasDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
-{ "key": "ctrl+d ctrl+c",         "command": "editor.action.referenceSearch.trigger", "when": "editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+d ctrl+r",         "command": "editor.action.referenceSearch.trigger", "when": "editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 { "key": "ctrl+d ctrl+i",         "command": "editor.action.peekImplementation", "when": "editorHasImplementationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 { "key": "ctrl+d ctrl+t",         "command": "editor.action.peekTypeDefinition", "when": "editorHasTypeDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "shift+alt+h",           "command": "-references-view.showCallHierarchy", "when": "editorHasCallHierarchyProvider" },
+{ "key": "ctrl+d ctrl+c",         "command": "references-view.showCallHierarchy", "when": "editorHasCallHierarchyProvider" },
 
 { "key": "ctrl+enter",            "command": "editor.action.peekDefinition", "when": "editorHasDeclarationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 { "key": "ctrl+shift+backspace",  "command": "editor.action.peekDefinition", "when": "editorHasDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
