@@ -1541,7 +1541,7 @@ git_rebase() {
     shift
   done
   # Main
-  git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
+  git_log_fzf 250 HEAD "$@" | xargs -ro sh -c '
     git rebase $1 ${2}~1
   ' _ "$OPTS"
 }
