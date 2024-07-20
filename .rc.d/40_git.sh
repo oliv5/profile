@@ -560,60 +560,39 @@ git_extract() {
 }
 
 ########################################
-
-# Update local branches with checkout
-#~ git_up() {
-  #~ git_exists || return 1
-  #~ git_modified && echo "Cannot run, repo is not clean..." && return 2
-  #~ local REMOTES="${1:-$(git_remotes)}"
-  #~ local BRANCHES="$2"
-  #~ local CURRENT_REF="$(git symbolic-ref --short HEAD 2>/dev/null || git_hash)"
-  #~ for REMOTE in $REMOTES; do
-    #~ if git_remote_valid "$REMOTE"; then
-      #~ echo -n "Pull from $REMOTE: "
-      #~ for BRANCH in ${BRANCHES:-$(git_branch_remote "$REMOTE" | cut -d/ -f2-)}; do
-        #~ if git_branch_exists "$BRANCH"; then
-          #~ if [ "$(git_hash "refs/heads/$BRANCH")" != "$(git_hash "refs/remotes/$REMOTE/$BRANCH")" ]; then
-            #~ git checkout "$BRANCH" &&
-              #~ git_pull --ff-only "$REMOTE" "$BRANCH" || continue
-          #~ else
-            #~ echo "Skip already aligned $REMOTE/$BRANCH ..."
-          #~ fi
-        #~ else
-          #~ git checkout --no-track "$REMOTE/$BRANCH" &&
-            #~ git_pull --ff-only "$REMOTE" "$BRANCH" || continue
-        #~ fi
-      #~ done
+# Sync local branches with 1 remote
+#~ git_sync() {
+  #~ local REMOTE="${1:?No remote specified...}"
+  #~ git fetch --tags "$REMOTE" || return 1
+  #~ local BRANCHES="${2:-$(git_branch_remote "$REMOTE" | cut -d / -f2- | sort -u)}"
+  #~ local CUR_BRANCH="$(git_branch)"
+  #~ for BRANCH in $BRANCHES; do
+    #~ if [ "$BRANCH" != "$CUR_BRANCH" ]; then
+      #~ echo -n "Update local branch $BRANCH from $REMOTE ... "
+      #~ git fetch "$REMOTE" "$BRANCH:$BRANCH" && echo "OK" || echo ""
     #~ fi
   #~ done
-  #~ git checkout "$CURRENT_REF" 2>/dev/null
 #~ }
 
-# Update local branches without checkout
-git_up() {
-  local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branch_remote "$REMOTE" | awk -F/ '{print $2}')}" # ${2:-$(git_branches)}
-  local CUR_BRANCH="$(git_branch)"
-  for REMOTE in $REMOTES; do
-    for BRANCH in $BRANCHES; do
-      if [ "$BRANCH" != "$CUR_BRANCH" ]; then
-        echo -n "Update local branch $BRANCH from $REMOTE ... "
-        git fetch "$REMOTE" "$BRANCH:$BRANCH" && echo "OK" || echo ""
-      fi
+# Sync local branches with 1 remote
+git_sync() {
+  local SRC_REMOTE="${1:?No source remote specified...}"
+  local REFS="${2:-'*'}"
+  git fetch --tags "$SRC_REMOTE" &&
+    for REF in $REFS; do
+      git fetch "$SRC_REMOTE" "refs/heads/$REF:refs/heads/$REF"
     done
-  done
 }
 
-# Update remote branches without checkout
-git_up_remote() {
-  local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches)}"
-  git_update_branch "$@" &&
-    for REMOTE in $REMOTES; do
-      for BRANCH in $BRANCHES; do
-        echo -n "Push to $REMOTE $BRANCH ... "
-        git push "$REMOTE" "$BRANCH"
-      done
+# Sync 1 remote with another
+# https://stackoverflow.com/questions/37884832/git-push-all-branches-from-one-remote-to-another-remote
+git_sync_remote() {
+  local SRC_REMOTE="${1:?No source remote specified...}"
+  local DST_REMOTE="${2:?No source remote specified...}"
+  local REFS="${3:-'*'}"
+  git fetch --tags "$SRC_REMOTE" &&
+    for REF in $REFS; do
+      git push "$DST_REMOTE" --tags "refs/remotes/$SRC_REMOTE/$REF:refs/heads/$REF"
     done
 }
 
@@ -627,8 +606,8 @@ else
 git_pull() { git pull "$@"; }
 fi
 
-# Pull current branch from all existing remotes
-git_pull_all() {
+# Pull one branch (default current) from all existing remotes
+git_pull_all_remotes() {
   git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
   shift $(($# > 1 ? 1 : $#))
@@ -641,9 +620,8 @@ git_pull_all() {
 }
 
 ########################################
-# Push current branch to all existing remotes
-alias git_push_all_all='git_push_all "" --all'
-git_push_all() {
+# Push one branch (default current) to all existing remotes
+git_push_all_remotes() {
   git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
   shift $(($# > 1 ? 1 : $#))
@@ -665,12 +643,6 @@ git_push_enable() {
   for REMOTE in ${@:-$(git_remotes)}; do
     git config --unset "remote.${REMOTE}.pushurl" no-push
   done
-}
-
-########################################
-# Sync local & remotes repo
-git_sync() {
-  git_up && git_push_all "" --all
 }
 
 ########################################
@@ -1889,10 +1861,10 @@ alias grbi='git_rebase_interactive'
 # Fetch/pull/push aliases
 alias gpu='git push'
 alias gpuu='git push -u'
-alias gpua='git_push_all'
+alias gpua='git_push_all_remotes'
 alias gpunc='git push -o ci.skip -o integrations.skip_ci'
 alias gup='git_pull'
-alias gupa='git_pull_all'
+alias gupa='git_pull_all_remotes'
 alias gfa='git fetch --all --tags'
 # Config aliases
 alias gcg='git config --get'
