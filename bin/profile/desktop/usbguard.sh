@@ -1,20 +1,28 @@
 #!/bin/sh
 # https://wiki.archlinux.org/title/USBGuard
 
-usbguard_block() {
+usbguard_block_all() {
     sudo usbguard set-parameter ImplicitPolicyTarget block
 }
 
-usbguard_allow() {
+usbguard_allow_all() {
     sudo usbguard set-parameter ImplicitPolicyTarget allow
 }
 
 usbguard_show() {
-    sudo sh -c 'cat /etc/usbguard/rules.conf'
+    sudo cat /etc/usbguard/rules.conf
+}
+
+usbguard_show_blocked() {
+    sudo usbguard list-devices --blocked
+}
+
+usbguard_allow_device() {
+    sudo usbguard allow-device ${1:?No device ID specified...} ${2:+--permanent}
 }
 
 usbguard_list() {
-    sudo sh -c 'usbguard generate-policy'
+    sudo usbguard generate-policy
 }
 
 usbguard_record() {
@@ -65,7 +73,7 @@ usbguard_enable() {
 }
 
 usbguard_help() {
-    echo >&2 "usbguard.sh <block|allow|record|show|list|status|disable|enable|help>"
+    echo >&2 "usbguard.sh <block_all|allow_all|allow_device|record|show|show_blocked|list|status|disable|enable|start|stop|help>"
 }
 
 # Main
