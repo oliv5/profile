@@ -601,16 +601,22 @@ git_sync() {
     done
 }
 
-# Sync 1 remote with another
+# Sync 1 remote with another or the local repo ("heads")
 # https://stackoverflow.com/questions/37884832/git-push-all-branches-from-one-remote-to-another-remote
 git_sync_remote() {
   local SRC_REMOTE="${1:?No source remote specified...}"
   local DST_REMOTE="${2:?No source remote specified...}"
   local REFS="${3:-'*'}"
-  git fetch --tags "$SRC_REMOTE" &&
+  if [ "$SRC_REMOTE" = "heads" ]; then
     for REF in $REFS; do
-      git push "$DST_REMOTE" --tags "refs/remotes/$SRC_REMOTE/$REF:refs/heads/$REF"
+      git push "$DST_REMOTE" --tags "refs/heads/$REF:refs/heads/$REF"
     done
+  else
+    git fetch --tags "$SRC_REMOTE" &&
+      for REF in $REFS; do
+        git push "$DST_REMOTE" --tags "refs/remotes/$SRC_REMOTE/$REF:refs/heads/$REF"
+      done
+  fi
 }
 
 ########################################
