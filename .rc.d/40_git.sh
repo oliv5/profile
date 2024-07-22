@@ -72,24 +72,31 @@ cat <<EOF
   for REMOTE in $(git_remotes); do
     git_gcrypt_remotes "$REMOTE" && echo "Disable push in remote $REMOTE" && git_push_disable "$REMOTE"
   done
-  # Git memory usage options
-  # https://stackoverflow.com/questions/4826639/repack-of-git-repository-fails
-  # https://stackoverflow.com/questions/10292903/git-on-windows-out-of-memory-malloc-failed
-  # http://git-scm.com/book/en/Git-Internals-Git-Objects
-  if [ "$1" = "low" ];
+    # Autosquash all interactive rebases
+  git config --global rebase.autosquash true
+}
+
+# Git memory usage options
+# https://stackoverflow.com/questions/4826639/repack-of-git-repository-fails
+# https://stackoverflow.com/questions/10292903/git-on-windows-out-of-memory-malloc-failed
+# http://git-scm.com/book/en/Git-Internals-Git-Objects
+git_setup_mem() {
+  if [ "$1" = "low" ] || [ "$1" = "medium" ] || [ "$1" = "high" ]; then
+    local SIZE=32m
+    if [ "$1" = "medium" ]; then
+      SIZE=100m
+    fi
     # git core
-    git config core.packedGitWindowSize 32m
-    git config core.packedGitLimit 32m
-    git config core.deltaCacheSize 32m
+    git config core.packedGitWindowSize $SIZE
+    git config core.packedGitLimit $SIZE
+    git config core.deltaCacheSize $SIZE
     # git repack
-    git config pack.windowMemory 32m
-    git config pack.packSizeLimit 32m
-    git config pack.deltacachesize 32m
+    git config pack.windowMemory $SIZE
+    git config pack.packSizeLimit $SIZE
+    git config pack.deltacachesize $SIZE
     #git config pack.window 2 # 0 to disable delta compression globally (larger repo size on disk)
     git config pack.threads 1
   fi
-  # Autosquash all interactive rebases
-  git config --global rebase.autosquash true
 EOF
 }
 
