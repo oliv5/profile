@@ -74,6 +74,7 @@ cat <<EOF
   done
     # Autosquash all interactive rebases
   git config --global rebase.autosquash true
+EOF
 }
 
 # Git memory usage options
@@ -81,23 +82,32 @@ cat <<EOF
 # https://stackoverflow.com/questions/10292903/git-on-windows-out-of-memory-malloc-failed
 # http://git-scm.com/book/en/Git-Internals-Git-Objects
 git_setup_mem() {
-  if [ "$1" = "low" ] || [ "$1" = "medium" ] || [ "$1" = "high" ]; then
-    local SIZE=32m
-    if [ "$1" = "medium" ]; then
-      SIZE=100m
-    fi
-    # git core
-    git config core.packedGitWindowSize $SIZE
-    git config core.packedGitLimit $SIZE
-    git config core.deltaCacheSize $SIZE
-    # git repack
-    git config pack.windowMemory $SIZE
-    git config pack.packSizeLimit $SIZE
-    git config pack.deltacachesize $SIZE
-    #git config pack.window 2 # 0 to disable delta compression globally (larger repo size on disk)
-    git config pack.threads 1
+  local SIZE=""
+  local THREADS=""
+  local GLOBAL="${2:+--global}"
+  if [ "$1" = "low" ]; then
+    SIZE=32m
+    THREADS=1
+  elif [ "$1" = "medium" ]; then
+    SIZE=100m
+    THREADS=2
   fi
-EOF
+  # setup param fct
+  _git_setup_mem_param() {
+    git config $GLOBAL --unset-all $1
+    [ -n "$2" ] && git config $GLOBAL --replace-all  $1 $2
+  }
+  # git core
+  _git_setup_mem_param core.packedGitWindowSize $SIZE
+  _git_setup_mem_param core.packedGitLimit $SIZE
+  _git_setup_mem_param core.deltaCacheSize $SIZE
+  # git repack
+  _git_setup_mem_param pack.windowMemory $SIZE
+  _git_setup_mem_param pack.packSizeLimit $SIZE
+  _git_setup_mem_param pack.deltacachesize $SIZE
+  #_git_setup_mem_param pack.window 2 # 0 to disable delta compression globally (larger repo size on disk)
+  _git_setup_mem_param pack.threads $THREADS
+  unset -f _git_setup_mem_param
 }
 
 # Configure the repos
