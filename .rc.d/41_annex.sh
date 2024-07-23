@@ -894,26 +894,26 @@ _annex_copy() {
   local FORCE="${FORCE:+--force}"
   local ALL="${ALL:+--all}"
   local DBG="${DBG:+echo}"
-  local FROM=" ${FROM}" # add space prefix
-  local TO=" ${TO}" # add space prefix
+  local FROM=" ${FROM} " # add space prefix/suffix
+  local TO=" ${TO} " # add space prefix/suffix
   annex_exists && ! annex_bare || return 1
   # Copy from remotes
   for REMOTE in $FROM; do
     if [ -n "$UNUSED" ]; then
       $DBG git annex unused --from "$REMOTE" || return $?
     fi
-    if [ -n "$DROP" ] && [ "${FROM%% $REMOTE}" != "$FROM" ]; then
+    if [ -n "$DROP" ] && [ "${FROM%% $REMOTE }" != "$FROM" ]; then
       $DBG git annex move --from "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
     else
       $DBG git annex copy --from "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
     fi
   done
   # Copy to remotes
-  if [ -n "$TO" ] && [ -n "$UNUSED" ]; then
+  if [ "$TO" != "  " ] && [ -n "$UNUSED" ]; then
     $DBG git annex unused || return $?
   fi
   for REMOTE in $TO; do
-    if [ -n "$DROP" ] && [ "${TO%% $REMOTE}" != "$TO" ]; then
+    if [ -n "$DROP" ] && [ "${TO%% $REMOTE }" != "$TO" ]; then
       $DBG git annex move --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
     else
       $DBG git annex copy --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-.}"}} ${FAST} ${FORCE} || return $?
