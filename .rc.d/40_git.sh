@@ -594,9 +594,10 @@ git_extract() {
 # Sync local branches with 1 remote
 git_sync() {
   local SRC_REMOTE="${1:?No source remote specified...}"
-  local REFS="${2:-'*'}"
+  local REFS="${2:-*}"
+  shift 2
   git fetch --tags "$SRC_REMOTE" &&
-    for REF in $REFS; do
+    for REF in ${REFS:-"*"}; do
       git fetch "$SRC_REMOTE" "refs/heads/$REF:refs/heads/$REF"
     done
 }
@@ -606,14 +607,14 @@ git_sync() {
 git_sync_remote() {
   local SRC_REMOTE="${1:?No source remote specified...}"
   local DST_REMOTE="${2:?No source remote specified...}"
-  local REFS="${3:-'*'}"
-  if [ "$SRC_REMOTE" = "heads" ]; then
-    for REF in $REFS; do
+  shift 2
+  if [ "$SRC_REMOTE" = "local" ]; then
+    for REF in ${REFS:-"*"}; do
       git push "$DST_REMOTE" --tags "refs/heads/$REF:refs/heads/$REF"
     done
   else
     git fetch --tags "$SRC_REMOTE" &&
-      for REF in $REFS; do
+      for REF in ${REFS:-"*"}; do
         git push "$DST_REMOTE" --tags "refs/remotes/$SRC_REMOTE/$REF:refs/heads/$REF"
       done
   fi
@@ -1074,11 +1075,7 @@ git_ls_bin() {
   [ "$REVLIST" = "all" ] && REVLIST="$(git rev-list --all | xargs)" ||
   [ "$REVLIST" = "branches" ] && REVLIST="$(git rev-list --branches | xargs)" ||
   [ "$REVLIST" = "tags" ] && REVLIST="$(git rev-list --tags | xargs)"
-  if [ -z "$REVLIST" ]; then
-    bash -c 'comm -13 <(git grep -Il "" $1 -- | sort -u) <(git grep -al "" $1 -- | sort -u)' _ "$REVLIST" | xargs -r du -hc | sort -h
-  else
-    bash -c 'comm -13 <(git grep -Il "" $1 -- | sort -u) <(git grep -al "" $1 -- | sort -u)' _ "$REVLIST"
-  fi
+  bash -c 'comm -13 <(git grep --null -Il "" $1 -- | sort -u) <(git grep --null -al "" $1 -- | sort -u)' _ "$REVLIST" | xargs -r0 du -hc | sort -h
 }
 
 # List all ignored files search patterns
@@ -1422,8 +1419,11 @@ git_findb_repo() {
 # Find binary files in history
 # https://stackoverflow.com/questions/27931520/git-find-all-binary-files-in-history
 alias git_history_bin='git_find_bin'
+git_find_bin0() {
+  git log --all --numstat -z | grep -Zz '^-' | cut -z -f3
+}
 git_find_bin() {
-  git log --all --numstat | grep '^-' | cut -f3 | sed -r 's|(.*)\{(.*) => (.*)\}(.*)|\1\2\4\n\1\3\4|g ; s|(.*) => (.*)|\1\n\2|g ; s|//|/|g' | sort -u
+  git_find_bin0 | xargs -r0 -n1
 }
 
 ########################################
