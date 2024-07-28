@@ -101,20 +101,63 @@ backlight() {
 }
 
 ###############
-# Optimus/primusrun
-
-# Define our own wrappers to manage nvidia-prime blacklist-nvidia.conf file
-# Note: primusrun perfs > optirun perfs
-optirun() { primusrun "$@"; }
-primusrun() {
-  sudo sh -c '
-    USER="$1"; shift
-    CONF=/usr/lib/modprobe.d/blacklist-nvidia.conf
-    trap "if [ -f "${CONF}.tmp" ]; then mv -v \"${CONF}.tmp\" \"$CONF\"; fi; trap - INT TERM EXIT" INT TERM EXIT
-    if [ -f "$CONF" ]; then mv -v "$CONF" "${CONF}.tmp"; fi
-    #modprobe nvidia
-    #vblank_mode=0 command primusrun "$@"
-    #rmmod nvidia nvidia_modeset nvidia_drm
-    sudo -u "$USER" vblank_mode=0 primusrun "$@"
-  ' _ "$(whoami)" "$@"
+# Mesa prime generic solution (!=primusrun)
+# https://docs.mesa3d.org/envvars.html#envvar-DRI_PRIME
+primerun() {
+  vblank_mode=0 DRI_PRIME=1 "$@"
 }
+
+###############
+# VGA switcheroo (nouveau driver)
+# https://01.org/linuxgraphics/gfx-docs/drm/gpu/vga-switcheroo.html
+# https://unix.stackexchange.com/questions/568378/nvidia-optimus-with-nouveau-drivers
+if grep -i switcheroo /boot/config-* >/dev/null && lsmod | grep nouveau >/dev/null; then
+  vgaswitcheroo_status() {
+    sudo cat /sys/kernel/debug/vgaswitcheroo/switch
+  }
+  vgaswitcheroo_on() {
+    echo ON | sudo tee /sys/kernel/debug/vgaswitcheroo/switch
+    echo DIS | sudo tee /sys/kernel/debug/vgaswitcheroo/switch
+  }
+  vgaswitcheroo_off() {
+    echo IGD | sudo tee /sys/kernel/debug/vgaswitcheroo/switch
+    echo OFF | sudo tee /sys/kernel/debug/vgaswitcheroo/switch
+  }
+fi
+
+###############
+# Bumblebee bbswitch
+# Package: bbswitch-dkms
+# https://github.com/Bumblebee-Project/bbswitch
+if test -f /proc/acpi/bbswitch; then
+  alias bb_status='cat /proc/acpi/bbswitch'
+  alias bb_on='sudo sh -c "echo ON > /proc/acpi/bbswitch"'
+  alias bb_off='sudo sh -c "echo OFF > /proc/acpi/bbswitch"'
+fi
+
+###############
+# nvidia-prime solution (!=primusrun)
+nvprimerun() {
+  vblank_mode=0 __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only __GLX_VENDOR_LIBRARY_NAME=nvidia "$@"
+}
+
+###############
+# Bumblebee wrappers for optirun/primusrun
+# Note 1: install bumblebee with primus backend instead of virtualGL
+#         because primusrun perfs > optirun (virtualGL) perfs
+# Note 2: do not mess with nvidia prime (!=primus)
+#~ if command -v primusrun >/dev/null; then
+  #~ optirun() { primusrun "$@"; }
+  #~ primusrun() {
+    #~ sudo sh -c '
+      #~ USER="$1"; shift
+      #~ CONF=/usr/lib/modprobe.d/blacklist-nvidia.conf
+      #~ trap "if [ -f "${CONF}.tmp" ]; then mv -v \"${CONF}.tmp\" \"$CONF\"; fi; trap - INT TERM EXIT" INT TERM EXIT
+      #~ if [ -f "$CONF" ]; then mv -v "$CONF" "${CONF}.tmp"; fi
+      #~ #modprobe nvidia
+      #~ #vblank_mode=0 command primusrun "$@"
+      #~ #rmmod nvidia nvidia_modeset nvidia_drm
+      #~ sudo -u "$USER" vblank_mode=0 primusrun "$@"
+    #~ ' _ "$(whoami)" "$@"
+  #~ }
+#~ fi

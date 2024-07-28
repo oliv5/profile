@@ -306,17 +306,6 @@ empty_uid() {
 }
 
 ################################
-# Bumblebee commands
-# https://github.com/Bumblebee-Project/bbswitch
-alias bb_status='cat /proc/acpi/bbswitch'
-alias bb_on='sudo sh -c "echo ON > /proc/acpi/bbswitch"'
-alias bb_off='sudo sh -c "echo OFF > /proc/acpi/bbswitch"'
-
-################################
-# nvidia-prime commands
-alias primerun='DRI_PRIME=1'
-
-################################
 # inotify helpers
 alias inotify_open='inotifywait -e open'
 alias inotify_close='inotifywait -e close'
