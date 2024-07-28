@@ -91,3 +91,8 @@ EOF
     ls /etc/apt/apt.conf.d/01norecommend
   fi
 }
+
+# List apt sources
+apt_show_src() {
+  find /etc/apt -type f \( -name '*.list*' -o -name '*.sources' \) -exec sh -c 'echo "\n\t$1\n"; [ "${1##*.}" = "list" -o "${1##*.}" = "sources" ] && cat -n "$1"' _ '{}' \;
+}
