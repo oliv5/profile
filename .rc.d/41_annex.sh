@@ -305,7 +305,7 @@ annex_dead() {
   local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
   { git show git-annex:trust.log 2>/dev/null; cat .git/annex/journal/trust.log 2>/dev/null; } |
     sed -r 's/^(.*)timestamp=(.*)s$/\2 \1/' | sort -k2b,2 -k1,1rn |
-    awk -v uuids="${UUIDS:-^$}" '$2~uuids && done[$2]=="" { if ($3~/X/) {print $2}; done[$2]=1 }' |
+    awk -v uuids="${UUIDS:-^$}" '$2~uuids && done[$2]=="" { done[$2]=1; if ($3~/X/) {print $2} }' |
     sort -u
 }
 annex_notdead() {
@@ -347,7 +347,7 @@ annex_enabled() {
   local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
   local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
   git config --get-regexp "remote\..*\.annex-uuid" |
-    awk -v uuids="${UUIDS:-^$}" -v excluded="${EXCLUDE:-^$}" '$1 !~ excluded && $2~uuids {print $2}' |
+    awk -v uuids="${UUIDS:-^$}" -v excluded="${EXCLUDE:-^$}" '$1!~excluded && $2~uuids {print $2}' |
     sort -u
 }
 alias annex_disabled='annex_notenabled'
@@ -369,7 +369,7 @@ annex_exported() {
   local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
   { git show git-annex:remote.log 2>/dev/null; cat .git/annex/journal/remote.log 2>/dev/null; } |
     sed -r 's/^(.*)timestamp=(.*)s$/\2 \1/' | sort -k2b,2 -k1,1rn |
-    awk -v uuids="${UUIDS:-^$}" '$2~uuids && done[$2]=="" { if ($0~/exporttree=yes/) {print $2}; done[$2]=1 }' |
+    awk -v uuids="${UUIDS:-^$}" '$2~uuids && done[$2]=="" { done[$2]=1; if ($0~/exporttree=yes/) {print $2} }' |
     sort -u
 }
 annex_notexported() {
@@ -384,6 +384,31 @@ annex_isexported() {
   [ -n "$(annex_exported "$@")" ]
 }
 
+####
+# List annex url or path of some enabled remotes
+annex_path() {
+  local REMOTES="$(annex_remotes "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
+  git config -l | grep -oE "remote.($REMOTES).(url|annex-rsyncurl|annex-directory)=.*" | sed 's/.*=//'
+}
+
+####
+# List online annexes
+annex_online() {
+  for REMOTE in $(annex_remotes "$@"); do
+    local P="$(annex_path "$REMOTE")"
+    test -e "$P" || git ls-remote -q "$P" >/dev/null 2>&1 && echo "$REMOTE"
+  done
+}
+alias annex_offline='annex_notonline'
+annex_notonline() {
+  for REMOTE in $(annex_remotes "$@"); do
+    local P="$(annex_path "$REMOTE")"
+    ! test -e "$P" && ! git ls-remote -q "$P" >/dev/null 2>&1 && echo "$REMOTE"
+  done
+}
+annex_isonline() {
+  [ -n "$(annex_online "$@")" ]
+}
 
 ########################################
 annex_hook_commit() {
@@ -687,6 +712,8 @@ annex_enum_special_remotes() {
 # $FROM is used to selected the origin repo
 # $DBG is used to print the command on stderr (when not empty)
 # $SELECT is used to select files to copy; values: want-get / missing / [all]
+# Note: it is superseeded by `git annex copy --from= --to=` in git-annex version 10+
+# except for the max size management
 alias annex_transfer='FROM= SELECT=missing _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
@@ -710,6 +737,16 @@ _annex_transfer() {
   if git_bare; then
     # Bare repositories do not have "git annex find"
     echo "BARE REPOS NOT SUPPORTED YET"
+  elif [ $(annex_version) -gt $(annex_version 10.20230408) ]; then
+    echo "Copy files ${FROM:+from $FROM} to $REPO..."
+    $DBG git annex copy ${FROM:+--from }${FROM:---from-anywhere} --to "$REPO" "$@"
+  elif [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
+    if [ -z "$FROM" ]; then
+      FROM="$(annex_online | head -n 1)"
+    fi
+    :${FROM:?$FROM is empty and autodetection failed...}
+    echo "Copy files from $FROM to $REPO..."
+    $DBG git annex copy --from "$FROM" --to "$REPO" "$@"
   else
     # Plain git repositories
     # 0) quick fsck for file location
@@ -720,7 +757,9 @@ _annex_transfer() {
     # 1) copy the local files
     for REPO in $REPOS; do
       echo "Copy local files to $REPO ($(annex_remotes "$REPO"))..."
-      if annex_isexported "$REPO"; then
+      if [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
+        $DBG git annex push "$REPO" --fast "$@"
+      elif annex_isexported "$REPO"; then
         $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
       else
         $DBG git annex copy --to "$REPO" --fast "$@"
@@ -755,7 +794,9 @@ _annex_transfer() {
           if [ $# -gt 0 ]; then
             $DBG git annex get ${FROM:+--from "$FROM"} "$@"
             for REPO in $REPOS; do
-              if annex_isexported "$REPO"; then
+              if [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
+                $DBG git annex push "$REPO" --fast "$@"
+              elif annex_isexported "$REPO"; then
                 $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
               else
                 $DBG git annex copy --to "$REPO" "$@"

@@ -492,6 +492,11 @@ git_remotes() {
   git ${2:+--git-dir="$2"} remote -v | awk 'BEGIN {ret=1} $1 ~ /'$1'/ && $3 ~ /(fetch)/ {if (ret==0){printf " "}; printf $1; ret=0} END {exit ret}'
 }
 
+# Is remote online ?
+git_remote_online() {
+  git ${2:+--git-dir="$2"} ls-remote -q "$1" >/dev/null 2>&1 </dev/stdin || return 1
+}
+
 # Is remote a valid git repo ?
 git_remote_valid() {
   git ${2:+--git-dir="$2"} config --get "remote.$1.fetch" >/dev/null
