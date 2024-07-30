@@ -722,7 +722,8 @@ _annex_transfer() {
   local DBG="${DBG:+echo}"
   local SELECTED=""
   [ $# -le 2 ] && shift $# || shift 2
-  REPOS="$(bash -c "sort <(echo $REPOS | xargs -n1) <(echo $(annex_remotes) | xargs -n1) | uniq -d")"
+  #REPOS="$(bash -c "sort <(echo $REPOS | xargs -n1) <(echo $(annex_remotes) | xargs -n1) | uniq -d")"
+  REPOS="$(annex_remotes $REPOS)"
   [ -z "$REPOS" ] && return 0
   [ "$SELECT" = "missing" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--not --in $REPO"; done
   if [ $(annex_version) -ge $(annex_version 9.0) ]; then
@@ -738,15 +739,19 @@ _annex_transfer() {
     # Bare repositories do not have "git annex find"
     echo "BARE REPOS NOT SUPPORTED YET"
   elif [ $(annex_version) -gt $(annex_version 10.20230408) ]; then
-    echo "Copy files ${FROM:+from $FROM} to $REPO..."
-    $DBG git annex copy ${FROM:+--from }${FROM:---from-anywhere} --to "$REPO" "$@"
+    for REPO in $REPOS; do
+      echo "Copy files ${FROM:+from $FROM} to $REPO..."
+      $DBG git annex copy ${FROM:+--from }${FROM:---from-anywhere} --to "$REPO" "$@"
+    done
   elif [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
-    if [ -z "$FROM" ]; then
-      FROM="$(annex_online | head -n 1)"
-    fi
-    :${FROM:?$FROM is empty and autodetection failed...}
-    echo "Copy files from $FROM to $REPO..."
-    $DBG git annex copy --from "$FROM" --to "$REPO" "$@"
+    local ONLINE="$(annex_online)"
+    for REPO in $REPOS; do
+      while [ -z "$FROM" ] || [ "$FROM" = "$REPO" ]; do
+        FROM="$(echo "$ONLINE" | sed '/^'"$FROM"'$/d' | head -n 1)"
+      done
+      echo "Copy files from $FROM to $REPO..."
+      $DBG git annex copy --from "$FROM" --to "$REPO" "$@"
+    done
   else
     # Plain git repositories
     # 0) quick fsck for file location
