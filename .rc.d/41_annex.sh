@@ -96,27 +96,56 @@ annex_mixed_content() {
 ########################################
 # Limitations
 annex_autocommit() {
-  git_config annex.autocommit "$@"
+  if [ -z "$1" ]; then
+    git config --get annex.autocommit
+  else
+    git config --replace-all annex.autocommit "$1"
+  fi
 }
 
-annex_remotes_push_enable() {
-  git_config_remotes annex-push "$@"
+annex_remote_push_enable() {
+  :${1:?no remote specified...}
+  if [ -z "$2" ]; then
+    git config --get "remote.$1.annex-push"
+  else
+    git config --replace-all "remote.$1.annex-push" "$2"
+  fi
 }
 
-annex_remotes_pull_enable() {
-  git_config_remotes annex-pull "$@"
+annex_remote_pull_enable() {
+  :${1:?no remote specified...}
+  if [ -z "$2" ]; then
+    git config --get "remote.$1.annex-pull"
+  else
+    git config --replace-all "remote.$1.annex-pull" "$2"
+  fi
 }
 
-annex_remotes_sync_enable() {
-  git_config_remotes annex-sync "$@"
+annex_remote_sync_enable() {
+  :${1:?no remote specified...}
+  if [ -z "$2" ]; then
+    git config --get "remote.$1.annex-sync"
+  else
+    git config --replace-all "remote.$1.annex-sync" "$2"
+  fi
 }
 
-annex_remotes_ignore() {
-  git_config_remotes annex-ignore "$@"
+annex_remote_ignore() {
+  :${1:?no remote specified...}
+  if [ -z "$2" ]; then
+    git config --get "remote.$1.annex-ignore"
+  else
+    git config --replace-all "remote.$1.annex-ignore" "$2"
+  fi
 }
 
-annex_remotes_readonly() {
-  git_config_remotes annex-readonly "$@"
+annex_remote_readonly() {
+  :${1:?no remote specified...}
+  if [ -z "$2" ]; then
+    git config --get "remote.$1.annex-readonly"
+  else
+    git config --replace-all "remote.$1.annex-readonly" "$2"
+  fi
 }
 
 ########################################
@@ -128,8 +157,8 @@ annex_init_hubic() {
   local KEYID="$4"
   local CHUNKS="$5"
   _run() { echo "$@"; "$@"; }
-  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
-  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init gdrive annex
@@ -140,8 +169,8 @@ annex_init_gdrive() {
   local KEYID="$4"
   local CHUNKS="$5"
   _run() { echo "$@"; "$@"; }
-  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
-  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init bup annex
@@ -152,8 +181,8 @@ annex_init_bup() {
   local KEYID="$4"
   local CHUNKS="$5"
   _run() { echo "$@"; "$@"; }
-  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
-  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init rsync annex
@@ -164,8 +193,8 @@ annex_init_rsync() {
   local KEYID="$4"
   local CHUNKS="$5"
   _run() { echo "$@"; "$@"; }
-  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
-  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init directory annex
@@ -178,8 +207,8 @@ annex_init_directory() {
   local EXPORTTREE="$6"
   local IMPORTTREE="$7"
   _run() { echo "$@"; "$@"; }
-  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ${EXPORTTREE:+exporttree=yes} ${IMPORTTREE:+importtree=yes} 2>/dev/null ||
-  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ${EXPORTTREE:+exporttree=yes} ${IMPORTTREE:+importtree=yes}
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"} ${EXPORTTREE:+exporttree="$EXPORTTREE"} ${IMPORTTREE:+importtree="$IMPORTTREE"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"} ${EXPORTTREE:+exporttree="$EXPORTTREE"} ${IMPORTTREE:+importtree="$IMPORTTREE"}
 }
 
 # Init gcrypt annex
@@ -190,8 +219,8 @@ annex_init_gcrypt() {
   local KEYID="$4"
   local CHUNKS="$5"
   _run() { echo "$@"; "$@"; }
-  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
-  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"} 2>/dev/null ||
+  _run git annex initremote   "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} ${KEYID:+keyid="$KEYID"}
 }
 
 # Clone gcrypt annex
@@ -215,8 +244,8 @@ annex_init_rclone() {
   local MAC="${7:-HMACSHA512}"
   local LAYOUT="${8:-lower}"
   _run() { echo "$@"; "$@"; }
-  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=rclone target="$PROFILE" prefix="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} mac="${MAC}" rclone_layout="$LAYOUT" ${KEYID:+keyid="$KEYID"} ||
-  _run git annex initremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=rclone target="$PROFILE" prefix="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} mac="${MAC}" rclone_layout="$LAYOUT" ${KEYID:+keyid="$KEYID"}
+  _run git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=rclone target="$PROFILE" prefix="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} mac="${MAC}" rclone_layout="$LAYOUT" ${KEYID:+keyid="$KEYID"} ||
+  _run git annex initremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=rclone target="$PROFILE" prefix="$REMOTEPATH" ${CHUNKS:+chunk="$CHUNKS"} mac="${MAC}" rclone_layout="$LAYOUT" ${KEYID:+keyid="$KEYID"}
 }
 
 ########################################
@@ -241,40 +270,50 @@ annex_uuid() {
 # List remotes by name or uuid
 annex_uuids() {
   local PATTERN=""
-  #~ for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
-  #~ git show git-annex:uuid.log |
-    #~ awk -v pattern="$PATTERN" '$1~pattern || $2~pattern {print $1}' |
-    #~ sort -u | xargs -r
-  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^\\\[?$REMOTE\\\]?\$"; done
-  git annex info --fast |
-    awk -v pattern="$PATTERN" '$1~/([0-9a-f-]{36})/ && $1!~/[0-]{35}[12]/ && ($1~pattern || $3~pattern) {print $1}' |
-      sort -u | xargs -r
+  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
+  { git show git-annex:uuid.log 2>/dev/null; cat .git/annex/journal/uuid.log 2>/dev/null; } |
+    awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $1}' |
+    sort -u
+  # Warning: `git annex info` does not print dead remotes
+  #~ for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}\[?$REMOTE\]?"; done
+  #~ git annex info "$@" --fast --json | jq -r --arg PATTERN "$PATTERN" '
+    #~ (."semitrusted repositories"[] , ."untrusted repositories"[] , ."trusted repositories"[])? // . |
+    #~ select(.uuid | test($PATTERN)) // select(.description | test($PATTERN)) |
+    #~ select(.uuid | test("00000000-0000-0000-0000-00000000000.") | not) |
+    #~ .uuid
+  #~ '
 }
 annex_remotes() {
   local PATTERN=""
-  #~ for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
-  #~ git show git-annex:uuid.log |
-    #~ awk -v pattern="$PATTERN" '$1~pattern || $2~pattern {print $2}' |
-    #~ uniq | xargs -r
-  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^\\\[?$REMOTE\\\]?\$"; done
-  git annex info --fast |
-    awk -v pattern="$PATTERN" '$1~/([0-9a-f-]{36})/ && $1!~/[0-]{35}[12]/ && ($1~pattern || $3~pattern) {print $3}' |
-      tr -d '][' | sort -u | xargs -r
+  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
+  { git show git-annex:uuid.log 2>/dev/null; cat .git/annex/journal/uuid.log 2>/dev/null; } |
+    awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $2}' |
+    sort -u
+  # Warning: `git annex info` does not print dead remotes
+  #~ for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}\[?$REMOTE\]?"; done
+  #~ git annex info --fast --json | jq -r --arg PATTERN "$PATTERN" '
+    #~ (."semitrusted repositories"[] , ."untrusted repositories"[] , ."trusted repositories"[])? // . |
+    #~ select(.uuid | test($PATTERN)) // select(.description | test($PATTERN)) |
+    #~ select(.uuid | test("00000000-0000-0000-0000-00000000000.") | not) |
+    #~ .description | gsub("\\[|\\]";"")
+  #~ '
 }
 
 ####
 # List dead remotes
 annex_dead() {
-  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
-  git show git-annex:trust.log 2>/dev/null |
-    awk -v uuids="${UUIDS:-^$}" '$1 ~ uuids && done[$1] == "" { if ($2 ~ /X/) {print $1}; done[$1]=1 }' |
-    xargs -rn1 | sort -u | xargs -r
+  local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
+  { git show git-annex:trust.log 2>/dev/null; cat .git/annex/journal/trust.log 2>/dev/null; } |
+    sed -r 's/^(.*)timestamp=(.*)s$/\2 \1/' | sort -k2b,2 -k1,1rn |
+    awk -v uuids="${UUIDS:-^$}" '$2~uuids && done[$2]=="" { if ($3~/X/) {print $2}; done[$2]=1 }' |
+    sort -u
 }
 annex_notdead() {
-  local UUIDS="$(annex_dead | sed 's/ /|/g')"
-  annex_uuids "$@" | xargs -rn1 |
+  # note: reverse logic because trust.log does not contain a repo whose trust level was never set
+  local UUIDS="$(annex_dead | tr '\n' '|' | rev | cut -c2- | rev)"
+  annex_uuids "$@" |
     command grep -vE "${UUIDS:-^$}" |
-    sort -u | xargs -r
+    sort -u
 }
 # Check one of the (listed) remotes is dead
 annex_isdead() {
@@ -284,16 +323,18 @@ annex_isdead() {
 ####
 # List special remotes
 annex_special() {
-  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
-  git show git-annex:remote.log 2>/dev/null |
-    awk -v uuids="${UUIDS:-^$}" '$0 ~ uuids {print $1}' |
-    sort -u | xargs -r
+  local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
+  { git show git-annex:remote.log 2>/dev/null; cat .git/annex/journal/remote.log 2>/dev/null; } |
+    sed -r 's/^(.*)timestamp=(.*)s$/\2 \1/' | sort -k2b,2 -k1,1rn |
+    awk -v uuids="${UUIDS:-^$}" '$2~uuids {print $2}' |
+    sort -u
 }
 annex_notspecial() {
-  local UUIDS="$(annex_special | sed 's/ /|/g')"
-  annex_uuids "$@" | xargs -rn1 |
+  # note: reverse logic because trust.log does not contain a repo whose trust level was never set
+  local UUIDS="$(annex_special | tr '\n' '|' | rev | cut -c2- | rev)"
+  annex_uuids "$@" |
     command grep -vE "${UUIDS:-^$}" |
-    sort -u | xargs -r
+    sort -u
 }
 # Check one of the (listed) remotes is  special
 annex_isspecial() {
@@ -303,18 +344,19 @@ annex_isspecial() {
 ####
 # List enabled local remotes
 annex_enabled() {
-  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
+  local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
   local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
   git config --get-regexp "remote\..*\.annex-uuid" |
-    awk -v uuids="${UUIDS:-^$}" -v excluded="${EXCLUDE:-^$}" '$1 !~ excluded && $2 ~ uuids {print $2}' |
-    sort -u | xargs -r
+    awk -v uuids="${UUIDS:-^$}" -v excluded="${EXCLUDE:-^$}" '$1 !~ excluded && $2~uuids {print $2}' |
+    sort -u
 }
 alias annex_disabled='annex_notenabled'
 annex_notenabled() {
-  local UUIDS="$(annex_enabled | sed 's/ /|/g')"
-  annex_uuids "$@" | xargs -rn1 |
+  # note: reverse logic because trust.log does not contain a repo whose trust level was never set
+  local UUIDS="$(annex_enabled | tr '\n' '|' | rev | cut -c2- | rev)"
+  annex_uuids "$@" |
     command grep -vE "${UUIDS:-^$}" |
-    sort -u | xargs -r
+    sort -u
 }
 # Check one of the (listed) remotes is enabled
 annex_isenabled() {
@@ -324,16 +366,18 @@ annex_isenabled() {
 ####
 # List exported annexes
 annex_exported() {
-  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
-  git show git-annex:remote.log |
-    awk -v uuids="${UUIDS:-^$}" '$1 ~ uuids && /exporttree=yes/{print $1}' |
-    sort -u | xargs -r
+  local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
+  { git show git-annex:remote.log 2>/dev/null; cat .git/annex/journal/remote.log 2>/dev/null; } |
+    sed -r 's/^(.*)timestamp=(.*)s$/\2 \1/' | sort -k2b,2 -k1,1rn |
+    awk -v uuids="${UUIDS:-^$}" '$2~uuids && done[$2]=="" { if ($0~/exporttree=yes/) {print $2}; done[$2]=1 }' |
+    sort -u
 }
 annex_notexported() {
-  local UUIDS="$(annex_exported | sed 's/ /|/g')"
-  annex_uuids "$@" | xargs -rn1 |
+  # note: reverse logic because trust.log does not contain a repo whose trust level was never set
+  local UUIDS="$(annex_exported | tr '\n' '|' | rev | cut -c2- | rev)"
+  annex_uuids "$@" |
     command grep -vE "${UUIDS:-^$}" |
-    sort -u | xargs -r
+    sort -u
 }
 # Check one of the (listed) remotes is exported
 annex_isexported() {
@@ -1384,12 +1428,12 @@ annex_clean() {
 # DBG enable debug mode
 annex_setpresentkey() {
   local REMOTE="${1:?No remote specified...}"
-  local WHERE="${2:-${WHERE:-\*}}"
+  local WHERE="${2:-${WHERE:---include \*}}"
   local PRESENT="${3:-1}"
   local UUID="$(git config --get remote.${REMOTE}.annex-uuid)"
   [ -z "$UUID" ] && { echo "Remote $REMOTE unknown..." && return 1; }
-  eval git annex find --include "$WHERE" --format="\${key} $UUID $PRESENT\n" |
-    git annex setpresentkey --batch
+  eval git annex find "$WHERE" --format="\${key} $UUID $PRESENT\n" |
+    ${DBG:+echo "[DBG]"} git annex setpresentkey --batch
 }
 
 # Declare present and missing files; Files must be accessible from a mountpoint
@@ -1397,19 +1441,19 @@ annex_setpresentkey() {
 # DBG enable debug mode
 annex_setpresentfiles() {
   local REMOTE="${1:?No remote specified...}"
-  local DIR="${2:?No remote folder specified...}"
-  local WHERE="${3:-${WHERE:-\*}}"
+  local WHERE="${2:-${WHERE:---include \*}}"
+  local DIR="${3:-.}"
   local PRESENT="$4"
   local UUID="$(git config --get remote.${REMOTE}.annex-uuid)"
   [ -z "$UUID" ] && { echo "Remote $REMOTE unknown..." && return 1; }
-  eval git annex find --include "$WHERE" --format='\${key}\\000\${file}\\000' | xargs -r0 -n2 sh -c '
+  eval git annex find "$WHERE" --format='\${key}\\000\${file}\\000' | xargs -r0 -n2 sh -c '
     DBG="$1"; UUID="$2"; DIR="$3"; PRESENT="$4"; KEY="$5"; FILE="$6"
     if [ -z "$PRESENT" ]; then
       [ -f "$DIR/$FILE" ] && PRESENT=1 || PRESENT=0
     fi
-    ${DBG} echo "$PRESENT $FILE"
-    $DBG git annex setpresentkey "$KEY" "$UUID" $PRESENT
-  ' _ "${DBG:+echo [DBG]}" "$UUID" "$DIR" "$PRESENT"
+    ${DBG:+true} echo "$PRESENT: $FILE"
+    ${DBG:+echo "[DBG]"} git annex setpresentkey "$KEY" "$UUID" $PRESENT
+  ' _ "$DBG" "$UUID" "$DIR" "$PRESENT"
 }
 
 ########################################
