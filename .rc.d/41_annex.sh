@@ -2,8 +2,7 @@
 
 # Get annex version
 annex_version() {
-  ANNEX_VERSION="${ANNEX_VERSION:-$(git annex version 2>/dev/null | awk -F': ' '/git-annex version:/ {print $2}')}"
-  echo "${1:-$ANNEX_VERSION}" | awk -F'.' '{printf "%.d%.8d\n",$1,$2$3$4}'
+  echo "${1:-${ANNEX_VERSION:-$(git annex version 2>/dev/null | awk -F': ' '/git-annex version:/ {print $2}')}}" | awk -F'.' '{printf "%.d%.8d\n",$1,$2$3$4}'
 }
 annex_repo_version() {
   git config --get annex.version 2>/dev/null || echo 0
@@ -712,11 +711,13 @@ annex_enum_special_remotes() {
 # $FROM is used to selected the origin repo
 # $DBG is used to print the command on stderr (when not empty)
 # $SELECT is used to select files to copy; values: want-get / missing / [all]
+# $FSCK is set to trigger a `fsck`
 # Note: it is superseeded by `git annex copy --from= --to=` in git-annex version 10+
 # except for the max size management
 alias annex_transfer='FROM= SELECT=missing _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
+  git_bare && echo "BARE REPOS NOT SUPPORTED YET" && return 1
   local REPOS="${1:-$(annex_enabled)}"
   local MAXSIZE="${2:-1073741824}"
   local DBG="${DBG:+echo}"
@@ -735,43 +736,39 @@ _annex_transfer() {
   echo "SELECTED=$SELECTED"
   echo "FROM=$FROM"
   echo "DBG=$DBG"
-  if git_bare; then
-    # Bare repositories do not have "git annex find"
-    echo "BARE REPOS NOT SUPPORTED YET"
-  elif [ $(annex_version) -gt $(annex_version 10.20230408) ]; then
+  # 1) copy the local files
+  for REPO in $REPOS; do
+    echo "Copy local files to $REPO ($(annex_remotes "$REPO"))..."
+    if annex_isexported "$REPO"; then
+      $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
+    elif [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
+      $DBG git annex push "$REPO" $SELECTED --fast "$@"
+    else
+      $DBG git annex copy $SELECTED --to "$REPO" --fast "$@"
+    fi
+  done
+  # 2) get, copy and drop the remote files
+  local ONE_EXPORTED=""
+  for REPO in $REPOS; do annex_isexported "$REPO" && ONE_EXPORTED=1 && break; done
+  if [ -z "$ONE_EXPORTED" ]; then
+    # New annex commands: git copy from/from-anywhere/to
+    echo "Get/copy remote files repos (new way)..."
     for REPO in $REPOS; do
-      echo "Copy files ${FROM:+from $FROM} to $REPO..."
-      $DBG git annex copy ${FROM:+--from }${FROM:---from-anywhere} --to "$REPO" "$@"
-    done
-  elif [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
-    local ONLINE="$(annex_online)"
-    for REPO in $REPOS; do
-      while [ -z "$FROM" ] || [ "$FROM" = "$REPO" ]; do
-        FROM="$(echo "$ONLINE" | sed '/^'"$FROM"'$/d' | head -n 1)"
-      done
-      echo "Copy files from $FROM to $REPO..."
-      $DBG git annex copy --from "$FROM" --to "$REPO" "$@"
-    done
-  else
-    # Plain git repositories
-    # 0) quick fsck for file location
-    #~ for REPO in $REPOS; do
-      #~ echo "Fsck $REPO..."
-      #~ $DBG git annex fsck --fast --from "$REPO" "$@"
-    #~ done
-    # 1) copy the local files
-    for REPO in $REPOS; do
-      echo "Copy local files to $REPO ($(annex_remotes "$REPO"))..."
-      if [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
-        $DBG git annex push "$REPO" --fast "$@"
-      elif annex_isexported "$REPO"; then
-        $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
+      if [ $(annex_version) -gt $(annex_version 10.20230408) ]; then
+        echo "Copy files ${FROM:+from $FROM} to $REPO..."
+        $DBG git annex copy $SELECTED ${FROM:+--from }${FROM:---from-anywhere} --to "$REPO" "$@"
       else
-        $DBG git annex copy --to "$REPO" --fast "$@"
+        local ONLINE="${ONLINE:-$(annex_online)}"
+        while [ -z "$FROM" ] || [ "$FROM" = "$REPO" ]; do
+          FROM="$(echo "$ONLINE" | sed '/^'"$FROM"'$/d' | head -n 1)"
+        done
+        echo "Copy files from $FROM to $REPO..."
+        $DBG git annex copy $SELECTED --from "$FROM" --to "$REPO" "$@"
       fi
     done
-    # 2) get, copy and drop the remote files
-    echo "Get/copy remote files..."
+  else
+    # Legacy way: get, copy and drop the remote files, especially for exported remotes
+    echo "Get/copy remote files repos (legacy way)..."
     git annex find --include='*' $SELECTED --print0 "$@" | xargs -0 -r sh -c '
       annex_isexported() {
         git show git-annex:remote.log | grep "exporttree=yes.*name=$1" >/dev/null
@@ -799,9 +796,7 @@ _annex_transfer() {
           if [ $# -gt 0 ]; then
             $DBG git annex get ${FROM:+--from "$FROM"} "$@"
             for REPO in $REPOS; do
-              if [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
-                $DBG git annex push "$REPO" --fast "$@"
-              elif annex_isexported "$REPO"; then
+              if annex_isexported "$REPO"; then
                 $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
               else
                 $DBG git annex copy --to "$REPO" "$@"
@@ -817,11 +812,14 @@ _annex_transfer() {
       exit 0
     ' _ "$DBG" "$REPOS" "$MAXSIZE" "$FROM"
   fi
-  # 3) quick fsck for file location
-  #~ for REPO in $REPOS; do
-    #~ echo "Fsck $REPO..."
-    #~ $DBG git annex fsck --fast --from "$REPO" "$@"
-  #~ done
+  # 3) fsck
+  if [ -n "$FSCK" ]; then
+    for REPO in $REPOS; do
+      echo "Fsck $REPO..."
+      $DBG git annex fsck --from "$REPO" "$@"
+    done
+  fi
+  echo "done"
 }
 
 ########################################
@@ -954,6 +952,7 @@ _annex_rsync() {
 alias annex_populate='MOVE= _annex_populate'
 alias annex_populatem='MOVE=1 _annex_populate'
 _annex_populate() {
+  annex_exists || return 1
   local DST="${1:?No dst directory specified...}"
   local SRC="${2:-$PWD}"
   local WHERE="${3:-${WHERE:---include '*'}}"
@@ -1165,19 +1164,25 @@ annex_missingc()  { annex_missing "$@" | wc -l; }
 annex_lost()  { git annex list "$@" | grep -E "^_+ "; }
 annex_lostc() { git annex list "$@" | grep -E "^_+ " | wc -l; }
 
-# Grouped find aliases
-annex_existingn() { for UUID in $(annex_notdead "$@"); do echo "*** Existing in $(annex_remotes $UUID) ($UUID) ***"; annex_existing "$UUID"; done; }
-annex_missingn()  { for UUID in $(annex_notdead "$@"); do echo "*** Missing in $(annex_remotes $UUID) ($UUID) ***"; annex_missing "$UUID"; done; }
-annex_existingnc() { for UUID in $(annex_notdead "$@"); do echo -n "Num existing in $(annex_remotes $UUID) ($UUID) : "; annex_existing "$UUID" | wc -l; done; }
-annex_missingnc()  { for UUID in $(annex_notdead "$@"); do echo -n "Num missing in $(annex_remotes $UUID) ($UUID) : "; annex_missing "$UUID" | wc -l; done; }
+# Want aliases
+annex_wantget()   { annex_missing "$1" --want-get-by "$1"; }
+annex_wantget0()  { annex_missing "$1" --want-get-by "$1" --print0; }
+annex_wantdrop()  { annex_existing "$1" --want-drop-by "$1"; }
+annex_wantdrop0() { annex_existing "$1" --want-drop-by "$1" --print0; }
+annex_wantgetc()  { annex_wantget "$@" | wc -l; }
+annex_wantdropc() { annex_wantdrop "$@" | wc -l; }
 
-# Want-get/want-drop are for local repo only
-alias annex_wantget='git annex find --want-get --not --in .'
-alias annex_wantget0='git annex find --print0 --want-get --not --in .'
-alias annex_wantdrop='git annex find --want-drop --in .'
-alias annex_wantdrop0='git annex find --print0 --want-drop --in .'
-alias annex_wantgetc='annex_wantget | wc -l'
-alias annex_wantdropc='annex_wantdrop | wc -l'
+# Grouped find aliases
+annex_existingn()  { for UUID in $(annex_notdead "$@"); do echo "*** Existing in $(annex_remotes $UUID) ($UUID) ***"; annex_existing "$UUID"; done; }
+annex_missingn()   { for UUID in $(annex_notdead "$@"); do echo "*** Missing in $(annex_remotes $UUID) ($UUID) ***"; annex_missing "$UUID"; done; }
+annex_existingnc() { for UUID in $(annex_notdead "$@"); do echo -n "Num existing in $(annex_remotes $UUID) ($UUID) : "; annex_existingc "$UUID"; done; }
+annex_missingnc()  { for UUID in $(annex_notdead "$@"); do echo -n "Num missing in $(annex_remotes $UUID) ($UUID) : "; annex_missingc "$UUID"; done; }
+
+# Grouped want aliases
+annex_wantgetn()  { for UUID in $(annex_notdead "$@"); do echo "*** Want-get in $(annex_remotes $UUID) ($UUID) ***"; annex_wantget "$UUID"; done; }
+annex_wantdropn() { for UUID in $(annex_notdead "$@"); do echo "*** Want-drop in $(annex_remotes $UUID) ($UUID) ***"; annex_wantdrop "$UUID"; done; }
+annex_wantgetnc() { for UUID in $(annex_notdead "$@"); do echo -n "Num want-get in $(annex_remotes $UUID) ($UUID) : "; annex_wantgetc "$UUID"; done; }
+annex_wantdropnc(){ for UUID in $(annex_notdead "$@"); do echo -n "Num want-drop in $(annex_remotes $UUID) ($UUID) : "; annex_wantdropc "$UUID"; done; }
 
 # Is file in annex ?
 annex_isin() {
@@ -1493,12 +1498,14 @@ annex_setpresentfiles() {
   local UUID="$(git config --get remote.${REMOTE}.annex-uuid)"
   [ -z "$UUID" ] && { echo "Remote $REMOTE unknown..." && return 1; }
   eval git annex find "$WHERE" --format='\${key}\\000\${file}\\000' | xargs -r0 -n2 sh -c '
-    DBG="$1"; UUID="$2"; DIR="$3"; PRESENT="$4"; KEY="$5"; FILE="$6"
-    if [ -z "$PRESENT" ]; then
-      [ -f "$DIR/$FILE" ] && PRESENT=1 || PRESENT=0
+    DBG="$1"; UUID="$2"; DIR="$3"; FLAG="$4"; KEY="$5"; FILE="$6"
+    [ -f "$DIR/$FILE" ] && PRESENT=1 || PRESENT=0
+    if [ -n "$FLAG" ] && [ "$FLAG" != "$PRESENT" ]; then
+      echo "P$PRESENT F$FLAG: skip $FILE"
+    else
+      ${DBG:+true} echo "P$PRESENT${FLAG:+ F$FLAG}: flag $FILE"
+      ${DBG:+echo "[DBG]"} git annex setpresentkey "$KEY" "$UUID" $PRESENT
     fi
-    ${DBG:+true} echo "$PRESENT: $FILE"
-    ${DBG:+echo "[DBG]"} git annex setpresentkey "$KEY" "$UUID" $PRESENT
   ' _ "$DBG" "$UUID" "$DIR" "$PRESENT"
 }
 
