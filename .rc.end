@@ -120,13 +120,37 @@ if command -v anacron >/dev/null 2>&1; then
   fi
 fi
 
-# Gnome keyring/GPG/SSH agents
-#command -v start_agent >/dev/null 2>&1 && start_agent && ssh_agent_no_forward
-
 # Protect private directories
 [ -e "$HOME/private" ] && chmod 700 "$HOME/private"
 [ -e "$HOME/.private" ] && chmod 500 "$HOME/.private"
 [ -e "$HOME/.ecryptfs" ] && chmod 500 "$HOME/.ecryptfs"
+
+################################
+# Gnome keyring/GPG/SSH agents
+#command -v start_agent >/dev/null 2>&1 && start_agent && ssh_agent_no_forward
+
+# Add SSH keys wrapper
+ssh_add() { ssh_add_wrapper "$@"; }
+ssh_add_wrapper() {
+  if [ -e "$HOME/private" ] && ! mountpoint "$HOME/private" > /dev/null; then
+      echo "Mount private folder..."
+      if ! mount_private_folder || ! mountpoint "$HOME/private" > /dev/null; then
+          echo "Error: cannot umount private folder..." 1>&2
+          return 1
+      fi
+  fi
+  ssh_agent
+  KEYS="$(ssh-add -l -E sha256)"
+  for KEY in "$@"; do
+    if [ -r "$KEY" ]; then
+      FINGERPRINT="$(ssh-keygen -l -E SHA256 -f "$KEY" 2>/dev/null | cut -d' ' -f 1-2)"
+      if ! echo "$KEYS" | grep "${FINGERPRINT}\|${KEY}" >/dev/null; then
+        chmod 400 "$KEY"
+        ssh-add "$KEY"
+      fi
+    fi
+  done
+}
 
 ################################
 # Alias ls - take care with --color=auto because this may hang with nfs/sshfs directories
