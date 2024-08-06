@@ -141,9 +141,9 @@ ssh_add_wrapper() {
   fi
   ssh_agent
   KEYS="$(ssh-add -l -E sha256)"
-  for KEY in "$@"; do
+  for KEY; do
     if [ -r "$KEY" ]; then
-      FINGERPRINT="$(ssh-keygen -l -E SHA256 -f "$KEY" 2>/dev/null | cut -d' ' -f 1-2)"
+      FINGERPRINT="$(ssh-keygen -l -E SHA256 -f "$(readlink -f "$KEY")" 2>/dev/null | cut -d' ' -f 1-2)"
       if ! echo "$KEYS" | grep "${FINGERPRINT}\|${KEY}" >/dev/null; then
         chmod 400 "$KEY"
         ssh-add "$KEY"
