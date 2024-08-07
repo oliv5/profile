@@ -268,13 +268,16 @@ annex_uuid() {
 ####
 # List remotes by name or uuid
 annex_uuids() {
-  local PATTERN=""
-  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
-  { git show git-annex:uuid.log 2>/dev/null; cat .git/annex/journal/uuid.log 2>/dev/null; } |
-    awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $1}' |
-    sort -u
+  local PATTERN
+  {
+    PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
+    { git show git-annex:uuid.log 2>/dev/null; cat .git/annex/journal/uuid.log 2>/dev/null; } |
+      awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $1}'
+    PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN }$REMOTE"; done
+    git annex info --fast --json $PATTERN 2>/dev/null | jq -Sr '.uuid | select(. != null)' 2>/dev/null
+  } | sort -u
   # Warning: `git annex info` does not print dead remotes
-  #~ for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}\[?$REMOTE\]?"; done
+  #~ PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}\[?$REMOTE\]?"; done
   #~ git annex info "$@" --fast --json | jq -r --arg PATTERN "$PATTERN" '
     #~ (."semitrusted repositories"[] , ."untrusted repositories"[] , ."trusted repositories"[])? // . |
     #~ select(.uuid | test($PATTERN)) // select(.description | test($PATTERN)) |
@@ -283,13 +286,17 @@ annex_uuids() {
   #~ '
 }
 annex_remotes() {
-  local PATTERN=""
-  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
-  { git show git-annex:uuid.log 2>/dev/null; cat .git/annex/journal/uuid.log 2>/dev/null; } |
-    awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $2}' |
-    sort -u
+  local PATTERN
+  { 
+    PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
+    { git show git-annex:uuid.log 2>/dev/null; cat .git/annex/journal/uuid.log 2>/dev/null; } |
+    awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $2}'
+    # Warning: `git annex info` does not print dead remotes
+    PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN }$REMOTE"; done
+    git annex info --fast --json $PATTERN 2>/dev/null | jq -Sr '.description | select(. != null) | gsub("\\[|\\]";"")' 2>/dev/null
+  } | sort -u
   # Warning: `git annex info` does not print dead remotes
-  #~ for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}\[?$REMOTE\]?"; done
+  #~ PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}\[?$REMOTE\]?"; done
   #~ git annex info --fast --json | jq -r --arg PATTERN "$PATTERN" '
     #~ (."semitrusted repositories"[] , ."untrusted repositories"[] , ."trusted repositories"[])? // . |
     #~ select(.uuid | test($PATTERN)) // select(.description | test($PATTERN)) |
