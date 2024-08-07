@@ -273,7 +273,7 @@ annex_uuids() {
     PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
     { git show git-annex:uuid.log 2>/dev/null; cat .git/annex/journal/uuid.log 2>/dev/null; } |
       awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $1}'
-    PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN }$REMOTE"; done
+    PATTERN=""; for REMOTE in "$@"; do PATTERN="${PATTERN:+$PATTERN }$REMOTE"; done
     git annex info --fast --json $PATTERN 2>/dev/null | jq -Sr '.uuid | select(. != null)' 2>/dev/null
   } | sort -u
   # Warning: `git annex info` does not print dead remotes
@@ -292,7 +292,7 @@ annex_remotes() {
     { git show git-annex:uuid.log 2>/dev/null; cat .git/annex/journal/uuid.log 2>/dev/null; } |
     awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $2}'
     # Warning: `git annex info` does not print dead remotes
-    PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN }$REMOTE"; done
+    PATTERN=""; for REMOTE in "$@"; do PATTERN="${PATTERN:+$PATTERN }$REMOTE"; done
     git annex info --fast --json $PATTERN 2>/dev/null | jq -Sr '.description | select(. != null) | gsub("\\[|\\]";"")' 2>/dev/null
   } | sort -u
   # Warning: `git annex info` does not print dead remotes
@@ -777,9 +777,13 @@ _annex_export() {
         $DBG git annex copy $SELECTED ${FROM:+--from }${FROM:---from-anywhere} --to "$REPO" "$@"
       else
         local ONLINE="${ONLINE:-$(annex_online)}"
-        while [ -z "$FROM" ] || [ "$FROM" = "$REPO" ]; do
-          FROM="$(echo "$ONLINE" | sed '/^'"$FROM"'$/d' | head -n 1)"
-        done
+        if [ -z "$FROM" ] || [ "$FROM" = "$REPO" ]; then
+          FROM="$(echo "$ONLINE" | sed '/^'"$FROM"'$/d ; /^'"$REPO"'$/d' | head -n 1)"
+        fi
+        if [ -z "$FROM" ] || [ "$FROM" = "$REPO" ]; then
+          echo "Found no online remote to get files from ! Skip repo $REPO...."
+          continue
+        fi
         echo "Copy files from $FROM to $REPO..."
         $DBG git annex copy $SELECTED --from "$FROM" --to "$REPO" "$@"
       fi
