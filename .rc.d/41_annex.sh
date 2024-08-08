@@ -293,7 +293,7 @@ annex_remotes() {
     awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $2}'
     # Warning: `git annex info` does not print dead remotes
     PATTERN=""; for REMOTE in "$@"; do PATTERN="${PATTERN:+$PATTERN }$REMOTE"; done
-    git annex info --fast --json $PATTERN 2>/dev/null | jq -Sr '.description | select(. != null) | gsub("\\[|\\]";"")' 2>/dev/null
+    git annex info --fast --json $PATTERN 2>/dev/null | jq -Sr '.remote | select(. != null)' 2>/dev/null
   } | sort -u
   # Warning: `git annex info` does not print dead remotes
   #~ PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}\[?$REMOTE\]?"; done
