@@ -21,7 +21,7 @@ alias dmesgg='dmesg | grep -i'
 # Get/set cpu governor
 cpu_governor() {
   local DEV="/sys/devices/system/cpu/cpu${2:-*}/cpufreq/scaling_governor"
-  if [ -n "$1" ]; then sudo sh -c ":; for CPU; do echo '$1' > \$CPU; done" _ $DEV; else cat $DEV; fi
+  if [ -n "$1" ]; then sudo sh -c ":; for D; do echo '$1' > \$D; done" _ $DEV; else cat $DEV; fi
 }
 alias cpu_governors='cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_available_governors'
 alias cpu_powersave='cpu_governor powersave'
@@ -31,18 +31,19 @@ alias cpu_conservative='cpu_governor conservative'
 alias cpu_schedutil='cpu_governor schedutil'
 alias cpu_userspace='cpu_governor userspace'
 
-# CPU frequencies
-cpu_curfreq() {
+# CPU frequencies. Need package cpufrequtils. Alias for cpufreq-set
+# To force frequencies, one must use an approriate scheduler: not powersave
+cpu_freq() {
   local DEV="/sys/devices/system/cpu/cpu${2:-*}/cpufreq/scaling_cur_freq"
-  if [ -n "$1" ]; then sudo sh -c "echo '$1' > '$DEV'"; else cat "$DEV"; fi
+  if [ -n "$1" ]; then sudo sh -c ":; for D; do echo '$1' > \$D; done" _ $DEV; else cat $DEV; fi
 }
-cpu_minfreq() {
+cpu_freq_min() {
   local DEV="/sys/devices/system/cpu/cpu${2:-*}/cpufreq/scaling_min_freq"
-  if [ -n "$1" ]; then sudo sh -c "echo '$1' > '$DEV'"; else cat "$DEV"; fi
+  if [ -n "$1" ]; then sudo sh -c ":; for D; do echo '$1' > \$D; done" _ $DEV; else cat $DEV; fi
 }
-cpu_maxfreq() {
+cpu_freq_max() {
   local DEV="/sys/devices/system/cpu/cpu${2:-*}/cpufreq/scaling_max_freq"
-  if [ -n "$1" ]; then sudo sh -c "echo '$1' > '$DEV'"; else cat "$DEV"; fi
+  if [ -n "$1" ]; then sudo sh -c ":; for D; do echo '$1' > \$D; done" _ $DEV; else cat $DEV; fi
 }
 
 ################################
