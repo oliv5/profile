@@ -416,6 +416,12 @@ if [ -f "$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.i
   alias gsconnect='"$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js"'
 fi
 
+# Clamscan
+if command -v clamscan >/dev/null; then
+  alias clamscan='clamscan -r --infected --detect-pua=yes --detect-structured=yes --official-db-only=yes --bytecode=yes --heuristic-alerts=yes --max-files=0 --max-filesize=0 --max-scansize=0 --max-scantime=0'
+  alias freshclam='sudo freshclam --show-progress'
+fi
+
 # Misc
 alias mo='mimeopen'
 alias xo='xdg-open'
