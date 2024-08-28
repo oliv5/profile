@@ -61,7 +61,6 @@
     "debug.terminal.clearBeforeReusing": true,
     "debug.console.closeOnEnd": false,
     "debug.onTaskErrors": "showErrors",
-    "debug.autoExpandLazyVariables": "on",
 
     // Terminal
     "terminal.integrated.profiles.linux": {
