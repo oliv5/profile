@@ -130,7 +130,8 @@ fi
 #command -v start_agent >/dev/null 2>&1 && start_agent && ssh_agent_no_forward
 
 # Add SSH keys wrapper
-ssh_add() { ssh_add_wrapper "$@"; }
+command -v ssh_add >/dev/null 2>&1 ||
+  ssh_add() { ssh_add_wrapper "$@"; }
 ssh_add_wrapper() {
   if [ -e "$HOME/private" ] && ! mountpoint "$HOME/private" > /dev/null; then
       echo "Mount private folder..."
