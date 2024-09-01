@@ -721,7 +721,7 @@ annex_enum_special_remotes() {
 # $FSCK is set to trigger a `fsck`
 # Note: it is superseeded by `git annex copy --from= --to=` in git-annex version 10+
 #  for a single remote except about the maximum local size management
-alias annex_export='SELECT=missing _annex_export'
+alias annex_export='SELECT=want-get _annex_export'
 _annex_export() {
   annex_exists || return 1
   git_bare && echo "BARE REPOS NOT SUPPORTED YET" && return 1
