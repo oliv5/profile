@@ -289,6 +289,18 @@ mem_top() {
 ' | LC_ALL=C sort -rbhk3 | less
 }
 
+# Thread top
+thread_top() {
+  local PID="$(pidof -sx "$1" || echo "$1")"
+  top -H ${PID:+-p "$PID"}
+}
+thread_top_loop() {
+  while true; do
+    thread_top "$1"
+    sleep 1
+  done
+}
+
 ################################
 # Kill top cpu/mem hungry processes
 kill_top_cpu() {
