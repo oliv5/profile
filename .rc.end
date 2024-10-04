@@ -393,8 +393,14 @@ if command -v batcat >/dev/null; then
 fi
 
 # syslog
-alias syslog='sudo tail /var/log/syslog'
 alias auth='sudo tail /var/log/auth.log'
+syslog() {
+  if command -v journalctl >/dev/null; then
+    journalctl -m ${@:--n 35}
+  else
+    sudo tail /var/log/syslog "$@"
+  fi
+}
 log() {
   local LOG="${1:?No log specified...}"
   shift
@@ -402,15 +408,16 @@ log() {
 }
 
 # system upgrade
-if [ "$(uname -m)" = "x86_64" ]; then
-  alias sysup=' \
-    sudo rm /etc/apt/apt.conf.d/20apt-esm-hook.conf; \
-    sudo systemctl disable ubuntu-advantage; \
-    sudo apt-get update && sudo apt full-upgrade && sudo apt autoremove; \
+alias sysup=' \
+  command -v apt-get >/dev/null && \
+    sudo apt-get update && \
+    sudo apt-get full-upgrade && \
+    sudo apt-get autoremove; \
+  command -v snap >/dev/null && \
     sudo snap refresh; \
-    flatpak upgrade \
-  '
-fi
+  command -v flatpak >/dev/null && \
+    flatpak upgrade; \
+'
 
 # KDEconnect/GSconnect
 if [ -f "$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js" ]; then
