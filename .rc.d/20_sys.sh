@@ -19,11 +19,6 @@ is_littleendian() {
 }
 
 ################################
-# Event tester
-alias event_list='xev'
-alias event_showkey='showkey -s'
-
-################################
 # Keyboad layout
 alias keyb_list='grep ^[^#] /etc/locale.gen'
 alias keyb_set='setxkbmap -layout'
@@ -61,25 +56,6 @@ EOF
   echo "Need a reboot... apply a temporary not persistent fix"
   sudo dumpkeys | grep -Pv '^\s+alt(gr)?\s+keycode\s+\d+\s+=\s+(Console_|Incr_Console|Decr_Console)' | sudo loadkeys
   echo "done!"
-}
-
-################################
-# Get XWindow ID
-xwmid() {
-  xwininfo | awk '/xwininfo: Window id:/ {print $4}'
-}
-# Get XWindow PID
-xwmpid() {
-  xprop -id "${1:-$(xwmid)}" | awk '/WM_PID/ {print $3}'
-}
-# My xkill
-command -v xkill >/dev/null ||
-xkill() {
-  xwmid | xargs -r xdotool windowkill
-}
-# Close Xwindow
-xclose() {
-  xwmid | xargs -r xdotool windowclose
 }
 
 ################################
