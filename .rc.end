@@ -430,6 +430,12 @@ if command -v clamscan >/dev/null; then
   alias freshclam='sudo freshclam --show-progress'
 fi
 
+# Miniconda env
+if [ -d "$HOME/miniconda3/bin" ]; then
+  export PATH="$HOME/miniconda3/bin:$PATH"
+  alias conda_bash='eval "$("/home/ola/miniconda3/bin/conda" "shell.bash" "hook" 2> /dev/null)"'
+fi
+
 # Misc
 alias mo='mimeopen'
 alias xo='xdg-open'
