@@ -238,7 +238,7 @@ GET()
 		(exec 0>&-; rsync -I -W "$(rsynclocation "$1")"/"$2" "$3" >&2)
 	elif isurl rclone "$1"
 	then
-		(exec 0>&-; rclone copyto "${1#rclone://}"/"$2" "$3" >&2)
+		(exec 0>&-; rclone copyto --error-on-no-transfer "${1#rclone://}"/"$2" "$3" >&2)
 	elif islocalrepo "$1"
 	then
 		cat "$1/$2" > "$3"
@@ -258,7 +258,7 @@ PUT()
 		rsync $Conf_rsync_put_flags -I -W "$3" "$(rsynclocation "$1")"/"$2" >&2
 	elif isurl rclone "$1"
 	then
-		rclone copyto "$3" "${1#rclone://}"/"$2" >&2
+		rclone copyto --error-on-no-transfer "$3" "${1#rclone://}"/"$2" >&2
 	elif islocalrepo "$1"
 	then
 		cat >| "$1/$2" < "$3"
@@ -580,7 +580,6 @@ ensure_connected()
 		echo_info "WARNING: to   $r_repoid"
 		echo_info "WARNING:"
 		Repoid=$r_repoid
-		[ -z "GCRYPT_ALLOW_REPOID_CHANGE" ] && echo_die "Repo ID is not allowed to change!"
 	else
 		return 0
 	fi
@@ -744,12 +743,8 @@ do_push()
 
 	ensure_connected
 
-	if [ -n "$GCRYPT_FORCE_REMOTE_ID" ]
-       	then
-		Repoid="$GCRYPT_FORCE_REMOTE_ID"
-	elif iseq "$Did_find_repo" "no"
+	if iseq "$Did_find_repo" "no"
 	then
-		[ -z "$GCRYPT_ALLOW_NEW_REPO" ] && echo_die "Creation of new repo is not allowed... Define GCRYPT_ALLOW_NEW_REPO."
 		make_new_repo
 	fi
 
