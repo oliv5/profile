@@ -231,6 +231,10 @@ runas() {
 	shift 2>/dev/null
 	sudo -u "$ME" -i -- script -qc "$@"
 }
+sudo_delayed() {
+  local DELAY="${1:?No delay specified...}"; shift
+  sudo sh -c "sleep $DELAY ; eval \$@" _ "$@"
+}
 
 # Search and process
 unalias ffv ffv1 ffp ffp1 ffe ffe1 ffo ffo1 ffc ffc1 ffwc 2>/dev/null || true
