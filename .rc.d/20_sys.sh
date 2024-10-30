@@ -341,3 +341,14 @@ sudoers_nopasswd() {
     local NAME="${3:-noname_$(date +%s)}"
     echo "$USER ALL = NOPASSWD: $CMD" | sudo EDITOR="tee" visudo "/etc/sudoers.d/$NAME"
 }
+
+################################
+# Recursive rmmod
+rmmod_r() {
+  local MOD
+  for MOD; do
+    eval rmmod_r $(lsmod | awk -v mod="$MOD" '$1 == mod {print $4}' | tr ',' ' ')
+    echo "Unload $MOD ..."
+    sudo rmmod "$MOD"
+  done
+}
