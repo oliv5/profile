@@ -412,7 +412,7 @@ log() {
 }
 
 # system upgrade
-alias sysup=' \
+alias sysup='screen -c /dev/null -m sh -c " \
   command -v apt-get >/dev/null && \
     sudo apt-get update && \
     sudo apt-get full-upgrade && \
@@ -421,7 +421,8 @@ alias sysup=' \
     sudo snap refresh; \
   command -v flatpak >/dev/null && \
     flatpak upgrade; \
-'
+  screen -X quit; \
+"'
 
 # KDEconnect/GSconnect
 if [ -f "$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js" ]; then
