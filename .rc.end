@@ -236,6 +236,10 @@ sudo_delayed() {
   sudo sh -c "sleep $DELAY ; eval \$@" _ "$@"
 }
 
+# Pkexec
+alias pkexec='pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
+# When pkexec fails because of dbus not available, do: `pkttyagent --process $$ &`
+
 # Search and process
 unalias ffv ffv1 ffp ffp1 ffe ffe1 ffo ffo1 ffc ffc1 ffwc 2>/dev/null || true
 ffv()  { ff "${@:-""}" -print0       | xargs -0 gvim; }
