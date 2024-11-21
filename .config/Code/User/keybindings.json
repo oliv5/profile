@@ -7,6 +7,9 @@
 // { "key":  "alt+q",                "command": "workbench.action.terminal.sendSequence", "args": {
     // "text" : "echo file = '${file}' : workspaceFolder = '${workspaceFolder}' : user = '${env:USERNAME}'\u000D" } },
 
+// Note about When clause: focusedView == 'workbench.debug.watchExpressionsView' equivalent to watchExpressionsFocused
+
+//////////////////////////////////////////////////
 // Disable defaults
 { "key": "ctrl+q",                "command": "" },
 { "key": "ctrl+w",                "command": "" },
@@ -236,8 +239,8 @@
 { "key": "ctrl+shift+f9",         "command": "workbench.debug.viewlet.action.toggleBreakpointsActivatedAction", "when": "debuggersAvailable" },
 { "key": "ctrl+alt+shift+f9",     "command": "workbench.debug.viewlet.action.removeAllBreakpoints", "when": "debuggersAvailable" },
 { "key": "ctrl+f2",               "command": "editor.debug.action.selectionToWatch", "when": "debuggersAvailable && editorTextFocus" },
-{ "key": "ctrl+f2",               "command": "workbench.debug.viewlet.action.addWatchExpression", "when": "debuggersAvailable && focusedView == 'workbench.debug.watchExpressionsView'" },
-{ "key": "shift+f2",              "command": "workbench.debug.viewlet.action.copyValue", "when": "debuggersAvailable && focusedView == 'workbench.debug.watchExpressionsView'" },
+{ "key": "ctrl+f2",               "command": "workbench.debug.viewlet.action.addWatchExpression", "when": "debuggersAvailable && watchExpressionsFocused" },
+{ "key": "shift+f2",              "command": "workbench.debug.viewlet.action.copyValue", "when": "debuggersAvailable && watchExpressionsFocused" }, // Does not seem to work !
 
 // Tasks
 //{ "key": "f6",                    "command": "extension.multiCommand.execute", "when": "!inDebugMode", "args":
