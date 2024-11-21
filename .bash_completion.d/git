@@ -1,3 +1,5 @@
+# See https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
+
 # Manual way 1
 #_gco() {
 #    COMPREPLY=( $(compgen -W "$(git for-each-ref --format='%(refname:short)' refs/heads refs/remotes 2>/dev/null)" -- ${cur}) )
@@ -42,3 +44,6 @@ elif command -v _gitk >/dev/null; then
         bash_completion "$C" _gitk
     done
 fi
+
+# Complete gk like gitk
+__git_complete gk gitk
