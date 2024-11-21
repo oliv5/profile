@@ -157,3 +157,76 @@ toms(){
   done
 }
 
+################################
+# Basic stats
+stats() {
+  echo "$@" | tr ' ' '\n' | sort -n |
+  awk -F'=|/' '
+BEGIN {
+  c = 0
+  sum = 0
+}
+$1 ~ /^(\-)?[0-9]*(\.[0-9]*)?$/ {
+  a[c++] = $1
+  sum += $1
+}
+END {
+  ave = sum / c;
+  if( (c % 2) == 1 ) {
+    median = a[ int(c/2) ]
+  } else {
+    median = ( a[c/2] + a[c/2-1] ) / 2
+  }
+  var = 0
+	for (i = 0; i < c; i++) {
+		d = (a[i] - ave)
+		var += (d * d)
+	}
+	var /= c
+	std = sqrt(var)
+  OFS="\t"
+  print sum, c, ave, median, a[0], a[c-1], var, std, ave-std, ave+std
+}
+'
+}
+
+sum_serie() {
+  stats "$@" | cut -f 1
+}
+
+num_serie() {
+  stats "$@" | cut -f 2
+}
+
+alias avg_serie='mean_serie'
+mean_serie() {
+  stats "$@" | cut -f 3
+}
+
+median_serie() {
+  stats "$@" | cut -f 4
+}
+
+min_serie() {
+  stats "$@" | cut -f 5
+}
+
+max_serie() {
+  stats "$@" | cut -f 6
+}
+
+var_serie() {
+  stats "$@" | cut -f 7
+}
+
+std_serie() {
+  stats "$@" | cut -f 8
+}
+
+avg_minus_std_serie() {
+  stats "$@" | cut -f 9
+}
+
+avg_plus_std_serie() {
+  stats "$@" | cut -f 10
+}
