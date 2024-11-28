@@ -902,6 +902,19 @@ git_diffm_all() {
   git difftool --cached -y "$@"
 }
 
+# Diff all modified files with a folder
+git_diff_folder() {
+    local FOLDER="${1:?No folder to compare to...}"
+    shift
+    git_stx "^[^\?\?]" | xargs -r0 -I{} diff {} "$FOLDER/{}"
+}
+# Diff all modified files with a folder
+git_diffm_folder() {
+    local FOLDER="${1:?No folder to compare to...}"
+    shift
+    git_stx "^[^\?\?]" | xargs -r0 -I{} meld {} "$FOLDER/{}"
+}
+
 ########################################
 
 # Backup stashes in .git/backup
