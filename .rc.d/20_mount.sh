@@ -239,8 +239,9 @@ umount_private_encfs() {
 }
 
 #####################################
-# Mount dmcrypt
+# Mount dmcrypt using cryptsetup
 # https://gist.github.com/d4v3y0rk/e19d346ec9836b4811d4fecc1e1d5d64
+if command -v cryptsetup >/dev/null 2>&1; then
 setup_dmcrypt() {
   local IMG="${1:?Missing image source file...}"
   local DST="${2:?Missing dest directory...}"
@@ -308,6 +309,87 @@ umount_private_dmcrypt() {
   local DST="${2:-$HOME/private}"
   umount_dmcrypt "$IMG" "$DST"
 }
+fi
+
+#####################################
+# Mount dmcrypt using cryptmount
+# https://github.com/rwpenney/cryptmount
+# https://www.enterprisenetworkingplanet.com/security/create-encrypted-volumes-with-cryptmount-and-linux/
+# Basic setup: sudo cryptmount-setup
+# Basic mount: cryptmount <name>
+# Basic umount: cryptmount -u <name>
+# Basic list: cryptmount -l
+if command -v cryptmount >/dev/null 2>&1; then
+setup_dmcrypt_cm() {
+  local IMG="${1:?Missing image source file...}"
+  local DST="${2:?Missing dest directory...}"
+  local SIZE="${3:?Missing image file size (ex: 1024M)...}"
+  local FTYPE="${4:-ext4}"
+  local ALGO="${5:-twofish}" #aes
+  local USER="${6:-$(id -un)}"
+  local NAME="$(basename "$IMG" .img)"
+  local MAP="/dev/disk/by-id/dm-name-$NAME"
+  local KEY="${IMG}.key"
+  if [ -e "$IMG" ]; then
+    echo "Error: image file $IMG exists already..."
+    return 1
+  fi
+  if [ -e "$KEY" ]; then
+    echo "Error: keyfile $KEY exists already..."
+    return 1
+  fi
+  if [ -e "$MAP" ]; then
+    echo "Error: map device $MAP exists already..."
+    return 1
+  fi
+  if cryptmount -l | grep "$NAME" >/dev/null; then
+    echo "Error: image $NAME exists already..."
+    return 1
+  fi
+  ( set -e
+  mkdir -p "$(dirname "$IMG")"
+  dd if=/dev/zero of="$IMG" bs="${SIZE}M" count=1
+  mkdir -p "$DST"
+  echo | sudo tee -a /etc/cryptmount/cmtab <<-EOF
+$NAME {
+    dev=$IMG
+    dir=$DST
+    fstype=$FTYPE
+    mountoptions=defaults
+    cipher=$ALGO
+    keyformat=builtin
+    keyfile=$KEY
+}
+EOF
+  sudo cryptmount --generate-key 32 "$NAME"
+  sudo cryptmount --prepare "$NAME"
+  sleep 1
+  sudo "mkfs.$FTYPE" "$MAP"
+  sudo cryptmount --release "$NAME"  
+  sudo chown "$USER:$USER" "$DST"
+  sudo chmod 0700 "$DST"
+  )
+}
+mount_dmcrypt_cm() {
+  local IMG="${1:?Missing image source file...}"
+  local NAME="$(basename "$IMG" .img)"
+  cryptmount "$NAME"
+}
+umount_dmcrypt_cm() {
+  local IMG="${1:?Missing image source file...}"
+  local NAME="$(basename "$IMG" .img)"
+  cryptmount -u "$NAME"
+}
+setup_private_dmcrypt_cm() {
+  local IMG="${1:-$HOME/.private/private.img}"
+  local DST="${2:-$HOME/private}"
+  local SIZE="${3:-4096M}"
+  local FTYPE="${4:-ext4}"
+  setup_dmcrypt_cm "$IMG" "$DST" "$SIZE" "$FTYPE"
+}
+mount_private_dmcrypt_cm() { mount_dmcrypt_cm "$@"; }
+umount_private_dmcrypt_cm() { umount_dmcrypt_cm "$@"; }
+fi
 
 #####################################
 # Mount iso
