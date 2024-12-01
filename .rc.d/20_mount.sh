@@ -325,7 +325,7 @@ setup_dmcrypt_cm() {
   local DST="${2:?Missing dest directory...}"
   local SIZE="${3:?Missing image file size (ex: 1024M)...}"
   local FTYPE="${4:-ext4}"
-  local ALGO="${5:-twofish}" #aes
+  local ALGO="${5:-aes-cbc-essiv}" #aes twofish
   local USER="${6:-$(id -un)}"
   local NAME="$(basename "$IMG" .img)"
   local MAP="/dev/disk/by-id/dm-name-$NAME"
