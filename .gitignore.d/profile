@@ -1,10 +1,12 @@
 *
+!/.gitignore.d
 !/.bash_completion
 !/.bash_completion.d/git
 !/.bash_login
 !/.bash_logout
 !/.bash_profile
 !/.bashrc
+!/bin/profile
 !/bin/profile/bashtop
 !/bin/profile/check-bashisms.sh
 !/bin/profile/check-ssh-agent.sh
@@ -257,6 +259,7 @@
 !/.config/uncrustify/Uncrustify-0.69.0_f.cfg
 !/.config/uncrustify/Uncrustify-0.70.1.cfg
 !/.config/vim/install.sh
+!/.config/vim/vim-legacy
 !/.config/vim/vim-legacy/samples/ftdetect/zsplog.vim
 !/.config/vim/vim-legacy/samples/syntax/zsplog.vim
 !/.config/vim/vim-legacy/.vim/after/plugin/after.vim
@@ -1469,6 +1472,7 @@
 !/.config/vim/vim-legacy/.vimrc.bundles
 !/.config/vim/vim-legacy/.vim/update.sh
 !/.config/vim/vim-legacy/xdg.vim
+!/.config/vim/vim-spf13
 !/.config/vim/vim-spf13/setup.sh
 !/.config/vim/vim-spf13/uninstall.sh
 !/.config/vim/vim-spf13/update.sh
@@ -1486,6 +1490,7 @@
 !/.pylintrc
 !/.rc
 !/.rc.autoload
+!/.rc.d
 !/.rc.d/00_shell.sh
 !/.rc.d/01_ansi.sh
 !/.rc.d/01_fct.sh
@@ -1566,8 +1571,10 @@
 !/.rc.d/80_xdg.sh
 !/.rc.d/98_screen.sh
 !/.rc.d/98_tmux.sh
+!/.rc.d/android
 !/.rc.d/android/10_search.sh
 !/.rc.d/android/50_termux.sh
+!/.rc.d/bash
 !/.rc.d/bash/00_shell.sh
 !/.rc.d/bash/01_fct.sh
 !/.rc.d/bash/01_realpath.md
@@ -1579,9 +1586,11 @@
 !/.rc.d/bash/disabled/10_basic_search.sh
 !/.rc.d/bash/disabled/10_search.sh
 !/.rc.d/bash/disabled/30_dev.sh
+!/.rc.d/doc
 !/.rc.d/doc/environment.txt
 !/.rc.d/.rc.list.sample.linux
 !/.rc.d/.rc.list.sample.termux
+!/.rc.d/test
 !/.rc.d/test/00_shell.sh
 !/.rc.d/test/annex_populate.sh
 !/.rc.d/test/io_test.sh
