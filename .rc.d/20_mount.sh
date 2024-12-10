@@ -380,6 +380,14 @@ umount_dmcrypt_cm() {
   local NAME="$(basename "$IMG" .img)"
   cryptmount -u "$NAME"
 }
+ls_dmcrypt_cm() {
+  cryptmount -l
+}
+rm_dmcrypt_cm() {
+  local IMG="${1:?Missing image source file...}"
+  cryptmount -l "$IMG" || return $?
+  sudo sed -i -r "/$IMG \{/,/\}/d" /etc/cryptmount/cmtab
+}
 setup_private_dmcrypt_cm() {
   local IMG="${1:-$HOME/.private/private.img}"
   local DST="${2:-$HOME/private}"
@@ -387,8 +395,17 @@ setup_private_dmcrypt_cm() {
   local FTYPE="${4:-ext4}"
   setup_dmcrypt_cm "$IMG" "$DST" "$SIZE" "$FTYPE"
 }
-mount_private_dmcrypt_cm() { mount_dmcrypt_cm "$@"; }
-umount_private_dmcrypt_cm() { umount_dmcrypt_cm "$@"; }
+mount_private_dmcrypt_cm() {
+  local IMG="${1:-$HOME/.private/private.img}"
+  local DST="${2:-$HOME/private}"
+  local SIZE="${3:-4096M}"
+  local FTYPE="${4:-ext4}"
+  mount_dmcrypt_cm "$IMG" "$DST" "$SIZE" "$FTYPE"
+}
+umount_private_dmcrypt_cm() {
+  local IMG="${1:-$HOME/.private/private.img}"
+  umount_dmcrypt_cm "$IMG"
+}
 fi
 
 #####################################
