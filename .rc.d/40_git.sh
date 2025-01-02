@@ -706,8 +706,25 @@ git_bundle() {
     echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
     return 2
   fi
-  echo "Bundle into $OUT"
+  # Save git LFS files, see https://gist.github.com/dvdveer/a47966db83af115e6200124f92e22761
+  # To unbundle, untar *before* running 'git pull' on the bundle file
+  # Target folder: `.git/lfs/objects` for plain repo, `lfs/objects` for bare repo
+  # Command: tar -xvf ../xxxxx.bundle.git.lfs.txz
+  if command -v git-lfs >/dev/null && test -n "$(git lfs ls-files -a -n | head -n 1)"; then
+    local LFSOUT="${OUT}.lfs.txz"
+    echo "Saving git LFS files into ${LFSOUT}"
+    git lfs fetch --all
+    if [ -d .git/lfs/objects ]; then
+      XZ_OPT=-9 tar -cvJf "${LFSOUT}" .git/lfs/objects
+    elif [ -d lfs/objects ]; then
+      XZ_OPT=-9 tar --transform='flags=r;s|^|.git/|' -cvJf "${LFSOUT}" lfs/objects
+    else
+      echo "Cannot find LFS objects. Abort..."
+      return 3
+    fi
+  fi
   # Bundle option --all should be equivalent to --branches --tags --remotes
+  echo "Bundle into $OUT"
   if [ $(git_version) -le $(git_version 2.20.1) ]; then
     git bundle create "$OUT" ${@:---all}
   else
@@ -1521,6 +1538,47 @@ git_tag_date() {
 	done
 }
 
+# Check if tag is lightweight or annotated
+git_tag_annotated() {
+  for TAG in "${@:-}"; do
+    TAG="refs/tags/${TAG##refs/tags/}"
+    local TYPE="$(git for-each-ref "${TAG}" --format='%(objecttype)')"
+    test "$TYPE" = "tag" || return 1
+  done
+  return 0
+}
+
+# Rename a tag (local & remote)
+git_tag_rename() {
+  local OLD="${1:?No old tag specified...}"
+  local NEW="${2:?No new tag specified...}"
+  local REMOTE="$3"
+  git_tag_exists "$OLD" || return 1
+  git_tag_exists "$NEW" && return 2
+  if git_tag_annotated "$OLD"; then
+    local MSG="$(git for-each-ref "refs/tags/${OLD##refs/tags/}" --format='%(contents)')"
+    git tag -a -m "$MSG" "$NEW" "$OLD"^{} || return 3 # ^{} makes sure it references the underlying commit and not the old annotated tag
+  else
+    git tag "$NEW" "$OLD" || return 3
+  fi
+  git tag -d "$OLD"
+  if [ -n "$REMOTE" ]; then
+    git push "$REMOTE" "$NEW" :"$OLD"
+  fi
+}
+
+# Convert a lightweight tag into annotated
+git_tag_annotate() {
+  local TAG="${1:?No tag specified...}"
+  git_tag_exists "$TAG" || return 1
+  local MSG="$2"
+  local REMOTE="$3"
+  git tag -a -f ${MSG:+-m "$MSG"} "$TAG" "$TAG"
+  if [ -n "$REMOTE" ]; then
+    git push "$REMOTE" "$TAG" --force
+  fi
+}
+
 ########################################
 # Easy amend of previous commit
 git_squash() {
@@ -1711,6 +1769,7 @@ alias gdd='git diff'
 alias gdm='git difftool -y'
 alias gdt='git diff $(git_tracking)'
 alias gdtc='git diff --cached $(git_tracking)'
+alias gddt='git diff $(git_tracking)'
 alias gdmt='git difftool -y $(git_tracking)'
 alias gdtl='git diff $(git_tag_last 1)'
 alias gdtlm='git difftool -y $(git_tag_last 1)'
@@ -1721,6 +1780,7 @@ alias gdc='git diff --cached'
 alias gddc='git diff --cached'
 alias gdmc='git difftool -y --cached'
 alias gdl='git diff --name-only'
+alias gdlt='git diff --name-only $(git_tracking)'
 alias gdlc='git diff --name-only --cached'
 alias gdll='git diff --name-status'
 alias gdllc='git diff --name-status --cached'
@@ -1907,6 +1967,8 @@ alias gpunc='git push -o ci.skip -o integrations.skip_ci'
 alias gup='git_pull'
 alias gupa='git_pull_all_remotes'
 alias gfa='git fetch --all --tags'
+alias gfap='git fetch --all --tags --prune --prune-tags'
+alias gfp='git fetch --tags --prune --prune-tags'
 # Config aliases
 alias gcg='git config --get'
 alias gcs='git config --set'
