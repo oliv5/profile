@@ -83,7 +83,8 @@ mkctags() {
   # Build tag file
   _tags_scandir "$SRC" "$_CTAGS_REGEX" "$EXCLUDE" |
     xargs -r0 ctags $_CTAGS_OPTS $* -f "${DB}"
-  ln -fs "${DB}" "${DST}/tags"
+  #ln -fs "${DB}" "${DST}/tags"
+  (cd "${DST}" && ln -fs "${_CTAGS_OUT}" "./tags")
 }
 
 # Make cscope db
