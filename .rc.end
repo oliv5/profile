@@ -158,7 +158,6 @@ ssh_add_wrapper() {
 #unalias ls
 alias l='ls -CF'
 alias la='ls -A'
-alias ld='ls -d'
 alias ll='ls -laF'
 alias lld='ls -lad'
 alias llh='ls -laFh'
