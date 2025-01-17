@@ -10,6 +10,12 @@ docker_build() {
     docker build -t "$NAME:$TAG" -f "$DOCKERFILE" "$DIR"
 }
 
+# Setup binfmt in docker
+# https://stackoverflow.com/questions/72444103/what-does-running-the-multiarch-qemu-user-static-does-before-building-a-containe
+docker_setup_binfmt() {
+    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes -c yes
+}
+
 # Docker run a fresh container in interactive mode (-i) with a terminal (-t) from a specific image
 docker_run() {
     local IMG="${1:?No image specified...}"
@@ -39,9 +45,11 @@ docker_resume() {
 docker_exec() {
     local CONTAINER="${1:?No container specified...}"
     local PRIVILEGED="${PRIVILEGED:+--privileged}"
-    local USER="${USER:+-u $USER}"
+    local USER="${USER:-root}"; USER="${USER:+-u $USER}"
+    local WORKDIR="${WORKDIR:+--workdir $WORKDIR}"
+    local ENV="${ENV:+--env $ENV}" # Ex: -e VAR=xxx"
     shift
-    docker exec -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $USER "$CONTAINER" "$@"
+    docker exec -it $PRIVILEGED $USER $WORKDIR $ENV "$CONTAINER" "${@:-bash}"
 }
 
 # Detach a single or all running container
@@ -57,43 +65,40 @@ docker_detach() {
     fi
 }
 
-# Setup binfmt in docker
-# https://stackoverflow.com/questions/72444103/what-does-running-the-multiarch-qemu-user-static-does-before-building-a-containe
-docker_setup_binfmt() {
-    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes -c yes
+# Stop specific containers (by id, tag, name or image name) or all containers
+docker_stop() {
+    if [ $# -eq 0 ]; then
+        docker ps -q | xargs -r docker stop
+    else
+        for VAL; do
+            docker ps -q --filter id="$VAL" --filter tag="$VAL" --filter name="$VAL" --filter ancestor="$VAL" | xargs -r docker stop
+        done
+    fi
 }
 
-# Stop all containers
-docker_stopc_all() {
-    docker ps -q | xargs -r docker stop
-}
-
-# Stop container by image name
-docker_stopc_by_img() {
-    for IMG; do
-        docker ps -q --filter ancestor="$IMG" | xargs -r docker stop
-    done
-}
-
-# Delete container by image name
-docker_rmc_by_img() {
-    for IMG; do
-        docker container ls -q --filter ancestor="$IMG" | xargs -r docker container rm -f
+# Delete specific containers (by id, tag, name or image name)
+docker_rmc() {
+    for VAL; do
+        docker container ls -q --filter id="$VAL" --filter tag="$VAL" --filter name="$VAL" --filter ancestor="$VAL" | xargs -r docker container rm -f
     done
 }
 
 # Delete image
 docker_rmi() {
-    docker_stopc_by_img "$@"
+    docker_stop "$@"
     for IMG; do
         docker rmi -f "$IMG"
     done
 }
 
 # Aliases
+alias docker_run_rm='docker_run --rm'
 alias docker_lsi='docker images'
 alias docker_lsc='docker container ls'
 alias docker_lsca='docker container ls -a'
 alias docker_rmc='docker rm -f'
 alias docker_rmi_dangling='docker image prune || { docker images -qa -f "dangling=true" | xargs -r docker rmi -f; }'
 alias docker_rmc_dangling='docker container prune || { docker container ls -a | cut -f1 | tail -n +2 | xargs -r docker rm -f; }'
+alias docker_rm_dangling='docker_rmc_dangling && docker_rmi_dangling'
+# Tool to get container runtime parameters
+alias docker_args="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock:ro assaflavie/runlike"
