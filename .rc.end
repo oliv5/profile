@@ -438,6 +438,11 @@ if command -v clamscan >/dev/null; then
   alias freshclam='sudo freshclam --show-progress'
 fi
 
+# ccache
+if command -v ccache >/dev/null; then
+  path_prepend /usr/lib/ccache
+fi
+
 # Miniconda env
 if [ -d "$HOME/miniconda3/bin" ]; then
   export PATH="$HOME/miniconda3/bin:$PATH"
