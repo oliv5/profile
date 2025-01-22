@@ -13,7 +13,7 @@ umask 022
 # Misc variables
 [ -z "$USER" ] && export USER="$({ id -un 2>/dev/null || id -u; } | awk '{print $1; exit}')"
 [ -z "$HOME" ] && export HOME="$(awk -F: '/'$USER'/ {print $6; exit}' /etc/passwd || echo "/home/$USER")"
-[ -z "$LOGNAME" ] && export LOGNAME="$USER"
+[ -z "$LOGINNAME" ] && export LOGINNAME="$USER"
 [ -z "$HOSTNAME" ] && export HOSTNAME="$({ hostname 2>/dev/null || uname -n; } | head -n 1)"
 [ -z "$DOMAIN" ] && export DOMAIN="$(hostname -d 2>/dev/null | head -n 1)"
 [ -z "$DISPLAY" ] && export DISPLAY=":0"

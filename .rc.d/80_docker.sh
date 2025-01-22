@@ -27,12 +27,12 @@ docker_run() {
     local PLT="${PLT:+--platform=$PLT}"
     local CAPABILITIES="${CAPABILITIES:+--cap-add=$CAPABILITIES}"
     local PRIVILEGED="${PRIVILEGED:+--privileged}"
-    local USER="${USER:-root}"; USER="${USER:+-u $USER}"
+    local USERNAME="${USERNAME:+-u $USERNAME}"
     local WORKDIR="${WORKDIR:+--workdir $WORKDIR}"
     local REMOVE_CONT="${REMOVE_CONT:+--rm}"
     local ENV="${ENV:+--env $ENV}" # Ex: -e VAR=xxx"
     shift
-    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $USER $WORKDIR $REMOVE_CONT $ENV "$IMG" "$@"
+    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $USERNAME $WORKDIR $REMOVE_CONT $ENV "$IMG" "$@"
 }
 
 # Docker start an existing container & attach
@@ -41,15 +41,15 @@ docker_resume() {
     docker attach "$@"
 }
 
-# Docker run inside an existing container
+# Docker run inside an existing container in interactive mode (-i) with a terminal (-t)
 docker_exec() {
     local CONTAINER="${1:?No container specified...}"
     local PRIVILEGED="${PRIVILEGED:+--privileged}"
-    local USER="${USER:-root}"; USER="${USER:+-u $USER}"
+    local USERNAME="${USERNAME:+-u $USERNAME}"
     local WORKDIR="${WORKDIR:+--workdir $WORKDIR}"
     local ENV="${ENV:+--env $ENV}" # Ex: -e VAR=xxx"
     shift
-    docker exec -it $PRIVILEGED $USER $WORKDIR $ENV "$CONTAINER" "${@:-bash}"
+    docker exec -it $PRIVILEGED $USERNAME $WORKDIR $ENV "$CONTAINER" "${@:sh}"
 }
 
 # Detach a single or all running container
