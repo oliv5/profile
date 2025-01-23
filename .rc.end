@@ -403,7 +403,7 @@ fi
 alias auth='sudo tail /var/log/auth.log'
 syslog() {
   if command -v journalctl >/dev/null; then
-    journalctl -m ${@:--n 35}
+    journalctl --no-pager -m ${@:--n 35}
   else
     sudo tail /var/log/syslog "$@"
   fi
