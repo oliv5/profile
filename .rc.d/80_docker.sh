@@ -29,7 +29,8 @@ docker_img_exists() {
 # Check if a container exists
 docker_cont_exists() {
     for CONT; do
-        if ! docker inspect --type=container "$CONT" >/dev/null 2>&1; then
+        #~ if ! docker inspect --type=container "$CONT" >/dev/null 2>&1; then
+        if [ -z "$(docker container ls -a -q --filter "id=$CONT")" ]; then
             return 1
         fi
     done
@@ -51,7 +52,8 @@ docker_img_is_running() {
 # http://stackoverflow.com/questions/43721513/ddg#43723174
 docker_cont_is_running() {
     for CONT; do
-        if [ "$(docker container inspect -f '{{.State.Status}}' "$CONT")" != "running" ]; then
+        #~ if [ "$(docker container inspect -f '{{.State.Status}}' "$CONT")" != "running" ]; then
+        if [ -z "$(docker container ls -q --filter "id=$CONT")" ]; then
             return 1
         fi
     done
@@ -61,7 +63,7 @@ docker_cont_is_running() {
 # List containers sorted by descending creation date
 docker_cont_ls() {
     local IMG="${1:+--filter ancestor='$1'}"
-    local NUM="${2:+-n $2}"; NUM="${NUM:--a}" # -a or -n show containers in all states
+    local NUM="${2:+-n $2}"; NUM="${NUM:--a}" # ls -a or -n show containers in all states
     eval docker container ls -q "$NUM" "$IMG"
 }
 
@@ -72,10 +74,19 @@ docker_cont_ls_running() {
     eval docker container ls -q "$IMG" | head -n "$NUM"
 }
 
-# Check if a tty is attached to a container
+# Check if a tty is attached to each container of a list
 docker_cont_is_attached() {
     for CONT; do
-        if ! pgrep -f "docker.*attach $CONT" >/dev/null 2>&1; then
+        local INSPECT="$(docker container inspect "$CONT")"
+        local IMG="$(echo "$INSPECT" | jq -r '.[0].Config.Image')"
+        local STATUS="$(echo "$INSPECT" | jq -r '.[0].State.Status')"
+        local INTERATIVE="$(echo "$INSPECT" | jq -r '.[0].Config.AttachStdin')"
+        [ "$STATUS" != "running" ] && return 1
+        [ "$INTERATIVE" != "true" ] && return 1
+        if  ! pgrep -f "docker attach.*$CONT" >/dev/null 2>&1 &&
+            ! pgrep -f "docker start.*$CONT" >/dev/null 2>&1 &&
+            ! pgrep -f "docker exec.*$CONT" >/dev/null 2>&1 &&
+            ! pgrep -f "docker run.*$IMG" >/dev/null 2>&1; then
             return 1
         fi
     done
@@ -112,65 +123,49 @@ docker_exec() {
     docker exec -it $PRIVILEGED $NAME $WORKDIR $ENV "$CONTAINER" "${@:sh}"
 }
 
-# Attach to containers
-docker_attach() {
+# Resume & re-attach TTY to a container. Exec a new shell if already attached
+alias docker_attach='docker_resume'
+docker_resume() {
     for CONT; do
-        if docker_cont_is_running "$CONT"; then
-            if docker_cont_is_attached "$CONT"; then
-                docker_exec "$CONT"
-            else
-                docker attach "$CONT"
-            fi
+        docker start "$CONT" >/dev/null || continue
+        docker container ls -a --filter id="$CONT" | tail -n +2
+        if docker_cont_is_attached "$CONT"; then
+            docker_exec "$CONT"
         else
-            docker start -ia "$CONT"
+            docker attach "$CONT"
         fi
     done
 }
 
-# Resume & attach a container
-docker_resume() {
-    for CONT; do
-        docker start "$1" &&
-        docker attach "$1" ||
-        true
-    done
-}
-
-# Docker start an existing container & attach
-docker_start() {
+# Docker start/restart specified container or image and attach
+docker_restart() {
     local IMG_OR_CONT="${1:?No image or container specified...}"
     if docker_img_exists "$IMG_OR_CONT"; then
         local LAST_CONT="$(docker_cont_ls "$IMG_OR_CONT" 1)"
         if [ -n "$LAST_CONT" ]; then
-            echo "Resume image $IMG_OR_CONT newest container $LAST_CONT"
-            docker container ls -a --filter id="$LAST_CONT"
-            docker_attach "$LAST_CONT"
+            echo "Re-attach to existing container $LAST_CONT for image $IMG_OR_CONT"
+            docker_resume "$LAST_CONT"
         else # Image never ran
             echo "Start a new container for image $IMG_OR_CONT"
-            docker image ls -a | awk -v id="$IMG_OR_CONT" '{if (match($3, id) || NR==1) {print $0}}'
             docker_run "$@"
         fi
     elif docker_cont_exists "$IMG_OR_CONT"; then
-        echo "Resume the container: $IMG_OR_CONT"
-        docker container ls -a --filter id="$IMG_OR_CONT"
-        docker_attach "$@"
+        echo "Re-attach to existing container: $IMG_OR_CONT"
+        docker_resume "$@"
     else
-        echo >&2 "Error: neither image or container $IMG_OR_CONT exist..."
+        echo >&2 "Error: neither image or container $IMG_OR_CONT exists..."
         return 1
     fi
 }
 
 # Detach a single or all running container
 docker_detach() {
-    if [ $# -eq 0 ]; then
-        pkill -9 -f 'docker run'
-        pkill -9 -f 'docker.*attach'
-    else
-        for CONT; do
-            pkill -9 -f "docker run.*$CONT"
-            pkill -9 -f "docker.*attach $CONT"
-        done
-    fi
+    for CONT in ${@:-""}; do
+        pkill -9 -f "docker run.*$CONT"
+        pkill -9 -f "docker attach.*$CONT"
+        pkill -9 -f "docker start.*$CONT"
+        pkill -9 -f "docker exec.*$CONT"
+    done
 }
 
 # Stop specific containers (by id, name or image name) or all containers
