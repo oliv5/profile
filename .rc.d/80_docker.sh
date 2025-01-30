@@ -207,7 +207,7 @@ import json
 import traceback
 import subprocess
 if __name__ == '__main__':
-    out = subprocess.getoutput('docker container inspect "%s" >&2' % container)
+    out = subprocess.getoutput('docker container inspect %s 2>/dev/null' % ' '.join(sys.argv[1:]))
     res = json.loads(out)
     for cont in res:
         cmd = ['docker', 'run']
