@@ -170,4 +170,6 @@
     "autoHide.sideBarDelay": 750,
     "autoHide.panelDelay": 750,
     "autoHide.hideOnOpen": false,
+    "workbench.activityBar.location": "top",
+    "window.commandCenter": false,
 }
