@@ -55,20 +55,20 @@ if command -v fzf >/dev/null 2>&1; then
       source /usr/share/doc/fzf/examples/key-bindings.bash
     fi
     # Override with my configuration
-    if [ -r "$RC_DIR/bin/profile/fzf/shell/completion.bash" ]; then
-      source "$RC_DIR/bin/profile/fzf/shell/completion.bash"
+    if [ -r "$RC_DIR/bin/profile/resources/fzf/shell/completion.bash" ]; then
+      source "$RC_DIR/bin/profile/resources/fzf/shell/completion.bash"
     fi
-    if [ -r "$RC_DIR/bin/profile/fzf/.fzf.bash" ]; then
-      source "$RC_DIR/bin/profile/fzf/.fzf.bash"
+    if [ -r "$RC_DIR/bin/profile/resources/fzf/.fzf.bash" ]; then
+      source "$RC_DIR/bin/profile/resources/fzf/.fzf.bash"
     fi
   fi
   export FZF_DEFAULT_OPTS="--bind=tab:accept"
 fi
 # https://github.com/RichiH/vcsh
 if command -v vcsh >/dev/null 2>&1; then
-  if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/bin/profile/vcsh_/completions/vcsh.bash" ]; then
+  if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/bin/profile/resources/vcsh/completions/vcsh.bash" ]; then
     if ! complete -p _vcsh >/dev/null 2>&1; then
-      source "$RC_DIR/bin/profile/vcsh_/completions/vcsh.bash"
+      source "$RC_DIR/bin/profile/resources/vcsh/completions/vcsh.bash"
     fi
   fi
 fi
