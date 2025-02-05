@@ -7,7 +7,7 @@ question() { local ANSWER; read -p "$1" ANSWER; echo $ANSWER; }
 # Create user
 USER="${1:?No user name specified...}"
 if ! id "$USER" >/dev/null 2>&1; then
-    sudo addgroup "$USER"
+    sudo groupadd -f "$USER"
     sudo useradd --gid "$USER" --create-home "$USER"
 else
     echo "Skip creating existing user..."
@@ -46,14 +46,20 @@ if [ "$(question 'Set SSH pubkey (y/n)? ')" = "y" ]; then
 fi
 echo
 
-# Add user to sudo group
-if [ "$USER" != "gitlab" ] && [ "$(question 'Add user to the sudo group (y/n)? ')" = "y" ]; then
-    sudo usermod -a -G sudo "$USER"
-else
-    if [ "$(question 'Allow user to "ip netns exec" with sudo without password (y/n)? ')" = "y" ]; then
-        cat <<-EOF | sudo EDITOR="tee" visudo -f "/etc/sudoers.d/75_$USER"
-$USER ALL=NOPASSWD: /usr/sbin/ip netns exec
+# Setup sudo
+for GRP in sudo admin group; do
+    if grep "$GRP" /etc/group >/dev/null; then
+        if [ "$(question 'Add user to the sudo group (y/n)? ')" = "y" ]; then
+            sudo groupadd -f "$GRP"
+            sudo usermod -a -G "$GRP" "$USER"
+        fi
+    fi
+done
+for CMD in "ip netns exec"; do
+    if [ "$(question 'Allow user to "$CMD" with sudo without password (y/n)? ')" = "y" ]; then
+        cat <<-EOF | sudo EDITOR="tee -a" visudo -f "/etc/sudoers.d/75_$USER"
+$USER ALL=NOPASSWD: $CMD
 EOF
     fi
-fi
+done
 echo
