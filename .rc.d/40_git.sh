@@ -747,6 +747,7 @@ git_bundle() {
     PAR2_RECOVERY="$(($PAR2_RECOVERY < 5 ? 5 : $PAR2_RECOVERY))"
     echo "Create PAR2 files for '$OUT' (${PAR2_RECOVERY}% recovery)"
     par2 create -r${PAR2_RECOVERY} "$OUT"
+    chown "$OWNER" "${OUT}"*
   fi
   ls -l "${OUTBASE}"*
   )
