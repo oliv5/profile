@@ -1,0 +1,20 @@
+[${HOME}/.local/bin/mr]
+checkout = git clone git://myrepos.branchable.com/ mr
+
+[${HOME}/.local/bin/vcsh]
+checkout = git clone https://github.com/RichiH/vcsh
+
+[${HOME}/.local/bin/fdfind]
+checkout = git clone https://github.com/sharkdp/fd fdfind
+
+[${HOME}/.local/bin/fzf]
+checkout = git clone https://github.com/junegunn/fzf
+
+[${HOME}/.local/bin/rpl]
+checkout = git clone https://github.com/kcoyner/rpl
+
+[${HOME}/.local/bin/ripgrep]
+checkout = git clone https://github.com/BurntSushi/ripgrep
+
+[${HOME}/.local/bin/pyenv]
+checkout = git clone https://github.com/pyenv/pyenv
