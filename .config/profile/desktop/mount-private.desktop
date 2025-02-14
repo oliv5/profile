@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Mount private folder
-Exec=/bin/sh -c 'exec $HOME/bin/profile/mount-private.sh'
+Exec=/bin/sh -c 'exec $HOME/.pbin/mount-private.sh'
 Icon=dialog-password
 Terminal=true
 Type=Application
