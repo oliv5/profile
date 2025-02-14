@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Hibernate
-Exec=/bin/sh -c 'exec $HOME/bin/profile/hibernate.sh'
+Exec=/bin/sh -c 'exec $HOME/bin/profile/desktop/hibernate.sh'
 Icon=system-shutdown
 Terminal=true
 Type=Application
