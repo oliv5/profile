@@ -7,7 +7,7 @@ BATCH=""
 TIMEOUT=""
 TIMEOUT_OPT="--foreground"
 RETRY=""
-RETRY_OPT=0
+RETRY_OPT=""
 WATCH=""
 WATCH_OPT="--no-title"
 INTERVAL=""
@@ -34,7 +34,7 @@ arg_quote() {
 # Get args
 OPTIND=0
 unset OPTFLAG OPTARG OPTERR
-while getopts "t:mbw:i:l:k:s:r:p:hdv" OPTFLAG
+while getopts "t:mbw:i:l:k:s:rp:hdv" OPTFLAG
 do
   case "$OPTFLAG" in
     t) AT="${OPTARG}";;
@@ -49,13 +49,13 @@ do
     k) arg_tosec; TIMEOUT_OPT="${TIMEOUT_OPT:+$TIMEOUT_OPT }-k ${OPTARG}";;
     s) TIMEOUT_OPT="${TIMEOUT_OPT:+$TIMEOUT_OPT }-s ${OPTARG}";;
     
-    r) RETRY="${OPTARG}";;
+    r) RETRY=1;;
     p) arg_tosec; RETRY_OPT="${OPTARG}";;
     
     d) DBG="echo";;
     v) VERBOSE="vx";;
     
-    h|*) echo >&2 "Usage: `basename $0` [-t time] [-m] [-b] [-w h:m:s] [-l h:m:s] [-k h:m:s] -[s signal] [-r trials] [-p h:m:s] -- <command line...>"
+    h|*) echo >&2 "Usage: `basename $0` [-t time] [-m] [-b] [-w h:m:s] [-l h:m:s] [-k h:m:s] [-s signal] [-r trials] [-p h:m:s] -- <command line...>"
        echo >&2 "-t   at: start time (man at)"
        echo >&2 "-m   at: send email upon completion"
        echo >&2 "-b   batch: execute when system load < 1.5%"
@@ -83,19 +83,19 @@ OPTIND=0
 AT="${BATCH:-${AT:+at $AT $AT_OPT}}"
 WATCH="${WATCH:+watch $WATCH_OPT $WATCH}"
 TIMEOUT="${TIMEOUT:+timeout $TIMEOUT_OPT $TIMEOUT}"
-RETRY="${RETRY:+retry.sh $RETRY $RETRY_OPT}"
+RETRY="${RETRY:+. $RC_DIR/.rc.d/20_utils.sh; retry $RETRY_OPT}"
 
 # "watch" does work with "at" when there is no terminal
 # use "interval" instead
-[ ! -z "$AT" ] && unset WATCH
+[ -n "$AT" ] && unset WATCH
 
 # Build the final command-line and execute
 CMDLINE="$(arg_quote "${@:-true}")"
-[ ! -z "$RETRY" ] &&    CMDLINE="${RETRY} \"${CMDLINE}\""
-[ ! -z "$TIMEOUT" ] &&  CMDLINE="${TIMEOUT} ${CMDLINE}"
-[ ! -z "$INTERVAL" ] && CMDLINE="while true; do ${CMDLINE}; sleep ${INTERVAL}s; done"
-[ ! -z "$WATCH" ] &&    CMDLINE="${WATCH} -- $(arg_quote "${CMDLINE}")"
-[ ! -z "$AT" ] &&       CMDLINE="$(printf "${AT} <<EOF\n${CMDLINE}\nEOF\n")"
+[ -n "$RETRY" ] &&    CMDLINE="${RETRY} \"${CMDLINE}\""
+[ -n "$TIMEOUT" ] &&  CMDLINE="${TIMEOUT} ${CMDLINE}"
+[ -n "$INTERVAL" ] && CMDLINE="while true; do ${CMDLINE}; sleep ${INTERVAL}s; done"
+[ -n "$WATCH" ] &&    CMDLINE="${WATCH} -- $(arg_quote "${CMDLINE}")"
+[ -n "$AT" ] &&       CMDLINE="$(printf "${AT} <<EOF\n${CMDLINE}\nEOF\n")"
 
 # Execute
 (set -${VERBOSE}; ${DBG} eval "$CMDLINE")
