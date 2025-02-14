@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Mydroid
+Comment=My Android on desktop
+Exec=/home/ola/.pbin/desktop/waydroid.sh start
+Icon=/usr/share/icons/hicolor/512x512/apps/waydroid.png
+Terminal=true
+Type=Application
+Categories=Utility;
