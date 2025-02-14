@@ -10,7 +10,7 @@ minify_generate() {
 	test -s "$DST" && continue
 	( set -e
 	    unalias -a
-	    python2.7 "$RC_DIR/bin/profile/minifier.py" "$SRC" > "$DST"
+	    python2.7 "$RC_DIR/.pbin/minifier.py" "$SRC" > "$DST"
 	    test -x "$SRC" && chmod +x "$DST"
 	    bash -n "$DST"
 	    bash "$DST"
