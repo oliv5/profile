@@ -63,9 +63,12 @@ alias rsync_mvu='rsync -a --remove-source-files --existing' # Recursive move, ex
 
 # https://askubuntu.com/questions/719439/using-rsync-with-sudo-on-the-destination-machine
 # in sudoers: $USER ALL=(ALL) NOPASSWD:/usr/bin/rsync
-rsync_as_user() {
+rsync_sudo_np() {
   rsync --rsync-path="sudo /usr/bin/rsync" "$@"
-  #~ read -s -p "Remote sudo password: " SUDOPASS && rsync --rsync-path="echo $SUDOPASS | sudo -Sv && sudo rsync" "$@"
+}
+rsync_sudo() {
+  #~ ( read -s -p "Remote sudo password: " SUDOPASS && rsync --rsync-path="echo $SUDOPASS | sudo -Sv && sudo rsync" "$@" )
+  ( read -s -p "Remote sudo password: " SUDOPASS && rsync --rsync-path="printf '%s\r' $SUDOPASS | sudo -Sv && sudo rsync" "$@" )
 }
 
 ##############################
