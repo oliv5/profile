@@ -7,17 +7,18 @@
 #   https://github.com/waydroid/waydroid/issues/309#issuecomment-1329881878
 #   https://github.com/waydroid/waydroid/issues/1300
 
-WAYLAND_DISPLAY=/run/user/$(id -u)/wayland-waydroid-1
+unset WAYLAND_DISPLAY WAYLAND_DISPLAY_NAME
+WAYLAND_DISPLAY_NAME=wayland-waydroid-1
 
 case "$1" in
     start | run)
-        weston --socket="$WAYLAND_DISPLAY" &
-        WAYLAND_DISPLAY="$(basename "$WAYLAND_DISPLAY")" waydroid show-full-ui &
+        weston --socket="/run/user/$(id -u)/$WAYLAND_DISPLAY_NAME" & # weston tries to use existing $WAYLAND_DISPLAY if it is set, else it creates new --socket
+        WAYLAND_DISPLAY="$WAYLAND_DISPLAY_NAME" waydroid show-full-ui &
         ;;
 
     stop | end)
         waydroid session stop
-        pkill -f "weston --socket=$WAYLAND_DISPLAY"
+        pkill -f "weston --socket=.*/$WAYLAND_DISPLAY_NAME"
         ;;
 
     poll)
@@ -31,4 +32,4 @@ case "$1" in
         read __
         ;;
 esac
-unset WAYLAND_DISPLAY
+unset WAYLAND_DISPLAY WAYLAND_DISPLAY_NAME
