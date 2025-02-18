@@ -18,3 +18,6 @@ checkout = git clone https://github.com/BurntSushi/ripgrep
 
 [${HOME}/.local/bin/pyenv]
 checkout = git clone https://github.com/pyenv/pyenv
+
+[${HOME}/.local/bin/uv]
+checkout = git clone https://github.com/astral-sh/uv
