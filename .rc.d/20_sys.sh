@@ -4,10 +4,14 @@
 # Forced actions
 force_reboot() {
   # https://stackoverflow.com/questions/31157305/forcing-linux-server-node-to-instantly-crash-and-reboot
-  # To enable it you probably need to put following in sysctl.conf:
-  # kernel.sysrq = 1
-  echo 1 > /proc/sys/kernel/sysrq
-  echo b > /proc/sysrq-trigger
+  # https://unix.stackexchange.com/questions/534220/how-can-i-reboot-a-server-with-systemctl-if-systemctl-reboot-fails
+  # Need `kernel.sysrq = 1` in sysctl.conf or do `sudo sysctl kernel.sysrq=1`
+  sudo sh -c '
+    echo 1 > /proc/sys/kernel/sysrq # Allow sysrq
+    echo s > /proc/sysrq-trigger # Sync disks
+    echo u > /proc/sysrq-trigger
+    echo b > /proc/sysrq-trigger # reboot
+  '
 }
 
 ################################
