@@ -9,10 +9,12 @@
 
 unset WAYLAND_DISPLAY WAYLAND_DISPLAY_NAME
 WAYLAND_DISPLAY_NAME=wayland-waydroid-1
+WIDTH=480 #600
+HEIGHT=800 #1000
 
 case "$1" in
     start | run)
-        weston --socket="/run/user/$(id -u)/$WAYLAND_DISPLAY_NAME" & # weston tries to use existing $WAYLAND_DISPLAY if it is set, else it creates new --socket
+        weston --socket="/run/user/$(id -u)/$WAYLAND_DISPLAY_NAME" --width=$WIDTH --height=$HEIGHT & # weston tries to use existing $WAYLAND_DISPLAY if it is set, else it creates new --socket
         WAYLAND_DISPLAY="$WAYLAND_DISPLAY_NAME" waydroid show-full-ui &
         ;;
 
@@ -31,5 +33,23 @@ case "$1" in
         echo "Press enter to stop"
         read __
         ;;
+
+    # https://github.com/waydroid/waydroid/issues/584
+    rotate-on)
+        sudo waydroid shell wm set-user-rotation free
+        ;;
+
+    rotate-portrait)
+        sudo waydroid shell wm set-user-rotation lock 0
+        ;;
+
+    rotate-landscape)
+        sudo waydroid shell wm set-user-rotation lock 1
+        ;;
+
+    rotate-off)
+        sudo waydroid shell wm set-user-rotation lock
+        ;;
+
 esac
 unset WAYLAND_DISPLAY WAYLAND_DISPLAY_NAME
