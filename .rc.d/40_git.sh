@@ -1343,6 +1343,14 @@ git_split() {
   git branch "${1:?No branch name specified}" $(echo "${2:-Initial commit.}" | git commit-tree HEAD^{tree})
 }
 
+# Merge a branch into one commit and put it on top of another one
+git_squash_merge() {
+  local SRC="${1:?No source branch specified...}"
+  local DST="${2:?No destination branch specified...}"
+  local MSG="${3:-squash $SRC and merge it in $DST}"
+  git commit-tree -p "$DST" -m "$MSG" "${SRC}^{tree}"
+}
+
 ########################################
 # https://stackoverflow.com/questions/4479960/git-checkout-to-a-specific-folder
 # Export the whole repo
