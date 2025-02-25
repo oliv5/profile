@@ -49,14 +49,14 @@ echo
 # Setup sudo
 for GRP in sudo admin group; do
     if grep "$GRP" /etc/group >/dev/null; then
-        if [ "$(question 'Add user to the sudo group (y/n)? ')" = "y" ]; then
+        if [ "$(question 'Add user to the $GRP group (y/n)? ')" = "y" ]; then
             sudo groupadd -f "$GRP"
             sudo usermod -a -G "$GRP" "$USER"
         fi
     fi
 done
-for CMD in "ip netns exec"; do
-    if [ "$(question 'Allow user to "$CMD" with sudo without password (y/n)? ')" = "y" ]; then
+for CMD in "/sbin/ip netns exec"; do
+    if [ "$(question 'Allow user to run "'"$CMD"'" with sudo without password (y/n)? ')" = "y" ]; then
         cat <<-EOF | sudo EDITOR="tee -a" visudo -f "/etc/sudoers.d/75_$USER"
 $USER ALL=NOPASSWD: $CMD
 EOF
