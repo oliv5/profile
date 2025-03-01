@@ -31,6 +31,7 @@ __fdfind() {
 
 ##########
 unset FCASE FTYPE FARGS
+unalias $(alias | awk -F' |=' '{print $2}' | grep '^[i]\?ff' | xargs) 2>/dev/null
 alias      ff='FCASE=   FTYPE=  FARGS="${FARGS}" __fdfind'
 alias     fff='FCASE=   FTYPE=f FARGS="${FARGS}" __fdfind'
 alias     ffd='FCASE=   FTYPE=d FARGS="${FARGS}" __fdfind'
@@ -39,6 +40,7 @@ alias     iff='FCASE=-i FTYPE=  FARGS="${FARGS}" __fdfind'
 alias    ifff='FCASE=-i FTYPE=f FARGS="${FARGS}" __fdfind'
 alias    iffd='FCASE=-i FTYPE=d FARGS="${FARGS}" __fdfind'
 alias    iffl='FCASE=-i FTYPE=l FARGS="${FARGS}" __fdfind'
+# Specific: print0
 alias     ff0='FARGS=-0 ff'
 alias    fff0='FARGS=-0 fff'
 alias    ffd0='FARGS=-0 ffd'
@@ -47,30 +49,26 @@ alias    iff0='FARGS=-0 iff'
 alias   ifff0='FARGS=-0 ifff'
 alias   iffd0='FARGS=-0 iffd'
 alias   iffl0='FARGS=-0 iffl'
+# Specific: 1 result only
+alias     ff1='FARGS="-0 -1" ff'
+alias    fff1='FARGS="-0 -1" fff'
+alias    ffd1='FARGS="-0 -1" ffd'
+alias    ffl1='FARGS="-0 -1" ffl'
+alias    iff1='FARGS="-0 -1" iff'
+alias   ifff1='FARGS="-0 -1" ifff'
+alias   iffd1='FARGS="-0 -1" iffd'
+alias   iffl1='FARGS="-0 -1" iffl'
+# Generic: silent error
 alias     ffs='ff    2>/dev/null'
 alias    fffs='fff   2>/dev/null'
+alias   ffffs='ffff  2>/dev/null'
 alias    ffds='ffd   2>/dev/null'
 alias    ffls='ffl   2>/dev/null'
 alias    iffs='iff   2>/dev/null'
 alias   ifffs='ifff  2>/dev/null'
+alias  iffffs='iffff 2>/dev/null'
 alias   iffds='iffd  2>/dev/null'
 alias   iffls='iffl  2>/dev/null'
-alias    ff1='FARGS=-maxdepth 1 ff'
-alias   fff1='FARGS=-maxdepth 1 fff'
-alias   ffd1='FARGS=-maxdepth 1 ffd'
-alias   ffl1='FARGS=-maxdepth 1 ffl'
-alias   iff1='FARGS=-maxdepth 1 iff'
-alias  ifff1='FARGS=-maxdepth 1 ifff'
-alias  iffd1='FARGS=-maxdepth 1 iffd'
-alias  iffl1='FARGS=-maxdepth 1 iffl'
-alias    ff2='FARGS=-maxdepth 2 ff'
-alias   fff2='FARGS=-maxdepth 2 fff'
-alias   ffd2='FARGS=-maxdepth 2 ffd'
-alias   ffl2='FARGS=-maxdepth 2 ffl'
-alias   iff2='FARGS=-maxdepth 2 iff'
-alias  ifff2='FARGS=-maxdepth 2 ifff'
-alias  iffd2='FARGS=-maxdepth 2 iffd'
-alias  iffl2='FARGS=-maxdepth 2 iffl'
 
 ###########################################
 # File grep implementations

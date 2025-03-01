@@ -262,19 +262,19 @@ alias pkexec='pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 
 # Search and process
 unalias ffv ffv1 ffp ffp1 ffe ffe1 ffo ffo1 ffc ffc1 ffwc 2>/dev/null || true
-ffv()  { ff "${@:-""}" -print0       | xargs -0 gvim; }
-iffv() { iff "${@:-""}" -print0      | xargs -0 gvim; }
-ffv1() { ff "${@:-""}" -print0 -quit | xargs -0 gvim; }
-iffv1(){ iff "${@:-""}" -print0 -quit | xargs -0 gvim; }
-ffp()  { ff "${@:-""}" -print0       | xargs -0 ${PAGER:-false}; }
-ffp1() { ff "${@:-""}" -print0 -quit | xargs -0 ${PAGER:-false}; }
-ffe()  { ff "${@:-""}" -print0       | xargs -0 ${GEDITOR:-false}; }
-ffe1() { ff "${@:-""}" -print0 -quit | xargs -0 ${GEDITOR:-false}; }
-ffo()  { ff "${@:-""}" -print0       | xargs -0 mimeopen; }
-ffo1() { ff "${@:-""}" -print0 -quit | xargs -0 mimeopen; }
-ffc()  { ff "${@:-""}" -print0       | xargs -0 cat ; }
-ffc1() { ff "${@:-""}" -print0 -quit | xargs -0 cat ; }
-ffwc() { ff "${@:-""}" -print        | wc -l; }
+ffv()  { ff0 "${@:-""}"  | xargs -0 gvim; }
+iffv() { iff0 "${@:-""}" | xargs -0 gvim; }
+ffv1() { ff1 "${@:-""}"  | xargs -0 gvim; }
+iffv1(){ iff1 "${@:-""}" | xargs -0 gvim; }
+ffp()  { ff0 "${@:-""}"  | xargs -0 ${PAGER:-false}; }
+ffp1() { ff1 "${@:-""}"  | xargs -0 ${PAGER:-false}; }
+ffe()  { ff0 "${@:-""}"  | xargs -0 ${GEDITOR:-false}; }
+ffe1() { ff1 "${@:-""}"  | xargs -0 ${GEDITOR:-false}; }
+ffo()  { ff0 "${@:-""}"  | xargs -0 mimeopen; }
+ffo1() { ff1 "${@:-""}"  | xargs -0 mimeopen; }
+ffc()  { ff0 "${@:-""}"  | xargs -0 cat ; }
+ffc1() { ff1 "${@:-""}"  | xargs -0 cat ; }
+ffwc() { ff0 "${@:-""}"  | wc --files0-from=- -l; }
 
 # Stat
 alias fs='stat -c "%s"'
