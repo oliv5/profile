@@ -120,7 +120,7 @@ docker_exec() {
     local WORKDIR="${WORKDIR:+--workdir $WORKDIR}"
     local ENV="${ENV:+--env $ENV}" # Ex: -e VAR=xxx"
     shift
-    docker exec -it $PRIVILEGED $NAME $WORKDIR $ENV "$CONTAINER" "${@:sh}"
+    docker exec -it $PRIVILEGED $NAME $WORKDIR $ENV "$CONTAINER" "${@:-sh}"
 }
 
 # Resume & re-attach TTY to a container. Exec a new shell if already attached
