@@ -713,16 +713,16 @@ annex_enum_special_remotes() {
 }
 
 ########################################
-# Export files to the specified repos by chunk of a given size
+# Copy/export files to the specified repos by chunk of a given size
 #  without downloading the whole repo locally at once
 # $FROM is used to selected the origin repo
 # $DBG is used to print the command on stderr (when not empty)
 # $SELECT is used to select files to copy; values: want-get / missing / [all]
 # $FSCK is set to trigger a `fsck`
 # Note: it is superseeded by `git annex copy --from= --to=` in git-annex version 10+
-#  for a single remote except about the maximum local size management
-alias annex_export='SELECT=want-get _annex_export'
-_annex_export() {
+#  for a single remote except about the maximum local size management and exported repos
+alias annex_transfer='SELECT=want-get _annex_transfer'
+_annex_transfer() {
   annex_exists || return 1
   git_bare && echo "BARE REPOS NOT SUPPORTED YET" && return 1
   local REPOS="${1:-$(annex_enabled)}"
@@ -739,7 +739,12 @@ _annex_export() {
   elif [ "$SELECT" = "want-get" ] && [ $(annex_version) -ge $(annex_version 9.0) ]; then
     for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }-( --not --in $REPO --and --want-get-by $REPO -)"; done
   fi
+  local EXPORTED_REPOS=""
+  local PLAIN_REPOS=""
+  for REPO in $REPOS; do annex_isexported "$REPO" && EXPORTED_REPOS="${EXPORTED_REPOS:+$EXPORTED_REPOS }$REPO" || PLAIN_REPOS="${PLAIN_REPOS:+$PLAIN_REPOS }$REPO"; done
   echo "REPOS=$REPOS"
+  echo "PLAIN_REPOS=$PLAIN_REPOS"
+  echo "EXPORTED_REPOS=$EXPORTED_REPOS"
   echo "MAXSIZE=$MAXSIZE"
   echo "SELECT=$SELECT"
   echo "SELECTED=$SELECTED"
@@ -754,47 +759,34 @@ _annex_export() {
       $DBG git annex fsck --fast --from "$REPO" "$@" | grep -v '^fsck.*ok$'
     done
   fi
-  # 1) copy the local files
-  for REPO in $REPOS; do
-    echo "Copy local files to $REPO..."
-    if annex_isexported "$REPO"; then
-      $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
-    elif [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
-      $DBG git annex push "$REPO" --content --fast "$@"
+  # 1) get, copy and drop remote files in plain repos
+  for REPO in $PLAIN_REPOS; do
+    ! annex_isexported "$REPO" || { echo >&2 "Bad repo type (plain) for $REPO ! abort..."; return 1; }
+    if [ $(annex_version) -gt $(annex_version 10.20230408) ]; then
+      echo "Copy files ${FROM:+from $FROM }to $REPO..."
+      $DBG git annex copy $SELECTED ${FROM:+--from }${FROM:---from-anywhere} --to "$REPO" "$@"
     else
-      $DBG git annex copy $SELECTED --to "$REPO" --fast "$@"
+      if [ -z "$FROM" ] || [ "$FROM" = "$REPO" ]; then
+        FROM="$(annex_online | sed '/^'"$FROM"'$/d ; /^'"$REPO"'$/d' | head -n 1)"
+      fi
+      if [ -z "$FROM" ] || [ "$FROM" = "$REPO" ]; then
+        echo "Found no online remote to get files from ! Skip repo $REPO...."
+        continue
+      fi
+      echo "Copy files from $FROM to $REPO..."
+      $DBG git annex copy $SELECTED --from "$FROM" --to "$REPO" "$@"
     fi
   done
-  # 2) get, copy and drop the remote files
-  local ONE_EXPORTED=""
-  for REPO in $REPOS; do annex_isexported "$REPO" && ONE_EXPORTED=1 && break; done
-  if [ -z "$ONE_EXPORTED" ]; then
-    # New annex commands: git copy from/from-anywhere/to
-    echo "Get/copy remote files repos (new way)..."
-    for REPO in $REPOS; do
-      if [ $(annex_version) -gt $(annex_version 10.20230408) ]; then
-        echo "Copy files ${FROM:+from $FROM} to $REPO..."
-        $DBG git annex copy $SELECTED ${FROM:+--from }${FROM:---from-anywhere} --to "$REPO" "$@"
-      else
-        local ONLINE="${ONLINE:-$(annex_online)}"
-        if [ -z "$FROM" ] || [ "$FROM" = "$REPO" ]; then
-          FROM="$(echo "$ONLINE" | sed '/^'"$FROM"'$/d ; /^'"$REPO"'$/d' | head -n 1)"
-        fi
-        if [ -z "$FROM" ] || [ "$FROM" = "$REPO" ]; then
-          echo "Found no online remote to get files from ! Skip repo $REPO...."
-          continue
-        fi
-        echo "Copy files from $FROM to $REPO..."
-        $DBG git annex copy $SELECTED --from "$FROM" --to "$REPO" "$@"
-      fi
+  # 2) get, export and drop remote files in exported repos
+  if [ -n "$EXPORTED_REPOS" ]; then
+    # 2.1) export local files
+    for REPO in $EXPORTED_REPOS; do
+      echo "Export local files to $REPO..."
+      $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
     done
-  else
-    # Legacy way: get, copy and drop the remote files, especially for exported remotes
-    echo "Get/copy remote files repos (legacy way)..."
+    # 2.2) get, export and drop remote files
+    echo "Get/copy remote files in exported repos..."
     git annex find --include='*' $SELECTED --print0 "$@" | xargs -0 -r sh -c '
-      annex_isexported() {
-        git show git-annex:remote.log | grep "exporttree=yes.*name=$1" >/dev/null
-      }
       DBG="$1";REPOS="$2";MAXSIZE="$3";FROM="$4"
       shift 4
       TOTALSIZE=0
@@ -818,11 +810,7 @@ _annex_export() {
           if [ $# -gt 0 ]; then
             $DBG git annex get ${FROM:+--from "$FROM"} "$@"
             for REPO in $REPOS; do
-              if annex_isexported "$REPO"; then
-                $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
-              else
-                $DBG git annex copy --to "$REPO" "$@"
-              fi
+              $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
             done
             $DBG git annex drop "$@"
           fi
@@ -832,7 +820,7 @@ _annex_export() {
         fi
       done
       exit 0
-    ' _ "$DBG" "$REPOS" "$MAXSIZE" "$FROM"
+    ' _ "$DBG" "$EXPORTED_REPOS" "$MAXSIZE" "$FROM"
   fi
   # 3) fsck
   if [ -n "$FSCK" ]; then
@@ -842,6 +830,111 @@ _annex_export() {
     done
   fi
   echo "done"
+}
+
+########################################
+# (Legacy) Transfer files to the specified repos by chunk of a given size
+# without downloading the whole repo locally at once
+# $FROM is used to selected the origin repo
+# $DBG is used to print the command on stderr (when not empty)
+# $SELECT is used to select files to copy; values: want-get / missing / [all]
+# Note: it is superseeded by `git annex copy --from= --to=` in git-annex version 10+
+# except for the max size management and exported repos
+alias annex_transfer_legacy='FROM= SELECT=missing _annex_transfer_legacy'
+_annex_transfer_legacy() {
+  annex_exists || return 1
+  git_bare && echo "BARE REPOS NOT SUPPORTED YET" && return 1
+  local REPOS="${1:-$(annex_enabled)}"
+  local MAXSIZE="${2:-1073741824}"
+  local DBG="${DBG:+echo}"
+  local SELECTED=""
+  [ $# -le 2 ] && shift $# || shift 2
+  #REPOS="$(bash -c "sort <(echo $REPOS | xargs -n1) <(echo $(annex_remotes) | xargs -n1) | uniq -d")"
+  REPOS="$(annex_remotes $REPOS)"
+  [ -z "$REPOS" ] && return 0
+  [ "$SELECT" = "missing" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--not --in $REPO"; done
+  if [ $(annex_version) -ge $(annex_version 9.0) ]; then
+    [ "$SELECT" = "want-get" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--want-get-by=$REPO"; done
+  fi
+  echo "REPOS=$REPOS"
+  echo "MAXSIZE=$MAXSIZE"
+  echo "SELECT=$SELECT"
+  echo "SELECTED=$SELECTED"
+  echo "FROM=$FROM"
+  echo "DBG=$DBG"
+  # 0) Fast fsck for links
+  if [ -n "$FSCK" ]; then
+    echo "Fast fsck local repo..."
+    $DBG git annex fsck --fast "$@" | grep -v '^fsck.*ok$'
+    for REPO in $REPOS; do
+      echo "Fast fsck $REPO..."
+      $DBG git annex fsck --fast --from "$REPO" "$@" | grep -v '^fsck.*ok$'
+    done
+  fi
+  # 1) copy the local files
+  for REPO in $REPOS; do
+    echo "Copy local files to $REPO ($(annex_remotes "$REPO"))..."
+    if [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
+      $DBG git annex push "$REPO" --fast "$@"
+    elif annex_isexported "$REPO"; then
+      $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
+    else
+      $DBG git annex copy --to "$REPO" --fast "$@"
+    fi
+  done
+  # 2) get, copy and drop the remote files
+  echo "Get/copy remote files..."
+  git annex find --include='*' $SELECTED --print0 "$@" | xargs -0 -r sh -c '
+    annex_isexported() {
+      git show git-annex:remote.log | grep "exporttree=yes.*name=$1" >/dev/null
+    }
+    DBG="$1";REPOS="$2";MAXSIZE="$3";FROM="$4"
+    shift 4
+    TOTALSIZE=0
+    NUMFILES=$#
+    for FILE; do
+      # Init
+      NUMFILES=$(($NUMFILES - 1))
+      [ $TOTALSIZE -eq 0 ] && set --
+      # Get current file size
+      SIZE=$(git annex info --bytes "$FILE" | awk "/size:/{print \$2}")
+      # List the current file
+      if [ $SIZE -le $MAXSIZE ]; then
+        set -- "$@" "$FILE"
+        TOTALSIZE=$(($TOTALSIZE + $SIZE))
+      else
+        echo "File \"$FILE\" size ($SIZE) is greater than max size ($MAXSIZE). Skip it..."
+      fi
+      # Check if the transfer limits or last file were reached
+      if [ $TOTALSIZE -ge $MAXSIZE -o $NUMFILES -eq 0 ]; then
+        # Transfer the listed files so far, if any
+        if [ $# -gt 0 ]; then
+          $DBG git annex get ${FROM:+--from "$FROM"} "$@"
+          for REPO in $REPOS; do
+            if [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
+              $DBG git annex push "$REPO" --fast "$@"
+            elif annex_isexported "$REPO"; then
+              $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
+            else
+              $DBG git annex copy --to "$REPO" "$@"
+            fi
+          done
+          $DBG git annex drop "$@"
+        fi
+        # Empty list
+        set --
+        TOTALSIZE=0
+      fi
+    done
+    exit 0
+  ' _ "$DBG" "$REPOS" "$MAXSIZE" "$FROM"
+  # 3) fsck
+  if [ -n "$FSCK" ]; then
+    for REPO in $REPOS; do
+      echo "Fsck $REPO..."
+      $DBG git annex fsck --from "$REPO" "$@"
+    done
+  fi
 }
 
 ########################################
