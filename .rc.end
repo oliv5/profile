@@ -46,9 +46,6 @@ cmd_unset which find grep awk sed xargs cut
 ################################
 # Load plugins (see mr -c .config/profile/mr/externals checkout)
 # https://github.com/junegunn/fzf
-if ! command -v fzf >/dev/null 2>&1; then
-  path_prepend "$HOME/.local/bin/fzf"
-fi
 if command -v fzf >/dev/null 2>&1; then
   if [ -n "$BASH_VERSION" ] && ! complete -p | grep _fzf_ >/dev/null; then
     if fzf --bash >/dev/null 2>&1; then
@@ -68,35 +65,12 @@ if command -v fzf >/dev/null 2>&1; then
   export FZF_DEFAULT_OPTS="--bind=tab:accept"
 fi
 # https://github.com/RichiH/vcsh
-if ! command -v vcsh >/dev/null 2>&1; then
-  path_prepend "$HOME/.local/bin/vcsh"
-fi
 if command -v vcsh >/dev/null 2>&1; then
   if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/.pbin/resources/vcsh/completions/vcsh.bash" ]; then
     if ! complete -p _vcsh >/dev/null 2>&1; then
       source "$RC_DIR/.pbin/resources/vcsh/completions/vcsh.bash"
     fi
   fi
-fi
-# https://myrepos.branchable.com/
-if ! command -v mr >/dev/null 2>&1; then
-  path_prepend "$HOME/.local/bin/mr"
-fi
-# https://github.com/kcoyner/rpl
-if ! command -v rpl >/dev/null 2>&1; then
-  path_prepend "$HOME/.local/bin/rpl"
-fi
-# https://github.com/sharkdp/fd
-if ! command -v fdfind >/dev/null 2>&1; then
-  path_prepend "$HOME/.local/bin/fdfind"
-fi
-# https://github.com/BurntSushi/ripgrep
-if ! command -v rg >/dev/null 2>&1; then
-  path_prepend "$HOME/.local/bin/ripgrep"
-fi
-# https://github.com/pyenv/pyenv
-if ! command -v pyenv >/dev/null 2>&1; then
-  path_prepend "$HOME/.local/bin/pyenv"
 fi
 
 ################################

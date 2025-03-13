@@ -1,23 +1,80 @@
-[${HOME}/.local/bin/mr]
-checkout = git clone git://myrepos.branchable.com/ mr
+[DEFAULT]
+lib = mr_filter() { set +e; REPO="$(basename "$MR_REPO")"; ! echo "${MR_REPOS:-$REPO}" | grep "$REPO" >/dev/null; }
+skip = mr_filter
 
-[${HOME}/.local/bin/vcsh]
-checkout = git clone https://github.com/RichiH/vcsh
+### Scripts
 
-[${HOME}/.local/bin/fdfind]
-checkout = git clone https://github.com/sharkdp/fd fdfind
+[${HOME}/.local/bin/mr-repo]
+checkout = git clone git://myrepos.branchable.com/ "$MR_REPO"
+install = REPO="$(basename "$MR_REPO")" ; ln -fs "$REPO/${REPO%%-repo}" ../mr
+uninstall = rm ../mr
+remove = rm -rf "${MR_REPO:-___unlikely___}"
 
-[${HOME}/.local/bin/fzf]
-checkout = git clone https://github.com/junegunn/fzf
+[${HOME}/.local/bin/vcsh-repo]
+checkout = git clone https://github.com/RichiH/vcsh "$MR_REPO"
+install = REPO="$(basename "$MR_REPO")" ; ln -fs "$REPO/vcsh.in" ../vcsh
+uninstall = rm ../vcsh
+remove = rm -rf "${MR_REPO:-___unlikely___}"
 
-[${HOME}/.local/bin/rpl]
-checkout = git clone https://github.com/kcoyner/rpl
+[${HOME}/.local/bin/rpl-repo]
+checkout = git clone https://github.com/kcoyner/rpl "$MR_REPO"
+install = REPO="$(basename "$MR_REPO")" ; ln -fs "$REPO/${REPO%%-repo}" ../rpl
+uninstall = rm ../rpl
+remove = rm -rf "${MR_REPO:-___unlikely___}"
 
-[${HOME}/.local/bin/ripgrep]
-checkout = git clone https://github.com/BurntSushi/ripgrep
+[${HOME}/.local/bin/pyenv-repo]
+checkout = git clone https://github.com/pyenv/pyenv "$MR_REPO"
+install = src/configure && make -C src || true ; echo "Setup PYENV_ROOT=\$HOME/.pyenv, PATH to \$PYENV_ROOT/bin, load env 'eval \"\$(pyenv init - bash)\"'"
+uninstall = true
+remove = rm -rf "${MR_REPO:-___unlikely___}"
 
-[${HOME}/.local/bin/pyenv]
-checkout = git clone https://github.com/pyenv/pyenv
+[${HOME}/.local/bin/git-annex-remote-rclone-repo]
+checkout = git clone https://github.com/git-annex-remote-rclone/git-annex-remote-rclone.git "$MR_REPO"
+install = REPO="$(basename "$MR_REPO")" ; ln -fs "$REPO/${REPO%%-repo}" ../git-annex-remote-rclone
+uninstall = rm ../git-annex-remote-rclone
+remove = rm -rf "${MR_REPO:-___unlikely___}"
 
-[${HOME}/.local/bin/uv]
-checkout = git clone https://github.com/astral-sh/uv
+### Rust (cargo)
+
+[${HOME}/.local/bin/fdfind-repo]
+checkout = git clone https://github.com/sharkdp/fd "$MR_REPO"
+install = cargo update home@0.5.5 --precise 0.5.5 ; cargo build ; cp ./target/debug/fd ../fdfind ; cargo clean
+uninstall = cargo clean ; rm ../fdfind
+remove = rm -rf "${MR_REPO:-___unlikely___}"
+
+[${HOME}/.local/bin/ripgrep-repo]
+checkout = git clone https://github.com/BurntSushi/ripgrep "$MR_REPO"
+install = cargo install --path . ; cp ./target/release/rg ../ ; cargo clean
+uninstall = cargo clean ; rm ../rg
+remove = rm -rf "${MR_REPO:-___unlikely___}"
+
+[${HOME}/.local/bin/uv-repo]
+checkout = git clone https://github.com/astral-sh/uv "$MR_REPO"
+install =   cargo update ptr_meta_derive@0.3.0 --precise 0.3.0 -Znext-lockfile-bump ;
+	    cargo update uv-globfilter@0.1.0 --precise 0.1.0 -Znext-lockfile-bump ;
+	    cargo update uv-options-metadata@0.0.1 --precise 0.0.1 -Znext-lockfile-bump ;
+	    cargo update uv-installer@0.0.1 --precise 0.0.1 -Znext-lockfile-bump ;
+	    cargo update uv-build-frontend@0.0.1 --precise 0.0.1 -Znext-lockfile-bump ;
+	    cargo update uv-state@0.0.1 --precise 0.0.1 -Znext-lockfile-bump ;
+	    cargo update rkyv_derive@0.8.10 --precise 0.8.10 -Znext-lockfile-bump ;
+	    cargo update uv-dirs@0.0.1 --precise 0.0.1 -Znext-lockfile-bump ;
+	    cargo update uv-dispatch@0.0.1 --precise 0.0.1 -Znext-lockfile-bump ;
+	    cargo update uv-metadata@0.1.0 --precise 0.1.0 -Znext-lockfile-bump ;
+	    cargo update uv-once-map@0.0.1 --precise 0.0.1 -Znext-lockfile-bump ;
+	    cargo update uv-build@0.6.6 --precise 0.6.6 -Znext-lockfile-bump ;
+	    cargo update uv-pep508@0.6.0 --precise 0.6.0 -Znext-lockfile-bump ;
+	    cargo update uv-pep440@0.7.0 --precise 0.7.0 -Znext-lockfile-bump ;
+	    cargo update uv-configuration@0.0.1 --precise 0.0.1 -Znext-lockfile-bump ;
+	    cargo update uv-bench@0.0.0 --precise 0.0.0 -Znext-lockfile-bump ;
+	    cargo update ptr_meta_derive@0.3.0 --precise 0.3.0 -Znext-lockfile-bump ;
+	    cargo build -Znext-lockfile-bump ; echo Command NOT ready: cp uv ../ ; false ; cargo clean
+uninstall = cargo clean ; rm ../uv
+remove = rm -rf "${MR_REPO:-___unlikely___}"
+
+### Go
+
+[${HOME}/.local/bin/fzf-repo]
+checkout = git clone https://github.com/junegunn/fzf "$MR_REPO"
+install = ./install
+uninstall = ./uninstall
+remove = rm -rf "${MR_REPO:-___unlikely___}"
