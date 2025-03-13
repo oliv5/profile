@@ -6,7 +6,7 @@
 # Note about clipboard
 #   https://github.com/waydroid/waydroid/issues/309#issuecomment-1329881878
 #   https://github.com/waydroid/waydroid/issues/1300
-
+set +e
 unset WAYLAND_DISPLAY WAYLAND_DISPLAY_NAME
 WAYLAND_DISPLAY_NAME=wayland-waydroid-1
 WIDTH=480 #600
@@ -23,9 +23,16 @@ case "$1" in
         pkill -f "weston --socket=.*/$WAYLAND_DISPLAY_NAME"
         ;;
 
+    kill)
+        waydroid session stop
+        sudo waydroid container stop
+        sudo pkill -f "/usr/bin/waydroid -w container start"
+        pkill -f "weston --socket=.*/$WAYLAND_DISPLAY_NAME"
+        ;;
+
     poll)
-        while pgrep waydroid >/dev/null; do
-            sleep 10
+        while pgrep -f "weston --socket=.*/$WAYLAND_DISPLAY_NAME" >/dev/null; do
+            sleep 5
         done
         ;;
 

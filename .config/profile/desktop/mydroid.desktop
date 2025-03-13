@@ -2,7 +2,7 @@
 Version=1.0
 Name=Mydroid
 Comment=My Android on desktop
-Exec=/home/ola/.pbin/desktop/waydroid.sh start
+Exec=/usr/bin/env DISPLAY=:0 /bin/sh -c '/home/ola/.pbin/desktop/waydroid.sh stop; sleep 1; /home/ola/.pbin/desktop/waydroid.sh start; /home/ola/.pbin/desktop/waydroid.sh poll; /home/ola/.pbin/desktop/waydroid.sh stop'
 Icon=/usr/share/icons/hicolor/512x512/apps/waydroid.png
 Terminal=true
 Type=Application
