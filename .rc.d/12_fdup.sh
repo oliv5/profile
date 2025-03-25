@@ -1,36 +1,9 @@
 #!/bin/sh
 
 ###########################################
-# Find duplicate files in directory
-# Does not handle filenames with \n inside
-alias ff_dup='find_duplicates'
-find_duplicates() {
-  local TMP1="$(mktemp)"
-  local TMP2="$(mktemp)"
-  local FILETYPES="${FILETYPES:--o -type l}"
-  echo -n > "$TMP1"
-  for DIR in "${@:-.}"; do
-    find "${DIR:-.}" \( -type f $FILETYPES \) -exec md5sum "{}" \; | sed -e 's/^\\//' >> "$TMP1"
-  done
-  #awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
-  sort -k 1 "$TMP1" | cut -d' ' -f 1 | uniq -d > "$TMP2"
-  while read SUM; do
-    grep "^$SUM" "$TMP1" | cut -d' ' -f 2- | sort
-    echo
-  done < "$TMP2"
-  rm "$TMP1" "$TMP2" 2>/dev/null
-}
-
-# Remove duplicated files
-# Does not handle filenames with \n inside
-# Dry-run only, does not execute the rm command
-alias rm_dup='rm_duplicates'
-rm_duplicates() {
-  find_duplicates "$@" | sed '1d ; /^$/{N;d}' | xargs -r -i -- echo "rm -I -- '{}'"
-}
-
-# Find duplicate files in directory
+# Find duplicate files in directory (by content)
 alias ff_dup0='find_duplicates0'
+alias ff_dup='find_duplicates'
 find_duplicates0() {
   local TMP1="$(mktemp)"
   local TMP2="$(mktemp)"
@@ -46,11 +19,15 @@ find_duplicates0() {
   done < "$TMP2"
   rm "$TMP1" "$TMP2" 2>/dev/null
 }
+find_duplicates() {
+  find_duplicates0 "$@" | xargs -r0 -n1
+}
 
-# Remove duplicated files
+# Remove duplicated files (by content)
 # Does not handle filenames with \n inside
 # Dry-run only, does not execute the rm command
 alias rm_dup0='rm_duplicates0'
+alias rm_dup='rm_duplicates'
 rm_duplicates0() {
   find_duplicates0 "$@" | xargs -r0 sh -c '
     while [ $# -gt 0 ]; do
@@ -62,6 +39,9 @@ rm_duplicates0() {
       fi
     done
   ' _ | xargs -r0 -- echo rm -I --
+}
+rm_duplicates() {
+  rm_duplicates0 "$@" | xargs -r0 -n1
 }
 
 # Find duplicate links of all links (good/bad)
@@ -85,8 +65,35 @@ ffl_dupr() {
 ffl_dupg() {
   for D in "${@:-.}"; do
     find "$D" -type f -exec sh -c '
-	    #find -L "$2" -samefile "$1" -xtype l -print0 | xargs -r0 -- echo
-      find "$2" -lname "$(basename "$1")" -print0 | xargs -r0 -- echo
+	    #find -L "$2" -samefile "$1" -xtype l -print0 | xargs -r0
+      find "$2" -lname "$(basename "$1")" -print0 | xargs -r0
     ' _ {} "$D" \;
   done
+}
+
+###########################################
+# Find duplicate files in directory (by name)
+alias ff_dupn0='find_duplicate_names0'
+alias ff_dupn='find_duplicate_names'
+find_duplicate_names0() {
+  {
+    local D
+    for D in "${@:-.}"; do
+      find "$D" ! -type d -print0
+    done
+  } | awk -F'/' '
+  BEGIN {
+    RS = "\0" 
+  } {
+    f = $NF
+    a[f] = f in a? a[f] RS $0 : $0
+    b[f]++
+  } END {
+    for(f in b)
+      if(b[f]>1)
+        printf "%s\0",a[f]
+  }'
+}
+find_duplicate_names() {
+  find_duplicate_names0 "$@" | xargs -r0 -n1
 }
