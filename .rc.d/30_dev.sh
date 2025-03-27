@@ -8,6 +8,23 @@ _dfind() { local DIR="$(dirname "$1")"; if git_exists "$DIR"; then git ls-files 
 alias rff='_rfind'
 _rfind() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then git_worktree "$@"; fi };
 
+# Find file & open
+_ffv() {
+  local FF="${1:?No find fct specified...}"
+  local ED="${2:?No editor specified...}"
+  local FCT_ED="$(fct_def "$ED")"
+  shift 2
+  for F; do
+    local FILE="${F%:*}"
+    local LINE="${F#*:}"; LINE="${LINE%%:*}"; [ "$LINE" = "$F" ] && LINE=""
+    eval "$FF" "$FILE" | xargs -0 sh -c "$FCT_ED; $ED \$@:$LINE" _
+  done
+}
+ffv()   { _ffv ff0 "${VI:-gvim}" "$@"; }
+iffv()  { _ffv iff0 "${VI:-gvim}" "$@"; }
+ffv1()  { _ffv ff1 "${VI:-gvim}" "$@"; }
+iffv1() { _ffv iff1 "${VI:-gvim}" "$@"; }
+
 # Grep based code search
 _dgrep1()   { local A="$2" B="$1" C="$3"; shift $(($#<3?$#:3)); (set -f; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$A" "${C:-.}/$B"); }
 _dgrep2()   { local A="$2" B="$1" C="$3"; shift $(($#<3?$#:3)); (set -f; _fgrep2 "$A" ${_DG2EXCLUDE} "$@" "${C:-.}/$B"); }
@@ -22,7 +39,7 @@ _DGEXT_V="*.vhd|*.v|*.sv"
 _DGEXT_PY="*.py"
 _DGEXT_SCONS="SConstruct|SConscript|sconstruct|sconscript"
 _DGEXT_CMAKE="CMakeLists.txt|cmakelists.txt|*.cmake"
-_DGEXT_MAKE="*.mk|Makefile|makefile|GNUmakefile|gnumakefile"
+_DGEXT_MAKE="*.mk|Makefile|makefile|GNUmakefile|gnumakefile|*.make"
 _DGEXT_MK="$_DGEXT_MAKE|$_DGEXT_CMAKE|$_DGEXT_SCONS"
 _DGEXT_ASM="*.inc|*.S|*.s|*.asm|*.ASM"
 _DGEXT_XML="*.xml"
@@ -155,6 +172,6 @@ gcc_show_def() {
 gpp_show_def() {
 	g++ "$@" -dM -E - < /dev/null
 }
-clang__show_def() {
+clang_show_def() {
 	clang "$@" -dM -E - < /dev/null
 }
