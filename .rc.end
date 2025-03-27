@@ -236,10 +236,12 @@ alias pkexec='pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 
 # Search and process
 unalias ffv ffv1 ffp ffp1 ffe ffe1 ffo ffo1 ffc ffc1 ffwc 2>/dev/null || true
-ffv()  { ff0 "${@:-""}"  | xargs -0 gvim; }
-iffv() { iff0 "${@:-""}" | xargs -0 gvim; }
-ffv1() { ff1 "${@:-""}"  | xargs -0 gvim; }
-iffv1(){ iff1 "${@:-""}" | xargs -0 gvim; }
+! command -v ffv >/dev/null 2>&1 &&
+  ffv()  { ff0 "${@:-""}"  | xargs -0 ${VI:-vi}; } &&
+  iffv() { iff0 "${@:-""}" | xargs -0 ${VI:-vi}; }
+! command -v ffv1 >/dev/null 2>&1 &&
+  ffv1() { ff1 "${@:-""}"  | xargs -0 ${VI:-vi}; } &&
+  iffv1(){ iff1 "${@:-""}" | xargs -0 ${VI:-vi}; }
 ffp()  { ff0 "${@:-""}"  | xargs -0 ${PAGER:-false}; }
 ffp1() { ff1 "${@:-""}"  | xargs -0 ${PAGER:-false}; }
 ffe()  { ff0 "${@:-""}"  | xargs -0 ${GEDITOR:-false}; }
