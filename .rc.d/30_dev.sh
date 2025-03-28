@@ -15,7 +15,7 @@ _ffv() {
   local FCT_ED="$(fct_def "$ED")"
   shift 2
   for F; do
-    local FILE="${F%:*}"
+    local FILE="${F%%:*}"
     local LINE="${F#*:}"; LINE="${LINE%%:*}"; [ "$LINE" = "$F" ] && LINE=""
     eval "$FF" "$FILE" | xargs -0 sh -c "$FCT_ED; $ED \$@:$LINE" _
   done
