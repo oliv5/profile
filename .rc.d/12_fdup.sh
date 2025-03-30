@@ -12,10 +12,10 @@ find_duplicates0() {
   for DIR in "${@:-.}"; do
     find "${DIR:-.}" \( -type f $FILETYPES \) -exec md5sum -z "{}" \; >> "$TMP1"
   done
-  sort -z -k 1 "$TMP1" | cut -z -d' ' -f 1 | uniq -z -d | xargs -0 -n1 > "$TMP2"
+  sort -z -k 1 "$TMP1" | cut -z -d' ' -f 1 | uniq -z -d | xargs -r0 > "$TMP2"
   while read SUM; do
     printf "$SUM\0"
-    grep -zZ "$SUM" "$TMP1" | sed -z -e "s/$SUM\s*//"
+    grep -zZ "$SUM" "$TMP1" | cut -z -d$' ' -f 3-
   done < "$TMP2"
   rm "$TMP1" "$TMP2" 2>/dev/null
 }
