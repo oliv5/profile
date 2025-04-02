@@ -106,10 +106,10 @@ docker_run() {
     local PRIVILEGED="${PRIVILEGED:+--privileged}"
     local NAME="${NAME:+-u $NAME}"
     local WORKDIR="${WORKDIR:+--workdir $WORKDIR}"
-    local REMOVE_CONT="${REMOVE_CONT:+--rm}"
+    local RM="${REMOVE_CONT:+--rm}"
     local ENV="${ENV:+--env $ENV}" # Ex: -e VAR=xxx"
     shift
-    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $NAME $WORKDIR $REMOVE_CONT $ENV "$IMG" "$@"
+    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $NAME $WORKDIR $RM $ENV "$IMG" "$@"
 }
 
 # Docker run inside an existing container in interactive mode (-i) with a terminal (-t)
