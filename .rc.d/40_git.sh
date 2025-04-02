@@ -429,11 +429,6 @@ git_untracked() {
 }
 
 # Git status for scripts
-git_st() {
-  #git ${2:+--git-dir="$2"} status -s | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
-  #git ${2:+--git-dir="$2"} status -s | awk '/'"^[\? ]?$1"'/{print substr($0,4)}'
-  git ${3:+--git-dir="$3"} status -s --porcelain --untracked ${2:+"$2"} | awk '/^^[\? ]?'$1'/{print $2}'
-}
 git_stx() {
   git ${3:+--git-dir="$3"} status -z ${2:+"$2"} | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
 }
@@ -1741,19 +1736,6 @@ git_hook_samples() {
 # Status aliases
 alias gt='git status -uno'
 alias gtu='gstu'
-alias gst='git_st'
-alias gst0='git_stx'
-alias gstv='git_stx | xargs -0 $GEDITOR'
-alias gstm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
-alias gsta='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
-alias gstd='git status --porcelain -b | awk "NR==1 || /^D[ M]|^ D/"'  # deleted
-alias gstr='git status --porcelain -b | awk "NR==1 || /^R[ MD]/"'     # renamed
-#alias gstc='git status --porcelain -b | awk "NR==1 || /^C[ MD]/"'     # copied in index
-alias gstc='git status --porcelain -b | awk "NR==1 || /^[DAU][DAU]/"' # unmerged = conflict
-alias gstu='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracked = new
-alias gsti='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
-alias gstz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
-alias gsts='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
 alias gstx='git_stx'
 alias gstxm='git_stx "^(M.|.M)"'    # modified
 alias gstxa='git_stx "^A[ MD]"'     # added
@@ -1761,10 +1743,24 @@ alias gstxd='git_stx "^D[ M]|^ D"'  # deleted
 alias gstxr='git_stx "^R[ MD]"'     # renamed
 #alias gstxc='git_stx "^C[ MD]"'     # copied in index
 alias gstxc='git_stx "^[DAU][DAU]"' # unmerged = conflict
+alias gstxcm='git_stx "^[DAU][U]"'  # unmerged+modified
+alias gstxcd='git_stx "^[DAU][D]"'  # unmerged+deleted
 alias gstxu='git_stx "^\?\?"'       # untracked = new
 alias gstxi='git_stx "^\!\!"'       # ignored
 alias gstxz='git_stx "^[MARC] "'    # in index
-alias gstxs='git_stx "^[^\?\?]"'    # not untracked# List aliases
+alias gstxs='git_stx "^[^\?\?]"'    # not untracked
+alias gst='git_stx | xargs -r0 -n1'
+alias gstm='gstxm | xargs -r0 -n1'
+alias gsta='gstxa | xargs -r0 -n1'
+alias gstd='gstxd | xargs -r0 -n1'
+alias gstr='gstxr | xargs -r0 -n1'
+alias gstc='gstxc | xargs -r0 -n1'
+alias gstcm='gstxcm | xargs -r0 -n1'
+alias gstcd='gstxcd | xargs -r0 -n1'
+alias gstu='gstxu | xargs -r0 -n1'
+alias gsti='gstxi | xargs -r0 -n1'
+alias gstz='gstxz | xargs -r0 -n1'
+alias gsts='gstxs | xargs -r0 -n1'
 # List files
 alias gls='git ls-files'
 alias glsm='git ls-files -m'
