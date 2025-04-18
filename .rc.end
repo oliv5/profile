@@ -413,10 +413,15 @@ log() {
 
 # system upgrade
 alias sysup='screen -c /dev/null -m sudo sh -c " \
+  set +e; \
   command -v apt-get >/dev/null && \
     apt-get update && \
     apt-get full-upgrade && \
     apt-get autoremove; \
+  command -v pkcon >/dev/null && \
+    pkcon refresh && \
+    pkcon get-updates && \
+    pkcon update; && \
   command -v snap >/dev/null && \
     snap refresh; \
   command -v flatpak >/dev/null && \
