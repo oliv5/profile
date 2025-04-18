@@ -8,7 +8,7 @@ shell $SHELL
 defscrollback 4000
 
 # create initial windows
-screen 1 $SHELL -c "export DISPLAY=$SCREEN_DISPLAY; $SHELL"
+#screen 1 $SHELL -c "export DISPLAY=$SCREEN_DISPLAY; $SHELL"
 
 # set the caption on the bottom line:
 # from http://diveintomark.org/public/2007/03/screenrc
@@ -54,9 +54,9 @@ termcapinfo xterm* ti@:te@
 bindkey -m "^ " eval "stuff ' '" writebuf "exec sh -c 'xsel -i < /tmp/screen-exchange'"
 
 # Window management
-bind c screen 1			# Open new windows from index 1
+bind c screen 1       # Open new windows from index 1
 bind ^c screen 1
-bind 0 select 10
+#~ bind 0 select 10   # Disable this when the first window ID is 0
 bind "^z" next
 bind "^q" prev
 #bindkey "^[[21;2~" select 0 # S-F10= screen 0
