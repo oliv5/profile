@@ -568,11 +568,11 @@ annex_lookup_special_remote() {
   done
 }
 
-# Lookup special remotes keys
+# Lookup special remotes keys; uses $FINDOPTS
 annex_lookup_special_remotes() {
   local RET=0
   for UUID in $(annex_notdead $(annex_special "$@")); do
-    eval annex_lookup_special_remote "$UUID" "$FINDOPTS" 2>&1 || RET=2
+    eval "annex_lookup_special_remote \"$UUID\" \"$FINDOPTS\"" 2>&1 || RET=2
   done
   return $RET
 }
