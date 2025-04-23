@@ -568,13 +568,25 @@ annex_lookup_special_remote() {
   done
 }
 
-# Lookup special remotes keys; uses $FINDOPTS
+# Lookup special remotes keys; uses $FINDOPTS, default "*"
 annex_lookup_special_remotes() {
   local RET=0
+  local FINDOPTS="${FINDOPTS:---include '*'}"
   for UUID in $(annex_notdead $(annex_special "$@")); do
-    eval "annex_lookup_special_remote \"$UUID\" \"$FINDOPTS\"" 2>&1 || RET=2
+    annex_lookup_special_remote "$UUID" "$FINDOPTS" 2>&1 || RET=2
   done
   return $RET
+}
+
+# Lookup special remotes keys by time interval
+annex_lookup_special_remotes_by_time() {
+  local TIME="$1"
+  shift $(($# > 1 ? 1 : $#))
+  local FINDOPTS="$(git rev-list ${TIME:+--after "$TIME"} HEAD | git diff-tree --no-commit-id --name-only -r --stdin -z 2>/dev/null | xargs -r0 sh -c 'find "$@" 2>/dev/null -printf "\"%p\" "' _)"
+  if test -n "$FINDOPTS"; then
+    FINDOPTS="--include '*' $FINDOPTS"
+    annex_lookup_special_remotes "$@"
+  fi
 }
 
 ########################################
@@ -589,8 +601,14 @@ _annex_archive() {
     local OUTBASE="$OUT"
     local GPG_RECIPIENT="$3"
     local FINDOPTS="${4:---include='*'}" # Passed as named parameter
+    local TIMEOPTS="${4}" # Passed as named parameter, same args than FINDOPTS
     local OWNER="${5:-$USER}"
     local XZOPTS="${6:--9}"
+    if echo "$TIMEOPTS" | grep "@{.*}" >/dev/null; then
+      FINDOPTS=""
+    else
+      TIMEOPTS=""
+    fi
     shift 6
     if ! mkdir -p "$(dirname "$OUT")"; then
       echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
@@ -598,6 +616,10 @@ _annex_archive() {
     fi
     echo "Generate $OUT"
     "$@"
+    if [ $? -ne 0 ]; then
+      echo "Low level command reported an error. Abort..."
+      return 3
+    fi
     if [ ! -s "${OUT}" ]; then
       echo "Output file '${OUT}' is missing or empty. Abort..."
       return 1
@@ -694,7 +716,7 @@ annex_info(){
 _annex_enum_special_remotes() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.txt}.txt"
-  annex_lookup_special_remotes > "$OUT"
+  annex_lookup_special_remotes_by_time "$TIMEOPTS" > "$OUT"
   # Skip empty bundle
   if ! test -s "$OUT"; then
     echo "Skip empty bundle..."
