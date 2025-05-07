@@ -53,22 +53,30 @@ if command -v gvim >/dev/null; then
       ARGS="${ARGS:+$ARGS }$ARG"
     done
     eval command gvim $ARGS
+    echo gvim $ARGS
   }
 fi
 
 # Manage nvim-qt command line options
+# Need: pip3 install neovim-remote
 if command -v nvim-qt >/dev/null; then
   alias gnvim="nvimqt"
-  alias ngvim="nvimqt"
   export VI="nvimqt"
   nvimqt() {
     local ARG
     local ARGS=""
     for ARG; do
-      ARG="$(echo "$ARG" | awk -F':' '{printf "\"%s\" +%s",$1,$2}')"
+      # nvim argument "+line" can be set anywhere and is applied to the first file only
+      ARG="$(echo "$ARG" | awk -F':' '{ if (length($1)>0) printf "\"%s\"",$1; if (length($2)>0) {printf " +%s",$2} }')"
       ARGS="${ARGS:+$ARGS }$ARG"
     done
-    eval command nvim-qt $ARGS
+    if pgrep nvim >/dev/null; then
+      eval command nvr --remote $ARGS
+      command -v wmctrl >/dev/null && wmctrl -R Neovim
+    else
+      eval command nvim-qt -- --listen /tmp/nvimsocket $ARGS
+    fi
+    echo nvim-qt $ARGS
   }
 fi
 
