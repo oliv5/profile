@@ -17,7 +17,7 @@ _ffv() {
   for F; do
     local FILE="${F%%:*}"
     local LINE="${F#*:}"; LINE="${LINE%%:*}"; [ "$LINE" = "$F" ] && LINE=""
-    eval "$FF" "$FILE" | xargs -0 sh -c "$FCT_ED; $ED \$@:$LINE" _
+    eval "$FF" "$FILE" | sort -z | xargs -r0 sh -c "$FCT_ED; $ED \$@:$LINE" _
   done
 }
 ffv()   { _ffv ff0 "${VI:-gvim}" "$@"; }
