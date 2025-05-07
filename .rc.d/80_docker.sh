@@ -97,19 +97,20 @@ docker_cont_is_attached() {
 docker_run() {
     local IMG="${1:?No image specified...}"
     local BIN="${BIN:+--entrypoint='$BIN'}"
-    local MOUNT="${MOUNT:+--volume $MOUNT}" # Ex: --volume=path:path:rw"
+    local MOUNT="${MOUNT:+--volume $MOUNT} ${VOLUME:+--volume $VOLUME}" # Ex: --volume=path:path:rw"
     local NETWORK="${NETWORK:+--network=$NETWORK}" # NETWORK=host to allow all accesses
     local NAT="${NAT:+-p $NAT}"
     local DEVICE="${DEVICE:+--device=$DEVICE}"
     local PLT="${PLT:+--platform=$PLT}"
     local CAPABILITIES="${CAPABILITIES:+--cap-add=$CAPABILITIES}"
     local PRIVILEGED="${PRIVILEGED:+--privileged}"
-    local NAME="${NAME:+-u $NAME}"
+    local USERNAME="${USERNAME:+-u $USERNAME}"
+    local NAME="${NAME:+--name $NAME}"
     local WORKDIR="${WORKDIR:+--workdir $WORKDIR}"
     local RM="${REMOVE_CONT:+--rm}"
     local ENV="${ENV:+--env $ENV}" # Ex: -e VAR=xxx"
     shift
-    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $NAME $WORKDIR $RM $ENV "$IMG" "$@"
+    docker run -it $BIN $MOUNT $NETWORK $NAT $DEVICE $PLT $CAPABILITIES $PRIVILEGED $USERNAME $NAME $WORKDIR $RM $ENV "$IMG" "$@"
 }
 
 # Docker run inside an existing container in interactive mode (-i) with a terminal (-t)
