@@ -74,6 +74,7 @@ if command -v nvim-qt >/dev/null; then
       eval command nvr --remote $ARGS
       command -v wmctrl >/dev/null && wmctrl -R Neovim
     else
+      rm /tmp/nvimsocket 2>/dev/null || true
       eval command nvim-qt -- --listen /tmp/nvimsocket $ARGS
     fi
     echo nvim-qt $ARGS

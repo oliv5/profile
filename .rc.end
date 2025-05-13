@@ -236,12 +236,17 @@ alias pkexec='pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 
 # Search and process
 unalias ffv ffv1 ffp ffp1 ffe ffe1 ffo ffo1 ffc ffc1 ffwc 2>/dev/null || true
-! command -v ffv >/dev/null 2>&1 &&
+if which "${VI:-gvim}" >/dev/null; then
   ffv()  { ff0 "${@:-""}"  | xargs -r0 ${VI:-vi}; } &&
   iffv() { iff0 "${@:-""}" | xargs -r0 ${VI:-vi}; }
-! command -v ffv1 >/dev/null 2>&1 &&
   ffv1() { ff1 "${@:-""}"  | xargs -r0 ${VI:-vi}; } &&
   iffv1(){ iff1 "${@:-""}" | xargs -r0 ${VI:-vi}; }
+else
+  ffv()  { ${VI:-gvim} $(ff0 "$@" | xargs -r0 printf '%s '); }
+  iffv() { ${VI:-gvim} $(iff0 "$@" | xargs -r0 printf '%s '); }
+  ffv1() { ${VI:-gvim} $(ff1 "$@" | xargs -r0 printf '%s '); }
+  iffv1(){ ${VI:-gvim} $(iff1 "$@" | xargs -r0 printf '%s '); }
+fi
 ffp()  { ff0 "${@:-""}"  | xargs -r0 ${PAGER:-false}; }
 ffp1() { ff1 "${@:-""}"  | xargs -r0 ${PAGER:-false}; }
 ffe()  { ff0 "${@:-""}"  | xargs -r0 ${GEDITOR:-false}; }
@@ -252,6 +257,10 @@ ffc()  { ff0 "${@:-""}"  | xargs -r0 cat ; }
 ffc1() { ff1 "${@:-""}"  | xargs -r0 cat ; }
 ffwc() { ff0 "${@:-""}"  | wc --files0-from=- -l; }
 
+# Grep & open
+refv()  { ${VI:-gvim} $(ref "$@" | awk -F: '{print $1 " +" $2}'); }
+irefv() { ${VI:-gvim} $(iref "$@" | awk -F: '{print $1 " +" $2}'); }
+
 # Stat
 alias fs='stat -c "%s"'
 
@@ -260,9 +269,9 @@ alias mv="mv -i"
 
 # rm files
 if command -v gio >/dev/null; then
-alias trash='gio trash'
+  alias trash='gio trash'
 else
-alias trash='gvfs-trash'
+  alias trash='gvfs-trash'
 fi
 
 # mk/rm dir
