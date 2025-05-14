@@ -172,4 +172,5 @@
     "autoHide.hideOnOpen": false,
     "workbench.activityBar.location": "top",
     "window.commandCenter": false,
+    "chat.agent.enabled": true,
 }
