@@ -73,6 +73,16 @@ FnNoremap <localleader>s	:windo set scrollbind!<CR>
 
 
 " *******************************************************
+" } Show matching bracket/parenthesis/block {
+" *******************************************************
+
+" Show matching bracket/parenthesis/block
+" https://vim.fandom.com/wiki/Moving_to_matching_braces
+inoremap } }<Left><c-o>%<c-o>:sleep 500m<CR><c-o>%<c-o>a
+inoremap ] ]<Left><c-o>%<c-o>:sleep 500m<CR><c-o>%<c-o>a
+inoremap ) )<Left><c-o>%<c-o>:sleep 500m<CR><c-o>%<c-o>a
+
+" *******************************************************
 " } Inline increment/decrement function {
 " *******************************************************
 
