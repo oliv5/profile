@@ -234,6 +234,11 @@ augroup vimrc_cursor_lastpos
 		\ endif
 augroup END
 
+" Show matching bracket/parenthesis/block
+" https://vim.fandom.com/wiki/Moving_to_matching_braces
+set showmatch
+set matchtime=3
+
 
 " *******************************************************
 " } Text Formatting {
