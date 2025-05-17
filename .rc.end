@@ -239,9 +239,9 @@ alias pkexec='pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 # Search and process
 unalias ffv ffv1 ffp ffp1 ffe ffe1 ffo ffo1 ffc ffc1 ffwc 2>/dev/null || true
 if which "${VI:-gvim}" >/dev/null; then
-  ffv()  { ff0 "${@:-""}"  | xargs -r0 ${VI:-vi}; } &&
+  ffv()  { ff0 "${@:-""}"  | xargs -r0 ${VI:-vi}; }
   iffv() { iff0 "${@:-""}" | xargs -r0 ${VI:-vi}; }
-  ffv1() { ff1 "${@:-""}"  | xargs -r0 ${VI:-vi}; } &&
+  ffv1() { ff1 "${@:-""}"  | xargs -r0 ${VI:-vi}; }
   iffv1(){ iff1 "${@:-""}" | xargs -r0 ${VI:-vi}; }
 else
   ffv()  { ${VI:-gvim} $(ff0 "$@" | xargs -r0 printf '%s '); }
