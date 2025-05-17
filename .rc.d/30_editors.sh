@@ -70,6 +70,7 @@ if command -v nvim-qt >/dev/null; then
       ARG="$(echo "$ARG" | awk -F':' '{ if (length($1)>0) printf "\"%s\"",$1; if (length($2)>0) {printf " +%s",$2} }')"
       ARGS="${ARGS:+$ARGS }$ARG"
     done
+    [ -z "$ARGS" ] && return
     if pgrep nvim >/dev/null; then
       eval command nvr --remote $ARGS
       command -v wmctrl >/dev/null && wmctrl -R Neovim

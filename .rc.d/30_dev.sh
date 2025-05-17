@@ -8,6 +8,34 @@ _dfind() { local DIR="$(dirname "$1")"; if git_exists "$DIR"; then git ls-files 
 alias rff='_rfind'
 _rfind() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then git_worktree "$@"; fi };
 
+# Find source file - add support for source code line number to existing ffind-style fct
+alias sff='_sfind'
+_sfind() {
+  for F; do
+	local FILE="${F%%:*}"
+	local LINE="${F#*:}"; LINE="${LINE%%:*}"; [ "$LINE" = "$F" ] && LINE=""
+	local EOL="\n" NULL=""
+	if [ "${FARGS%%-0*}" != "$FARGS" ]; then
+		EOL="\0"; NULL="0"
+	elif [ "${FARGS%%-print0*}" != "$FARGS" ]; then
+		EOL="\0"; NULL="0"
+	fi
+	__sfind "$FILE" | xargs -r$NULL printf "%s${LINE:+:$LINE}${EOL}"
+  done
+}
+if ! command -v __sfind >/dev/null; then
+	# Hook either __fdfind or _ffind
+	if command -v __fdfind >/dev/null; then
+		eval "__sfind() { $(type __fdfind 2>/dev/null | head -n -1 | tail -n +4); }"
+		__fdfind() { _sfind "$@"; }
+	elif command -v _ffind >/dev/null; then
+		eval "__sfind() { $(type _ffind 2>/dev/null | head -n -1 | tail -n +4); }"
+		_ffind() { _sfind "$@"; }
+	else
+		unset -f _sfind
+	fi
+fi
+
 # Grep based code search
 _dgrep1()   { local A="$2" B="$1" C="$3"; shift $(($#<3?$#:3)); (set -f; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$A" "${C:-.}/$B"); }
 _dgrep2()   { local A="$2" B="$1" C="$3"; shift $(($#<3?$#:3)); (set -f; _fgrep2 "$A" ${_DG2EXCLUDE} "$@" "${C:-.}/$B"); }
