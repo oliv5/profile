@@ -113,12 +113,12 @@ shell_reload() {
 }
 
 # Returns true for interactive shells
-# Oneliner: shell_isinteractive() { case $- in *i*) return 0;; *) return 1;; "") [ -t "0" ] || ! [ -p /dev/stdin ];; esac; }
+# Oneliner: shell_isinteractive() { case $- in *i*) return 0;; *) [ -t "0" ] || ! [ -p /dev/stdin ];; esac; }
 shell_isinteractive() {
   case $- in
     *i*) return 0;; # for bash
-    *) return 1;; # for bash
-    "") [ -t "0" ] || ! [ -p /dev/stdin ] # not bash: test whether stdin exists
+    #*) return 1;; # for bash-only [not working?]
+    *) [ -t "0" ] || ! [ -p /dev/stdin ] # not bash: test whether stdin exists
   esac
 }
 
