@@ -424,7 +424,8 @@ log() {
 
 # system upgrade
 alias sysup='screen -c /dev/null -m sudo sh -c " \
-  set +e; \
+  set +e; set -x; \
+  echo System update starting...; \
   command -v apt-get >/dev/null && \
     apt-get update && \
     apt-get full-upgrade && \
@@ -432,11 +433,13 @@ alias sysup='screen -c /dev/null -m sudo sh -c " \
   command -v pkcon >/dev/null && \
     pkcon refresh && \
     pkcon get-updates && \
-    pkcon update; && \
+    pkcon update; \
   command -v snap >/dev/null && \
     snap refresh; \
   command -v flatpak >/dev/null && \
     flatpak upgrade; \
+  echo Done... press enter to quit; \
+  read VAR; \
   screen -X quit; \
 "'
 
