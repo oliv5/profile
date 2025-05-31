@@ -20,20 +20,22 @@ _sfind() {
 		EOL="\0"; NULL="0"
 	elif [ "${FARGS%%-print0*}" != "$FARGS" ]; then
 		EOL="\0"; NULL="0"
+	elif [ "${*%%-0*}" != "$*" ]; then
+		EOL="\0"; NULL="0"
+	elif [ "${*%%-print0*}" != "$*" ]; then
+		EOL="\0"; NULL="0"
 	fi
 	__sfind "$FILE" "$@" | xargs -r$NULL printf "%s${LINE:+:$LINE}${EOL}"
 }
-if ! command -v __sfind >/dev/null; then
-	# Hook either __fdfind or _ffind
-	if command -v __fdfind >/dev/null; then
-		eval "__sfind() { $(type __fdfind 2>/dev/null | head -n -1 | tail -n +4); }"
-		__fdfind() { _sfind "$@"; }
-	elif command -v _ffind >/dev/null; then
-		eval "__sfind() { $(type _ffind 2>/dev/null | head -n -1 | tail -n +4); }"
-		_ffind() { _sfind "$@"; }
-	else
-		unset -f _sfind
-	fi
+# Hook either __fdfind or _ffind
+if command -v __fdfind >/dev/null; then
+	eval "__sfind() { $(type __fdfind 2>/dev/null | head -n -1 | tail -n +4); }"
+	__fdfind() { _sfind "$@"; }
+elif command -v _ffind >/dev/null; then
+	eval "__sfind() { $(type _ffind 2>/dev/null | head -n -1 | tail -n +4); }"
+	_ffind() { _sfind "$@"; }
+else
+	unset -f _sfind
 fi
 
 # Grep based code search
