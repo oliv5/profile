@@ -7,12 +7,13 @@ macro InsertLine(txt, ln) {
 
 macro AppendTxt(txt, ln) {
   hbuf = GetCurrentBuf()
-  if "@ln@" == ")" ln = GetBufLnCur(hbuf)
+  if ln == ")" ln = GetBufLnCur(hbuf)
   line = GetBufLine(hbuf, ln)
   txt = cat(line, txt)
   putBufLine(hbuf, ln, txt)
 }
 
+/******************/
 macro DoxygenFile() {
   InsertLine("/**")
   InsertLine(" * \file ")
@@ -46,4 +47,21 @@ macro DoxygenVar() {
 
 macro DoxygenField() {
   AppendTxt(" /*!< ... */")
+}
+
+/******************/
+macro SnippetPrintfC() {
+  InsertLine("fprintf(stderr, \"here\\n\");")
+}
+
+macro SnippetDebugPrintfC() {
+  InsertLine("fprintf(stderr, \"%s:%s:%d - %s\\n\", __FUNCTION__, __FILE__, __LINE__, \"here\");")
+}
+
+macro SnippetPrintfCpp() {
+  InsertLine("cerr << \"here\\n\";")
+}
+
+macro SnippetDebugPrintfCpp() {
+  InsertLine("cerr << __FUNCTION__ << \":\" <<__FILE__ << \":\" << __LINE__ << \" - \" << \"here\\n\";")
 }

@@ -53,7 +53,7 @@
 			CascadeNewWindows="1"
 			ShowProjectInWorkspace="1"
 			ShowOutlineHover="1"
-			AlwaysShowOutlineMarks="0"
+			AlwaysShowOutlineMarks="1"
 			OutlineIndent="0"
 			OutlineAllBlocks="1"
 			ShowNestingLines="1"
@@ -107,7 +107,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</DefaultPanelFontAndColor>
 	</DisplayPreferences>
 	<EditingPreferences
@@ -116,14 +116,14 @@
 		BounceParens="1"
 		KeepCursorInWindow="1"
 		UseBlockCursor="0"
-		UseSmartTab="0"
+		UseSmartTab="1"
 		TabIndentsLine="0"
 		TabReplacesSelection="1"
 		IndentPreprocStatments="0"
 		UseSmartPaste="1"
 		SelectLinesAfterPaste="0"
 		SelectAfterPaste="End"
-		UseAutoComplete="1"
+		UseAutoComplete="0"
 		AutoCompleteDetailMode="1"
 		AutoCompleteInsertParams="1"
 		AutoCompleteInComments="0"
@@ -136,7 +136,7 @@
 		/>
 	<SyntaxFormatting
 		UseSyntaxFormatting="1"
-		UseOnlyColor="0"
+		UseOnlyColor="1"
 		UseNoColor="0"
 		>
 		<ApplyStylesFor
@@ -180,7 +180,7 @@
 		<Item Name="ChangeMarks" Color="#ffff00" />
 		<Item Name="SavedChangeMarks" Color="#bdddba" />
 		<Item Name="CurrentLineIndicator" Color="#e6e6e6" />
-		<Item Name="EndofFile" Color="#bcd6dc" />
+		<Item Name="EndofFile" Color="#c0c0c0" />
 		<Item Name="ApplicationBackground" Color="#808080" />
 		<Item Name="FrameText" Color="#000000" />
 		<Item Name="FrameBackground" Color="#dbe2ea" />
@@ -206,7 +206,7 @@
 		ConfirmDelete="1"
 		BlockBinaryFiles="1"
 		OpenBackupsAsReadOnly="1"
-		DefaultFileFormat="1"
+		DefaultFileFormat="2"
 		DefaultEncoding="65001"
 		FileOpenAction="Project File List"
 		/>
@@ -431,11 +431,21 @@
 	</Menus>
 	<Keymaps>
 		<Main>
+			<item Command="SnippetPrintfCpp" Keycode="(S)F8" Allocated="1" />
+			<item Command="SnippetPrintfC" Keycode="F8" Allocated="1" />
+			<item Command="SnippetDebugPrintfCpp" Keycode="(S)F7" Allocated="1" />
+			<item Command="SnippetDebugPrintfC" Keycode="F7" Allocated="1" />
+			<item Command="Insert Snippet" Keycode="(C)F7" />
+			<item Command="Select Word" Keycode="(CS)W" />
+			<item Command="Select Block" Keycode="(CS)PgDn" />
+			<item Command="Select Block" Keycode="(CS)PgUp" />
+			<item Command="Select Word" Keycode="(C)W" />
+			<item Command="Custom Commands..." Keycode="(CA)M" />
+			<item Command="Activate Context Menu" Keycode="(A)C" />
 			<item Command="Symbol Info..." Keycode="(CS)BackSpace" />
 			<item Command="Browse Project Symbols..." Keycode="(C)BackSpace" />
 			<item Command="Function Up" Keycode="(CA)Up" />
 			<item Command="Function Down" Keycode="(CA)Down" />
-			<item Command="Select Block" Keycode="(C)W" />
 			<item Command="Block Up" Keycode="(C)Up" />
 			<item Command="Block Down" Keycode="(C)Down" />
 			<item Command="Run Project" Keycode="F5" Allocated="1" />
@@ -487,8 +497,6 @@
 			<item Command="InsertFileHeader" Keycode="(C)F10" Allocated="1" />
 			<item Command="IfdefNever" Keycode="(S)F10" Allocated="1" />
 			<item Command="InsertIfdef" Keycode="F10" Allocated="1" />
-			<item Command="InsertScratch" Keycode="F8" Allocated="1" />
-			<item Command="InsertLogTest" Keycode="(S)F8" Allocated="1" />
 			<item Command="DoxygenFile" Keycode="(A)F9" Allocated="1" />
 			<item Command="DoxygenVar" Keycode="(C)F9" Allocated="1" />
 			<item Command="DoxygenField" Keycode="(S)F9" Allocated="1" />
@@ -514,9 +522,6 @@
 			<item Command="Go Back Toggle" Keycode="(A)Enter" />
 			<item Command="Select Paragraph" Keycode="(A)F6" />
 			<item Command="Select Sentence" Keycode="(S)F6" />
-			<item Command="Select Match" Keycode="(C)F7" />
-			<item Command="Paren Left" Keycode="(S)F7" />
-			<item Command="Activate Context Menu" Keycode="(A)C" />
 			<item Command="Activate Project Menu" Keycode="(A)P" />
 			<item Command="Reload File" Keycode="(CS)R" />
 			<item Command="Smart Rename..." Keycode="(C)R" />
@@ -551,7 +556,6 @@
 			<item Command="Activate File Menu" Keycode="(A)F" />
 			<item Command="Activate Edit Menu" Keycode="(A)E" />
 			<item Command="Activate Search Menu" Keycode="(A)S" />
-			<item Command="Activate Window Menu" Keycode="(A)W" />
 			<item Command="Activate Help Menu" Keycode="(A)H" />
 			<item Command="Activate Options Menu" Keycode="(A)O" />
 			<item Command="Activate View Menu" Keycode="(A)V" />
@@ -646,15 +650,16 @@
 				Command="Activate Project Symbol List"
 				Keycode="(CA)BackSpace"
 				/>
+			<item Command="Pick Window..." Keycode="(A)W" />
 		</Main>
 	</Keymaps>
 	<CustomCommands>
 		<Command
 			Name="Build Project"
-			RunText="%APPDATA_DIR%\..\..\bin\wsl.bat %j /home/olivier/bin/si_build.sh %j"
+			RunText="c:\xterm.bat %j make -s pucchsim"
 			WorkingDir=""
 			NormalWindow="0"
-			CaptureOutput="1"
+			CaptureOutput="0"
 			PasteOutput="0"
 			SaveFilesFirst="1"
 			PauseWhenDone="0"
@@ -662,11 +667,11 @@
 			WaitUntilDone="0"
 			ReloadFiles="0"
 			ExitToWindows="0"
-			ParseOutput="1"
+			ParseOutput="0"
 			LineThenFile="0"
 			RegexType="Source Insight"
 			Preset="0"
-			ParsePattern="^\([^\:]+\):\([0-9]+\):.*"
+			ParsePattern=""
 			/>
 		<Command
 			Name="Check In"
@@ -764,6 +769,44 @@
 			ParsePattern="^\([a-zA-Z].*\)(\([0-9][0-9]*\)).*"
 			/>
 		<Command
+			Name="EX: run in WSL"
+			RunText="%APPDATA_DIR%\..\..\bin\wsl.bat %j /home/olivier/bin/si_build.sh %j"
+			WorkingDir=""
+			NormalWindow="0"
+			CaptureOutput="1"
+			PasteOutput="0"
+			SaveFilesFirst="1"
+			PauseWhenDone="0"
+			BeepWhenDone="0"
+			WaitUntilDone="0"
+			ReloadFiles="0"
+			ExitToWindows="0"
+			ParseOutput="1"
+			LineThenFile="0"
+			RegexType="Source Insight"
+			Preset="0"
+			ParsePattern="^\([^\:]+\):\([0-9]+\):.*"
+			/>
+		<Command
+			Name="EX: run in xterm"
+			RunText="c:\xterm.bat %j make -s pucchsim"
+			WorkingDir=""
+			NormalWindow="0"
+			CaptureOutput="0"
+			PasteOutput="0"
+			SaveFilesFirst="1"
+			PauseWhenDone="0"
+			BeepWhenDone="0"
+			WaitUntilDone="0"
+			ReloadFiles="0"
+			ExitToWindows="0"
+			ParseOutput="0"
+			LineThenFile="0"
+			RegexType="Source Insight"
+			Preset="0"
+			ParsePattern=""
+			/>
+		<Command
 			Name="Explore Project Folder"
 			RunText="ShellExecute explore %j"
 			WorkingDir=""
@@ -803,7 +846,7 @@
 			/>
 		<Command
 			Name="Run Project"
-			RunText="%APPDATA_DIR%\..\..\bin\wsl.bat %j /home/olivier/bin/si_run.sh %j -O ci-scripts/conf_files/enb.band3.tm1.6PRB.emtc.srsepc.conf"
+			RunText="c:\xterm.bat %j sudo ./cmake_targets/ran_build/build/lte-softmodem -O ci-scripts/conf_files/test.enb.band8.tm1.6PRB.emtc.srsepc.conf"
 			WorkingDir=""
 			NormalWindow="1"
 			CaptureOutput="0"
@@ -1123,7 +1166,7 @@
 			AllowSmartPaste="1"
 			AllowSnippets="1"
 			ShowRefHighlights="1"
-			TabWidth="2"
+			TabWidth="4"
 			MarginWidth="120"
 			IndentWidth="4"
 			AutoInsertPairs="1"
@@ -1132,7 +1175,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="0"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Tahoma" psize="10" fpfamily="34" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1222,7 +1265,7 @@
 			VisibleTabs="0"
 			VisibleSpaces="0"
 			VisibleEOL="0"
-			ShowLineNumbers="0"
+			ShowLineNumbers="1"
 			ShowRightMargin="0"
 			ShowPageBreaks="0"
 			UseSymbolPane="1"
@@ -2075,7 +2118,7 @@
 	<Styles
 		StyleAppVer="4.00.0126"
 		>
-		<Style Name="Default Text" TextColor="#000000" />
+		<Style Name="Default Text" />
 		<Style
 			Name="Number"
 			TextColor="#ff0000"
@@ -7603,7 +7646,7 @@
 		>
 		<SearchDialogs>
 			<Search
-				RegexType="Perl Compatible"
+				RegexType="Source Insight"
 				IgnoreCase="1"
 				UseRegexp="0"
 				WrapAround="1"
@@ -7629,10 +7672,10 @@
 				ResultNormalizeFileNames="1"
 				/>
 			<LookupReferences
-				SearchMethod="Keyword Expression"
+				SearchMethod="Simple String"
 				RegexType="Source Insight"
 				IgnoreCase="1"
-				FindWholeWords="1"
+				FindWholeWords="0"
 				SkipComments="0"
 				OnlyComments="0"
 				SkipDeadCode="0"
@@ -7649,7 +7692,7 @@
 			<SearchProject
 				SearchMethod="Keyword Expression"
 				RegexType="Source Insight"
-				IgnoreCase="0"
+				IgnoreCase="1"
 				FindWholeWords="1"
 				SkipComments="0"
 				OnlyComments="0"
@@ -7826,9 +7869,9 @@
 		<SymbolTypes All="1" />
 	</ProjectReport>
 	<SymbolPane
-		Width="265"
+		Width="254"
 		TextColor="#000000"
-		BackColor="#c5d2de"
+		BackColor="#ffffff"
 		ShowChanges="1"
 		ShowLongFunctions="1"
 		>
@@ -8103,7 +8146,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</BookmarkWindow>
 	<SnippetWindow>
@@ -8122,7 +8165,7 @@
 				TextColor="#000000"
 				BackColor="#ffffff"
 				>
-				<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+				<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 			</ListDisplay>
 		</SnippetWindowOptions>
 	</SnippetWindow>
@@ -8136,9 +8179,9 @@
 		>
 		<ListDisplay
 			TextColor="#000000"
-			BackColor="#ffffc8"
+			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ClipWindow>
 	<ContextWindow
@@ -8155,7 +8198,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 		<TrackingOptions tracktype="1" InComments="0" InStrings="0" InAnyFile="0" />
 	</ContextWindow>
@@ -8173,7 +8216,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</DirectoryCompareWindow>
 	<FileCompareWindow
@@ -8194,7 +8237,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</FileCompareWindow>
 	<ProjectFileWindow
@@ -8210,7 +8253,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ProjectFileWindow>
 	<ProjectFileTypeWindow
@@ -8225,7 +8268,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ProjectFileTypeWindow>
 	<ProjectFolderWindow
@@ -8239,7 +8282,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ProjectFolderWindow>
 	<ProjectSymbolWindow
@@ -8299,7 +8342,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ProjectSymbolWindow>
 	<ProjectSymbolTypeWindow
@@ -8371,7 +8414,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ProjectSymbolTypeWindow>
 	<WindowListWindow
@@ -8383,7 +8426,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</WindowListWindow>
 	<RelationWindow>
@@ -8394,7 +8437,7 @@
 				TextColor="#000000"
 				BackColor="#ffffff"
 				>
-				<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+				<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 			</ListOptions>
 			<GraphOptions
 				LayoutStyle="1"
@@ -8433,11 +8476,11 @@
 				CodeMetricsType="0"
 				SortType="1"
 				>
-				<TrackingOptions tracktype="1" InComments="0" InStrings="0" InAnyFile="1" />
+				<TrackingOptions tracktype="1" InComments="0" InStrings="0" InAnyFile="0" />
 				<SymbolTypes All="1" />
 				<CodeMetricsFilter CodeMetricsType="0" MinValue="0" MaxValue="0" />
 				<ViewRelationRules
-					ForTypes="Referenced by Types"
+					ForTypes="References"
 					ForFunctions="References"
 					ForVariables="References"
 					ForClasses="Base Classes"
@@ -8477,7 +8520,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Segoe UI" psize="9" fpfamily="0" charset="1" />
+			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</FTPWindow>
 </SourceInsightConfiguration>
