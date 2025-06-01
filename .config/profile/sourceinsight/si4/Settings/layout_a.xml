@@ -10,17 +10,17 @@
 		IsFullScreen="0"
 		>
 		<WindowRect Left="0" Top="27" Right="2560" Bottom="1440" />
-		<NormalWindowRect Left="441" Top="171" Right="2293" Bottom="1162" />
+		<NormalWindowRect Left="651" Top="179" Right="2124" Bottom="1181" />
 	</MainWindow>
 	<Options>
-		<WindowTabOptions IsVisible="1" ShowPathInfo="0" SortOrder="Usage" />
+		<WindowTabOptions IsVisible="1" ShowPathInfo="1" SortOrder="Name" />
 	</Options>
 	<PanelArea>
 		<WorkArea Left="4" Top="92" Right="2556" Bottom="1416" />
 		<TabTray IsVisible="0" />
 		<DockZones>
 			<Left>
-				<Rect Left="4" Top="95" Right="7" Bottom="1140" />
+				<Rect Left="4" Top="95" Right="7" Bottom="1138" />
 				<Contents>
 					<PanelHost
 						Title="Symbol Categories"
@@ -28,10 +28,10 @@
 						IsHidden="1"
 						PctTrans="0"
 						IsMinimized="0"
-						PanelCount="2"
+						PanelCount="1"
 						idPalActive="ProjectSymbolCategoryPanel"
 						>
-						<WindowRect Left="4" Top="95" Right="32771" Bottom="2595" />
+						<WindowRect Left="4" Top="95" Right="32680" Bottom="1386" />
 						<PredockRect Left="479" Top="280" Right="1630" Bottom="1130" />
 						<Panels>
 							<Panel
@@ -44,18 +44,6 @@
 									<Column1 ID="0" Width="120" />
 								</Columns>
 							</Panel>
-							<Panel
-								id="ProjectFileCatagoryPanel"
-								IsHidden="0"
-								ViewToolbar="1"
-								>
-								<Columns>
-									<Column0 ID="5" Width="192" />
-									<Column1 ID="1" Width="96" />
-									<Column2 ID="2" Width="96" />
-									<Column3 ID="4" Width="96" />
-								</Columns>
-							</Panel>
 						</Panels>
 					</PanelHost>
 				</Contents>
@@ -65,7 +53,7 @@
 				<Contents/>
 			</Top>
 			<Right>
-				<Rect Left="2208" Top="95" Right="2556" Bottom="1140" />
+				<Rect Left="2302" Top="95" Right="2556" Bottom="1138" />
 				<Contents>
 					<PanelHost
 						Title="Project Files"
@@ -76,7 +64,7 @@
 						PanelCount="3"
 						idPalActive="ProjectFilePanel"
 						>
-						<WindowRect Left="2211" Top="95" Right="2556" Bottom="779" />
+						<WindowRect Left="2307" Top="95" Right="2556" Bottom="618" />
 						<PredockRect Left="374" Top="329" Right="2934" Bottom="1729" />
 						<Panels>
 							<Panel
@@ -85,8 +73,8 @@
 								ViewToolbar="0"
 								>
 								<Columns>
-									<Column0 ID="0" Width="223" />
-									<Column1 ID="1" Width="416" />
+									<Column0 ID="0" Width="150" />
+									<Column1 ID="1" Width="200" />
 								</Columns>
 							</Panel>
 							<Panel
@@ -121,7 +109,7 @@
 						PanelCount="1"
 						idPalActive="BookmarkPanel"
 						>
-						<WindowRect Left="2213" Top="779" Right="2556" Bottom="1140" />
+						<WindowRect Left="2307" Top="618" Right="2556" Bottom="1138" />
 						<PredockRect Left="594" Top="365" Right="1094" Bottom="602" />
 						<Panels>
 							<Panel id="BookmarkPanel" IsHidden="0" ViewToolbar="1" />
@@ -130,10 +118,10 @@
 				</Contents>
 			</Right>
 			<Bottom>
-				<Rect Left="4" Top="1140" Right="2556" Bottom="1416" />
+				<Rect Left="4" Top="1138" Right="2556" Bottom="1416" />
 				<Contents>
 					<PanelHost
-						Title="Context"
+						Title="main::pucch_payload_tx"
 						id="ContextPanelHost"
 						IsHidden="0"
 						PctTrans="0"
@@ -141,7 +129,7 @@
 						PanelCount="1"
 						idPalActive="ContextPanel"
 						>
-						<WindowRect Left="4" Top="1152" Right="965" Bottom="1416" />
+						<WindowRect Left="4" Top="1142" Right="1125" Bottom="1416" />
 						<PredockRect Left="1061" Top="533" Right="1499" Bottom="908" />
 						<Panels>
 							<Panel id="ContextPanel" IsHidden="0" ViewToolbar="0" />
@@ -156,7 +144,7 @@
 						PanelCount="1"
 						idPalActive="RelationPanel"
 						>
-						<WindowRect Left="1741" Top="1152" Right="2556" Bottom="1416" />
+						<WindowRect Left="1863" Top="1145" Right="2556" Bottom="1416" />
 						<PredockRect Left="1155" Top="1005" Right="1635" Bottom="1273" />
 						<Panels>
 							<Panel
@@ -205,7 +193,7 @@
 						PanelCount="1"
 						idPalActive="RelationPanel"
 						>
-						<WindowRect Left="965" Top="1152" Right="1741" Bottom="1416" />
+						<WindowRect Left="1125" Top="1145" Right="1863" Bottom="1416" />
 						<PredockRect Left="1155" Top="1109" Right="1635" Bottom="1366" />
 						<Panels>
 							<Panel
@@ -226,11 +214,11 @@
 									CodeMetricsType="0"
 									SortType="1"
 									>
-									<TrackingOptions tracktype="1" InComments="0" InStrings="0" InAnyFile="0" />
+									<TrackingOptions tracktype="1" InComments="0" InStrings="0" InAnyFile="1" />
 									<SymbolTypes All="1" />
 									<CodeMetricsFilter CodeMetricsType="0" MinValue="0" MaxValue="0" />
 									<ViewRelationRules
-										ForTypes="References"
+										ForTypes="Referenced by Types"
 										ForFunctions="References"
 										ForVariables="References"
 										ForClasses="Base Classes"
@@ -238,9 +226,9 @@
 										/>
 								</RelationOptions>
 								<Columns>
-									<Column0 ID="0" Width="291" />
-									<Column1 ID="2" Width="396" />
-									<Column2 ID="3" Width="77" />
+									<Column0 ID="0" Width="359" />
+									<Column1 ID="2" Width="220" />
+									<Column2 ID="3" Width="120" />
 								</Columns>
 							</Panel>
 						</Panels>
@@ -258,7 +246,7 @@
 				PanelCount="1"
 				idPalActive="SnippetPanel"
 				>
-				<WindowRect Left="1069" Top="296" Right="1603" Bottom="610" />
+				<WindowRect Left="1069" Top="296" Right="1619" Bottom="626" />
 				<PredockRect Left="100" Top="210" Right="650" Bottom="400" />
 				<Panels>
 					<Panel
@@ -284,7 +272,7 @@
 				PanelCount="1"
 				idPalActive="ClipPanel"
 				>
-				<WindowRect Left="306" Top="417" Right="678" Bottom="601" />
+				<WindowRect Left="306" Top="417" Right="694" Bottom="617" />
 				<PredockRect Left="175" Top="300" Right="563" Bottom="500" />
 				<Panels>
 					<Panel id="ClipPanel" IsHidden="0" ViewToolbar="1" />
@@ -299,7 +287,7 @@
 				PanelCount="1"
 				idPalActive="WindowPanel"
 				>
-				<WindowRect Left="618" Top="299" Right="1040" Bottom="533" />
+				<WindowRect Left="618" Top="299" Right="1056" Bottom="549" />
 				<PredockRect Left="125" Top="250" Right="563" Bottom="500" />
 				<Panels>
 					<Panel
