@@ -192,6 +192,16 @@
 // Editor misc
 { "key": "ctrl+shift+x",          "command": "workbench.action.files.toggleActiveEditorReadonlyInSession" },
 
+// Code snippets
+{ "key": "f7",                    "command": "editor.action.insertSnippet", "when": "editorTextFocus && editorLangId==c", "args": { "snippet": "fprintf(stderr, \"%s:%s:%d - %s\\n\", __FUNCTION__, __FILE__, __LINE__, \"here\");\n$0" } },
+{ "key": "f7",                    "command": "editor.action.insertSnippet", "when": "editorTextFocus && editorLangId==cpp", "args": { "snippet": "cerr << __FUNCTION__ << \":\" << __FILE__ << \":\" << __LINE__ << \" - here\";\n$0" } },
+{ "key": "f7",                    "command": "editor.action.insertSnippet", "when": "editorTextFocus && editorLangId==python", "args": { "snippet": "from inspect import currentframe, getframeinfo; info = getframeinfo(currentframe()); print(info.filename, info.lineno)\n$0" }},
+{ "key": "shift+f7",              "command": "editor.action.insertSnippet", "when": "editorTextFocus && editorLangId==c", "args": { "snippet": "fprintf(stderr, \"here\");\n$0" } },
+{ "key": "shift+f7",              "command": "editor.action.insertSnippet", "when": "editorTextFocus && editorLangId==cpp", "args": { "snippet": "cerr << \"here\";\n$0" } },
+{ "key": "shift+f7",              "command": "editor.action.insertSnippet", "when": "editorTextFocus && editorLangId==python", "args": { "snippet": "print(\"here\")\n$0" } },
+{ "key": "f8",                    "command": "editor.action.insertSnippet", "when": "editorTextFocus && editorLangId==python", "args": { "snippet": "import pdb; pdb.set_trace()\n$0" } },
+{ "key": "shift+f8",              "command": "editor.action.insertSnippet", "when": "editorTextFocus && editorLangId==python", "args": { "snippet": "import ipdb; ipdb.set_trace()\n$0" } },
+
 // Intellisense peek/preview
 { "key": "ctrl+d ctrl+d",         "command": "editor.action.peekDeclaration", "when": "editorHasDeclarationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
 { "key": "ctrl+d ctrl+e",         "command": "editor.action.peekDefinition", "when": "editorHasDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
