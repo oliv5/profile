@@ -914,6 +914,12 @@ annex_copy() { DROP="" _annex_copy "$@"; }
 annex_move() { DROP=1 _annex_copy "$@"; }
 annex_unload() { UNUSED=1 DROP=1 _annex_copy "$@"; }
 
+annex_copy_missing() {
+  local REPO="${1:?No repo specified...}"
+  shift
+  git annex copy --not --in "$REPO" --to "$REPO" "$@"
+}
+
 ########################################
 # Drop local files which are in the specified remote repos
 alias annex_drop='git annex drop -N $(annex_enabled | wc -w)'
