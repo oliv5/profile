@@ -748,11 +748,11 @@ _annex_export() {
   local REPOS="${1:-$(annex_exported)}"
   local MAXSIZE="${2:-4294967296}"
   local DBG="${DBG:+echo}"
-  local SELECTED=""
+  local SELECT="${SELECT:-missing}"
   [ $# -le 2 ] && shift $# || shift 2
   REPOS="$(annex_remotes $REPOS)"
   [ -z "$REPOS" ] && return 0
-  SELECT="${SELECT:-missing}"
+  local SELECTED=""
   if [ "$SELECT" = "missing" ]; then
     for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--not --in $REPO"; done
   elif [ "$SELECT" = "want-get" ] && [ $(annex_version) -ge $(annex_version 9.0) ]; then
