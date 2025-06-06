@@ -1593,6 +1593,11 @@ git_squash() {
       git commit --edit -m "$LOG"
   ' _
 }
+git_autosquash() {
+  git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
+    git rebase --autosquash "${1}~1"
+  ' _
+}
 git_fixup() {
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
     { ! git diff --quiet || ! git diff --cached --quiet; } &&
