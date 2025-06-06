@@ -310,10 +310,10 @@ if has("folding")
 endif
 
 " Key mapping
-FnNoremap <F6>       zo  " Open
-FnNoremap <S-F6>     zc  " Close
-FnNoremap <C-F6>     zO  " Open all
-FnNoremap <M-F6>     zC  " Close all
+FnNoremap <F7>       zo  " Open
+FnNoremap <S-F7>     zc  " Close
+FnNoremap <C-F7>     zO  " Open all
+FnNoremap <M-F7>     zC  " Close all
 
 
 " *******************************************************
@@ -654,6 +654,7 @@ vnoremap <A-g><A-g>         "+y:RGrepCount<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 " Make program (default values)
 "set makeprg=make\ $*
 "set makeformat=%f:%l:%m
+let &makeprg='cd '.g:FindRootDir().' && make $*'
 
 " Fix make errors encoding
 function! QfRemoveAnsiColor()
@@ -669,6 +670,10 @@ endfunction
 if has('quickfix')
 	autocmd! QuickfixCmdPost make call QfRemoveAnsiColor()
 endif
+
+" Key mappings
+FnNoremap <F6>   :make<CR>
+
 
 
 " *******************************************************
