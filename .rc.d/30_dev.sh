@@ -11,21 +11,18 @@ _rfind() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then gi
 # Find source file - add support for source code line number to existing ffind-style fct
 alias sff='_sfind'
 _sfind() {
-	local F="${1:?No file pattern specified...}"
+	local F="${1:-*}"
 	shift
 	local FILE="${F%%:*}"
 	local LINE="${F#*:}"; LINE="${LINE%%:*}"; [ "$LINE" = "$F" ] && LINE=""
-	local EOL="\n" NULL=""
-	if [ "${FARGS%%-0*}" != "$FARGS" ]; then
-		EOL="\0"; NULL="0"
-	elif [ "${FARGS%%-print0*}" != "$FARGS" ]; then
-		EOL="\0"; NULL="0"
-	elif [ "${*%%-0*}" != "$*" ]; then
-		EOL="\0"; NULL="0"
-	elif [ "${*%%-print0*}" != "$*" ]; then
-		EOL="\0"; NULL="0"
+	local EOL="\n" NULL="-0"
+	if 	[ "${FARGS%%-0*}" != "$FARGS" ] ||
+		[ "${FARGS%%-print0*}" != "$FARGS" ] ||
+		[ "${*%%-0*}" != "$*" ] ||
+		[ "${*%%-print0*}" != "$*" ]; then
+			EOL="\0"; NULL=""
 	fi
-	__sfind "$FILE" "$@" | xargs -r$NULL printf "%s${LINE:+:$LINE}${EOL}"
+	__sfind "$FILE" $NULL "$@" | xargs -r0 printf "%s${LINE:+:$LINE}${EOL}"
 }
 # Hook either __fdfind or _ffind
 if command -v __fdfind >/dev/null; then
