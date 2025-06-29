@@ -7,7 +7,7 @@ zstdq() {
     if [ "$SRC" != "${SRC%.zst}" ]; then
       zstdd "." "$SRC"
     else
-      zstda "${SRC%%/*}.zst" "$SRC"
+      zstda "${SRC%/}.zst" "$SRC"
     fi
   done
 }

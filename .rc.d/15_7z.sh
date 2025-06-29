@@ -20,7 +20,7 @@ _7z() {
     if [ "$SRC" != "${SRC%.7z}" ]; then
       _7zd "." "$SRC"
     else
-      _7za "${SRC%%/*}.7z" "$SRC"
+      _7za "${SRC%/}.7z" "$SRC"
     fi
   done
 }
@@ -29,7 +29,8 @@ _7z() {
 _7za() {
   local ARCHIVE="${1:?No archive to create...}"
   shift 1
-  7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off "$ARCHIVE" "$@"
+  7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off "$ARCHIVE" "$@" &&
+    echo "$ARCHIVE"
 }
 
 # 7z deflate
@@ -51,7 +52,7 @@ _7zg() {
     if [ "$SRC" != "${SRC%.7z.gpg}" ]; then
       _7zgd "." "$SRC"
     else
-      _7zga "$KEY" "${SRC%%/*}.7z.gpg" "$SRC"
+      _7zga "$KEY" "${SRC%/}.7z.gpg" "$SRC"
     fi
   done
 }
@@ -64,8 +65,9 @@ _7zga(){
   # 7z does not support "7z a -so" with 7z compression
   #7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off -an -so "$@" | gpg --encrypt  --batch --recipient "$KEY" -o "$ARCHIVE"
   local TMP="$(mktemp --suffix=.7z -u)"
-  eval 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off "$TMP" "$SRC"
-  gpg --encrypt --batch --recipient "$KEY" -o "$ARCHIVE" "$TMP"
+  eval 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off "$TMP" "$SRC" &&
+    gpg --encrypt --batch --recipient "$KEY" -o "$ARCHIVE" "$TMP" &&
+    echo "$ARCHIVE"
   rm "$TMP"
 }
 

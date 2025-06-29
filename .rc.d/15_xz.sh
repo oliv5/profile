@@ -8,7 +8,7 @@ xzq() {
     if [ "$SRC" != "${SRC%.xz}" ]; then
       xzd "." "$SRC"
     else
-      xza "${SRC%%/*}.xz" "$SRC"
+      xza "${SRC%/}.xz" "$SRC"
     fi
   done
 }
@@ -17,7 +17,8 @@ xzq() {
 xza() {
   local ARCHIVE="${1:?No archive to create...}"
   shift 1
-  command xz -zk9c "$@" > "$ARCHIVE"
+  command xz -zk9c "$@" > "$ARCHIVE" &&
+    echo "$ARCHIVE"
 }
 
 # xz deflate
@@ -42,7 +43,7 @@ xzg() {
     if [ "$SRC" != "${SRC%.xz.gpg}" ]; then
       xzgd "." "$SRC"
     else
-      xzga "$KEY" "${SRC%%/*}.xz.gpg" "$SRC"
+      xzga "$KEY" "${SRC%/}.xz.gpg" "$SRC"
     fi
   done
 }
@@ -52,7 +53,8 @@ xzga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  command xz -zk9c "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  command xz -zk9c "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE" &&
+    echo "$ARCHIVE"
 }
 
 # gpg > xz deflate
