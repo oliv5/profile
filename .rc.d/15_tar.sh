@@ -9,7 +9,7 @@ taz() {
       tad "." "$SRC"
     else
       #tar -cvf "${SRC}.tar" "$SRC"
-      taa "${SRC%%/*}.tar" "$SRC"
+      taa "${SRC%/}.tar" "$SRC"
     fi
   done
 }
@@ -18,7 +18,8 @@ taz() {
 taa() {
   local ARCHIVE="${1:?No archive to create...}"
   shift
-  tar -cvf "$ARCHIVE" "$@"
+  tar -cvf "$ARCHIVE" "$@" &&
+    echo "$ARCHIVE"
 }
 
 # untar
@@ -41,7 +42,7 @@ tag() {
     if [ "$SRC" != "${SRC%.tar.gpg}" ]; then
       tagd "." "$SRC"
     else
-      taga "$KEY" "${SRC%%/*}.tar.gpg" "$SRC" 
+      taga "$KEY" "${SRC%/}.tar.gpg" "$SRC"
     fi
   done
 }
@@ -51,7 +52,8 @@ taga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  tar -cf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  tar -cf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE" &&
+    echo "$ARCHIVE"
 }
 
 # gpg > tar deflate
@@ -74,7 +76,7 @@ tgz() {
       tgzd "." "$SRC"
     else
       #tar -cvzf "${SRC}.tgz" "$SRC"
-      tgza "${SRC%%/*}.tgz" "$SRC"
+      tgza "${SRC%/}.tgz" "$SRC"
     fi
   done
 }
@@ -83,7 +85,8 @@ tgz() {
 tgza() {
   local ARCHIVE="${1:?No archive to create...}"
   shift
-  tar -cvzf "$ARCHIVE" "$@"
+  tar -cvzf "$ARCHIVE" "$@" &&
+    echo "$ARCHIVE"
 }
 
 # gz > tar deflate
@@ -116,7 +119,7 @@ tgzg() {
     if [ "$SRC" != "${SRC%.tgz.gpg}" ] || [ "$SRC" != "${SRC%.tar.gz.gpg}" ]; then
       tgzgd "." "$SRC"
     else
-      tgzga "$KEY" "${SRC%%/*}.tgz.gpg" "$SRC" 
+      tgzga "$KEY" "${SRC%/}.tgz.gpg" "$SRC" 
     fi
   done
 }
@@ -126,7 +129,8 @@ tgzga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  tar -czf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  tar -czf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE" &&
+    echo "$ARCHIVE"
 }
 
 # gpg > gz > tar deflate
@@ -149,7 +153,7 @@ tbz() {
       tbzd "." "$SRC"
     else
       #tar -cvjf "${SRC}.tbz" "$SRC"
-      tbza "${SRC%%/*}.tbz" "$SRC"
+      tbza "${SRC%/}.tbz" "$SRC"
     fi
   done
 }
@@ -158,7 +162,8 @@ tbz() {
 tbza() {
   local ARCHIVE="${1:?No archive to create...}"
   shift
-  tar -cvjf "$ARCHIVE" "$@"
+  tar -cvjf "$ARCHIVE" "$@" &&
+    echo "$ARCHIVE"
 }
 
 # tar > bz deflate
@@ -181,7 +186,7 @@ tbzg() {
     if [ "$SRC" != "${SRC%.tbz.gpg}" ] || [ "$SRC" != "${SRC%.tar.bz.gpg}" ]; then
       tbzgd "." "$SRC"
     else
-      tbzga "$KEY" "${SRC%%/*}.tbz.gpg" "$SRC" 
+      tbzga "$KEY" "${SRC%/}.tbz.gpg" "$SRC" 
     fi
   done
 }
@@ -191,7 +196,8 @@ tbzga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  tar -cjf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  tar -cjf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE" &&
+    echo "$ARCHIVE"
 }
 
 # gpg > bz > tar deflate
@@ -214,7 +220,7 @@ txz() {
       txzd "." "$SRC"
     else
       #tar -cvJf "${SRC}.txz" "$SRC"
-      txza "${SRC%%/*}.txz" "$SRC"
+      txza "${SRC%/}.txz" "$SRC"
     fi
   done
 }
@@ -224,7 +230,8 @@ txza() {
   local ARCHIVE="${1:?No archive to create...}"
   shift
   #tar -cvf - "$@" | xz -c -9 - > "$ARCHIVE"
-  XZ_OPT=-9 tar -cvJf "$ARCHIVE" "$@"
+  XZ_OPT=-9 tar -cvJf "$ARCHIVE" "$@" &&
+    echo "$ARCHIVE"
 }
 
 # tar > xz deflate
@@ -248,7 +255,7 @@ txzg() {
     if [ "$SRC" != "${SRC%.txz.gpg}" ]; then
       txzgd "." "$SRC"
     else
-      txzga "$KEY" "${SRC%%/*}.txz.gpg" "$SRC"
+      txzga "$KEY" "${SRC%/}.txz.gpg" "$SRC"
     fi
   done
 }
@@ -259,7 +266,8 @@ txzga(){
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
   #tar -cvf - "$@" | xz -c -9 - | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
-  XZ_OPT=-9 tar -cvJf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  XZ_OPT=-9 tar -cvJf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE" &&
+    echo "$ARCHIVE"
 }
 
 # gpg > xz > tar deflate
@@ -281,7 +289,7 @@ t7z() {
     if [ "$SRC" != "${SRC%.tar.7z}" ]; then
       t7zd "." "$SRC"
     else
-      t7za "${SRC%%/*}.tar.7z" "$SRC"
+      t7za "${SRC%/}.tar.7z" "$SRC"
     fi
   done
 }
@@ -290,7 +298,8 @@ t7z() {
 t7za() {
   local ARCHIVE="${1:?No archive to create...}"
   shift 1
-  tar -cf - "$@" | 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off -si "$ARCHIVE"
+  tar -cf - "$@" | 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off -si "$ARCHIVE" &&
+    echo "$ARCHIVE"
 }
 
 # 7z > tar deflate
@@ -313,7 +322,7 @@ t7zg() {
     if [ "$SRC" != "${SRC%.tar.7z.gpg}" ]; then
       t7zgd "." "$SRC"
     else
-      t7zga "$KEY" "${SRC%%/*}.tar.7z.gpg" "$SRC"
+      t7zga "$KEY" "${SRC%/}.tar.7z.gpg" "$SRC"
     fi
   done
 }
@@ -326,8 +335,9 @@ t7zga(){
   # 7z does not support "7z a -so" with 7z compression
   #tar -cf - "$@" | 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off -si -an -so "$@" | gpg --encrypt  --batch --recipient "$KEY" -o "$ARCHIVE"
   local TMP="$(mktemp --suffix=.7z -u)"
-  tar -cf - "$@" | eval 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off -si "$TMP"
-  gpg --encrypt --batch --recipient "$KEY" -o "$ARCHIVE" "$TMP"
+  tar -cf - "$@" | eval 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off -si "$TMP" &&
+    gpg --encrypt --batch --recipient "$KEY" -o "$ARCHIVE" "$TMP" &&
+    echo "$ARCHIVE"
   rm "$TMP"
 }
 

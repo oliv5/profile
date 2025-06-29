@@ -6,7 +6,7 @@ zp() {
     if [ "$SRC" != "${SRC%.zip}" ]; then
       zpd "." "$SRC"
     else
-      zpa "${SRC%%/*}.zip" "$SRC"
+      zpa "${SRC%/}.zip" "$SRC"
     fi
   done
 }
@@ -15,7 +15,8 @@ zp() {
 zpa() {
   local ARCHIVE="${1:?No archive to create...}"
   shift 1
-  zip -r9 "$ARCHIVE" "$@"
+  zip -r9 "$ARCHIVE" "$@" &&
+    echo "$ARCHIVE"
 }
 
 # Zip deflate (in place when output dir is "")
@@ -47,7 +48,7 @@ zpg() {
     if [ "$SRC" != "${SRC%.zip.gpg}" ]; then
       zpgd "." "$SRC"
     else
-      zpga "$KEY" "${SRC%%/*}.zip.gpg" "$SRC"
+      zpga "$KEY" "${SRC%/}.zip.gpg" "$SRC"
     fi
   done
 }
@@ -57,7 +58,8 @@ zpga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  zip -r9 - "$@" | gpg --encrypt --recipient "$KEY" > "$ARCHIVE"
+  zip -r9 - "$@" | gpg --encrypt --recipient "$KEY" > "$ARCHIVE" &&
+    echo "$ARCHIVE"
 }
 
 # gpg > zip deflate

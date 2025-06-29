@@ -6,25 +6,29 @@ gz() {
     if [ "$SRC" != "${SRC%.gz}" ]; then
       gzd "." "$SRC"
     else
-      gza "${SRC%%/*}.gz" "$SRC"
+      gza "${SRC%/}.gz" "$SRC"
     fi
   done
 }
 
 # gzip add
 gza() {
-  local SRC
-  for SRC; do
-    gzip -rk9 "$SRC"
-  done
+  local ARCHIVE="${1:?No archive to create...}"
+  shift 1
+  gzip -rk9 "$@" > "$ARCHIVE" &&
+    echo "$ARCHIVE"
 }
 
 # gzip deflate
 gzd() {
+  local DST="${1:?No output directory specified...}"
   local SRC
-  for SRC; do
-    gunzip -dk "$SRC"
-  done
+  shift 1
+  (cd "$DST" &&
+    for SRC; do
+      gunzip -dk "$SRC"
+    done
+  )
 }
 
 # gzip test archive
@@ -46,7 +50,7 @@ gzg() {
     if [ "$SRC" != "${SRC%.gz.gpg}" ]; then
       gzgd "." "$SRC"
     else
-      gzga "$KEY" "${SRC%%/*}.gz.gpg" "$SRC"
+      gzga "$KEY" "${SRC%/}.gz.gpg" "$SRC"
     fi
   done
 }
@@ -56,7 +60,8 @@ gzga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  zip -r9 - "$@" | gpg --encrypt --recipient "$KEY" > "$ARCHIVE"
+  zip -r9 - "$@" | gpg --encrypt --recipient "$KEY" > "$ARCHIVE" &&
+    echo "$ARCHIVE"
 }
 
 # gpg > gzip > tar deflate
