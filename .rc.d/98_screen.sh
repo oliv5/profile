@@ -23,14 +23,14 @@ screen_is_running() {
   command screen -ls "$1" >/dev/null 2>&1
 }
 
-# Run screen command (exec, quit, ...) in specific session
+# Run screen command (screen, stuff, exec, quit, ...) in specific session
 screen_cmd() {
   local SESSION="${1:?No session specified...}"
   shift
   command -p screen -S "$SESSION" -X "$@"
 }
 
-# Send a shell command to a running screen
+# Send a shell command to a running screen. Does not press enter
 screen_send() {
   local SESSION="${1:?No session specified...}"
   shift

@@ -438,6 +438,7 @@ alias sysup='screen -c /dev/null -m sudo sh -c " \
     snap refresh; \
   command -v flatpak >/dev/null && \
     flatpak upgrade; \
+  set +x; \
   echo Done... press enter to quit; \
   read VAR; \
   screen -X quit; \
