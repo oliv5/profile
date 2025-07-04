@@ -435,7 +435,7 @@ git_stx() {
 
 # Files status in a commit
 git_ls_in_ref() {
-  git diff-tree --no-commit-id --name-status -r "${2:-HEAD}" | awk "/^($1)/ {print \$2}"
+  git diff-tree --no-commit-id --name-status -r "${2:-HEAD}" | grep -E "^($1)" | cut -f2-
 }
 git_ls_deleted_in_ref()  { git_ls_in_ref D "$@"; }
 git_ls_created_in_ref()  { git_ls_in_ref A|C "$@"; }
