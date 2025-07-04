@@ -943,6 +943,9 @@ annex_copy_missing() {
 annex_copy_wanted() {
   for REPO in ${1:-$(annex_enabled)}; do
     echo "Process $(annex_remotes $REPO) ($REPO) ..."
+    if [ -z "$(git annex wanted "$REPO")$(git annex required "$REPO")" ]; then
+      echo >&2 "Warning: this repo does not want anything! Use annex_copy_missing instead..."
+    fi
     git annex copy --not --in "$REPO" --want-get-by "$REPO" --to "$REPO" ${FROM:---from-anywhere}
   done
 }
