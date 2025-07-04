@@ -11,8 +11,11 @@ export LESS="-FXr" # Don't stop when less than 1 page, color
 # Gedit
 if command -v gedit >/dev/null; then
   gedit() {
-    local ARGS="$(echo $@ | sed -re 's/([^ :]*):?([0-9]*)?(:[^ ]*)?/+\2 \1/g')"
-    command gedit $ARGS
+    local ARG ARGS=""
+    for ARG; do
+      ARGS="${ARGS:+$ARGS }$(echo "$ARG" | awk -F':' '{printf "+%s \"%s\"",$2,$1}')"
+    done
+    eval command gedit "$ARGS"
   }
 fi
 
@@ -20,8 +23,11 @@ fi
 # Geany
 if command -v geany >/dev/null; then
   geany() {
-    local ARGS="$(echo $@ | sed -re 's/([^ :]*):?([0-9]*)?(:[^ ]*)?/+\2 \1/g')"
-    command geany $ARGS
+    local ARG ARGS=""
+    for ARG; do
+      ARGS="${ARGS:+$ARGS }$(echo "$ARG" | awk -F':' '{printf "+%s \"%s\"",$2,$1}')"
+    done
+    eval command geany "$ARGS"
   }
 fi
 
