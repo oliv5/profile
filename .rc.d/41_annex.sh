@@ -266,13 +266,26 @@ annex_uuid() {
 }
 
 ####
+# List low level uuids
+_annex_uuids() {
+  git show git-annex:uuid.log 2>/dev/null
+  cat .git/annex/journal/uuid.log 2>/dev/null
+  git config --get-regexp "remote\..*\.annex-uuid" | awk '{gsub(/remote\.|\.annex-uuid/,"",$1); print $2 " " $1 " 99999999999999"}'
+}
+
 # List remotes by name or uuid
 annex_uuids() {
   local PATTERN
   {
     PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
-    { git show git-annex:uuid.log 2>/dev/null; cat .git/annex/journal/uuid.log 2>/dev/null; } |
-      awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $1}'
+    _annex_uuids |
+      awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {
+        gsub(/timestamp=/,"", $3); gsub(/s$/,"", $3);
+        if ($3 > arr[$1]) {arr[$1]=$3; arr2[$3]=$2}
+      }
+      END{
+        for(i in arr){print i}
+      }'
     PATTERN=""; for REMOTE in "$@"; do PATTERN="${PATTERN:+$PATTERN }$REMOTE"; done
     git annex info --fast --json $PATTERN 2>/dev/null | jq -Sr '.uuid | select(. != null)' 2>/dev/null
   } | sort -u
@@ -289,8 +302,14 @@ annex_remotes() {
   local PATTERN
   { 
     PATTERN=""; for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
-    { git show git-annex:uuid.log 2>/dev/null; cat .git/annex/journal/uuid.log 2>/dev/null; } |
-    awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {print $2}'
+    _annex_uuids |
+      awk -v pattern="$PATTERN" 'NF==3 && ($1~pattern || $2~pattern) {
+        gsub(/timestamp=/,"", $3); gsub(/s$/,"", $3);
+        if ($3 > arr[$1]) {arr[$1]=$3; arr2[$3]=$2}
+      }
+      END{
+        for(i in arr){print arr2[arr[i]]}
+      }'
     # Warning: `git annex info` does not print dead remotes
     PATTERN=""; for REMOTE in "$@"; do PATTERN="${PATTERN:+$PATTERN }$REMOTE"; done
     git annex info --fast --json $PATTERN 2>/dev/null | jq -Sr '.remote | select(. != null)' 2>/dev/null
@@ -308,7 +327,7 @@ annex_remotes() {
 ####
 # List dead remotes
 annex_dead() {
-  local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
+  local UUIDS="$(annex_uuids "$@" | xargs | tr ' ' '|')"
   { git show git-annex:trust.log 2>/dev/null; cat .git/annex/journal/trust.log 2>/dev/null; } |
     sed -r 's/^(.*)timestamp=(.*)s$/\2 \1/' | sort -k2b,2 -k1,1rn |
     awk -v uuids="${UUIDS:-^$}" '$2~uuids && done[$2]=="" { done[$2]=1; if ($3~/X/) {print $2} }' |
@@ -316,7 +335,7 @@ annex_dead() {
 }
 annex_notdead() {
   # note: reverse logic because trust.log does not contain a repo whose trust level was never set
-  local UUIDS="$(annex_dead | tr '\n' '|' | rev | cut -c2- | rev)"
+  local UUIDS="$(annex_dead | xargs | tr ' ' '|')"
   annex_uuids "$@" |
     command grep -vE "${UUIDS:-^$}" |
     sort -u
@@ -329,7 +348,7 @@ annex_isdead() {
 ####
 # List special remotes
 annex_special() {
-  local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
+  local UUIDS="$(annex_uuids "$@" | xargs | tr ' ' '|')"
   { git show git-annex:remote.log 2>/dev/null; cat .git/annex/journal/remote.log 2>/dev/null; } |
     sed -r 's/^(.*)timestamp=(.*)s$/\2 \1/' | sort -k2b,2 -k1,1rn |
     awk -v uuids="${UUIDS:-^$}" '$2~uuids {print $2}' |
@@ -337,7 +356,7 @@ annex_special() {
 }
 annex_notspecial() {
   # note: reverse logic because trust.log does not contain a repo whose trust level was never set
-  local UUIDS="$(annex_special | tr '\n' '|' | rev | cut -c2- | rev)"
+  local UUIDS="$(annex_special | xargs | tr ' ' '|')"
   annex_uuids "$@" |
     command grep -vE "${UUIDS:-^$}" |
     sort -u
@@ -350,7 +369,7 @@ annex_isspecial() {
 ####
 # List enabled local remotes
 annex_enabled() {
-  local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
+  local UUIDS="$(annex_uuids "$@" | xargs | tr ' ' '|')"
   local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
   git config --get-regexp "remote\..*\.annex-uuid" |
     awk -v uuids="${UUIDS:-^$}" -v excluded="${EXCLUDE:-^$}" '$1!~excluded && $2~uuids {print $2}' |
@@ -359,7 +378,7 @@ annex_enabled() {
 alias annex_disabled='annex_notenabled'
 annex_notenabled() {
   # note: reverse logic because trust.log does not contain a repo whose trust level was never set
-  local UUIDS="$(annex_enabled | tr '\n' '|' | rev | cut -c2- | rev)"
+  local UUIDS="$(annex_enabled | xargs | tr ' ' '|')"
   annex_uuids "$@" |
     command grep -vE "${UUIDS:-^$}" |
     sort -u
@@ -372,7 +391,7 @@ annex_isenabled() {
 ####
 # List exported annexes
 annex_exported() {
-  local UUIDS="$(annex_uuids "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
+  local UUIDS="$(annex_uuids "$@" | xargs | tr ' ' '|')"
   { git show git-annex:remote.log 2>/dev/null; cat .git/annex/journal/remote.log 2>/dev/null; } |
     sed -r 's/^(.*)timestamp=(.*)s$/\2 \1/' | sort -k2b,2 -k1,1rn |
     awk -v uuids="${UUIDS:-^$}" '$2~uuids && done[$2]=="" { done[$2]=1; if ($0~/exporttree=yes/) {print $2} }' |
@@ -380,7 +399,7 @@ annex_exported() {
 }
 annex_notexported() {
   # note: reverse logic because trust.log does not contain a repo whose trust level was never set
-  local UUIDS="$(annex_exported | tr '\n' '|' | rev | cut -c2- | rev)"
+  local UUIDS="$(annex_exported | xargs | tr ' ' '|')"
   annex_uuids "$@" |
     command grep -vE "${UUIDS:-^$}" |
     sort -u
@@ -393,7 +412,7 @@ annex_isexported() {
 ####
 # List annex url or path of some enabled remotes
 annex_path() {
-  local REMOTES="$(annex_remotes "$@" | tr '\n' '|' | rev | cut -c2- | rev)"
+  local REMOTES="$(annex_remotes "$@" | xargs | tr ' ' '|')"
   git config -l | grep -oE "remote.($REMOTES).(url|annex-rsyncurl|annex-directory)=.*" | sed 's/.*=//'
 }
 
@@ -858,7 +877,7 @@ _annex_populate() {
 }
 
 ########################################
-# Copy/Move files between remotes
+# Copy/move files between remotes
 # Ex: DBG= ALL= UNUSED=1 FAST= FORCE= FROM="x y" TO="x y" DROP= _annex_copy /path/to/file1 /path/to/file2
 _annex_copy() {
   local DBG="${DBG:+echo}"
@@ -867,7 +886,7 @@ _annex_copy() {
   local FORCE="${FORCE:+--force}"
   local ALL="${ALL:+--all}"
   local DROP="${DROP:+--want-drop}"
-  local FROM=" ${FROM} " # add space prefix/suffix
+  local FROM=" ${FROM:---from-anywhere} " # add space prefix/suffix
   local TO=" ${TO} " # add space prefix/suffix
   annex_exists && ! annex_bare || return 1
   # Copy from remotes
@@ -915,9 +934,17 @@ annex_move() { DROP=1 _annex_copy "$@"; }
 annex_unload() { UNUSED=1 DROP=1 _annex_copy "$@"; }
 
 annex_copy_missing() {
-  local REPO="${1:?No repo specified...}"
-  shift
-  git annex copy --not --in "$REPO" --to "$REPO" "$@"
+  for REPO in ${1:-$(annex_enabled)}; do
+    echo "Process $(annex_remotes $REPO) ($REPO) ..."
+    git annex copy --not --in "$REPO" --to "$REPO" ${FROM:---from-anywhere}
+  done
+}
+
+annex_copy_wanted() {
+  for REPO in ${1:-$(annex_enabled)}; do
+    echo "Process $(annex_remotes $REPO) ($REPO) ..."
+    git annex copy --not --in "$REPO" --want-get-by "$REPO" --to "$REPO" ${FROM:---from-anywhere}
+  done
 }
 
 ########################################
