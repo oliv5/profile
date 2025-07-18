@@ -26,11 +26,15 @@ _sfind() {
 }
 # Hook either __fdfind or _ffind
 if command -v __fdfind >/dev/null; then
-	eval "__sfind() { $(type __fdfind 2>/dev/null | head -n -1 | tail -n +4); }"
+	_F="$(type __fdfind 2>/dev/null | head -n -1 | tail -n +4)"
+	eval "__sfind() { ${_F:-true}; }"
 	__fdfind() { _sfind "$@"; }
+	unset _F
 elif command -v _ffind >/dev/null; then
-	eval "__sfind() { $(type _ffind 2>/dev/null | head -n -1 | tail -n +4); }"
+	_F="$(type _ffind 2>/dev/null | head -n -1 | tail -n +4)"
+	eval "__sfind() { ${_F:-true}; }"
 	_ffind() { _sfind "$@"; }
+	unset _F
 else
 	unset -f _sfind
 fi

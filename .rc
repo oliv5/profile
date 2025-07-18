@@ -49,7 +49,7 @@ rc_source() {
         # Find all functions and unalias them
         # Take care of: fct defined in comments, minified files on one single line
         for FCT in $(grep -Eo '[a-zA-Z_]+\s*\(\)' "$FILE" | sed -e 's/\s*()//'); do
-          ${RC_DRYRUN} unalias "$FCT" 2>/dev/null
+          ${RC_DRYRUN} unalias "$FCT" 2>/dev/null || true
         done
         # Source the file
         set --; eval "${RC_DRYRUN} . '$FILE' ${RC_VERBOSE:->/dev/null}" || 
@@ -115,7 +115,7 @@ rc_source() {
   command -v cut >/dev/null || { echo "Cut is missing..." ; return 1; }
   command -v sort >/dev/null || { echo "Sort is missing..." ; return 1; }
   unset -f grep awk sed head cut sort
-  unalias grep awk sed head cut sort 2>/dev/null
+  unalias grep awk sed head cut sort 2>/dev/null || true
 
   ##############
   # Startup scripts
