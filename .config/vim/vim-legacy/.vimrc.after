@@ -476,7 +476,7 @@ endfunction
 
 " Key mapping
 map <silent><localleader>v  :call <SID>SpaceTabToggle()<CR>
-
+noremap <silent><localleader>vv :set invlist<CR>
 
 " *******************************************************
 " } Search {
