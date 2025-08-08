@@ -184,11 +184,14 @@ if has('nvim')
     " Should work directly with guioptions+=aA but it doesn't...
 	" Workaround: https://github.com/neovim/neovim/issues/2325
 	" https://superuser.com/questions/624231/in-vim-what-is-the-difference-between-and-registers
-	set mouse=a
-	vnoremap <LeftRelease> "*ygv
-	noremap <2-LeftMouse> viw"*ygv
+	"set mouse=a
+	"vnoremap <LeftRelease> "*ygv
+	"noremap <2-LeftMouse> viw"*ygv
 	" https://neovim.io/doc/user/provider.html
 	set clipboard^=unnamed,unnamedplus " unnamed = use linux selection; unnamedplus = use system clipboard
+	" https://www.reddit.com/r/neovim/comments/v7s1ts/how_do_i_avoid_replacing_the_content_of_my/
+	" Don't touch unnamed register when pasting over visual selection
+	xnoremap <expr> p 'pgv"' . v:register . 'y'
 else
 	set clipboard+=autoselect
 endif
