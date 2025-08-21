@@ -37,7 +37,7 @@ screen_send() {
   command -p screen -S "$SESSION" -X stuff "^C\n${@}\n"
 }
 
-# Run a shell command in a new screen window
+# Run a shell command in an existing named session or in a new named one
 screen_run() {
   local SESSION="${1:?No session specified...}"
   shift
@@ -45,6 +45,19 @@ screen_run() {
     command -p screen -S "$SESSION" -X screen "$@"
   else
     command -p screen -S "$SESSION" -d -m "$@"
+  fi
+  echo "$SESSION"
+}
+
+# Execute a shell command in the first session available or in a new one
+screen_exec() {
+  local SESSION="$(command screen -ls | awk '/^\t/{print $1; exit}')"
+  if [ -n "$SESSION" ]; then
+    command -p screen -S "$SESSION" -X screen "$@"
+    echo "$SESSION"
+  else
+    command -p screen -d -m "$@"
+    screen_ls
   fi
 }
 
@@ -72,11 +85,16 @@ screen_setdisplay() {
 }
 
 # List screen sessions
-screen_ls() {
+screen_ll() {
   command -p screen -q -ls
   if [ $? -ne 9 ]; then
     command screen -ls
   fi
+}
+
+# List screen sessions name only
+screen_ls() {
+  command screen -ls | awk '/^\t/{print $1}'
 }
 
 # Long aliases
