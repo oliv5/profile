@@ -189,3 +189,28 @@ gpp_show_def() {
 clang_show_def() {
 	clang "$@" -dM -E - < /dev/null
 }
+
+# Addr2line wrapper
+addr2line() {
+	local BINARY="${1:?No binary specified...}"
+	local ENTRYPOINT_ADDR="${2:?No entrypoint base address specified...}"
+	local ENTRYPOINT_OFFSET="${3:?No entrypoint relative offset specified...}"
+	local BASE_OFFSET="$(($ENTRYPOINT_ADDR - $ENTRYPOINT_OFFSET))"
+	local ADDR REL_ADDR
+	shift 3
+	echo "Using base offset = $(printf '0x%x' "$BASE_OFFSET")"
+	for ADDR; do
+		REL_ADDR="$(($ADDR - $BASE_OFFSET))"
+		echo "Convert address $(printf '0x%x' "$ADDR") to $(printf '0x%x' "$REL_ADDR")"
+		command addr2line -p -e "$BINARY" $(printf '0x%x' $((REL_ADDR)))
+	done
+}
+
+addr2line_gdb() {
+	local BINARY="${1:?No binary specified...}"
+	local ADDR
+	shift
+	for ADDR; do
+		gdb -q "$BINARY" -ex "info line *${ADDR}" -ex quit
+	done
+}
