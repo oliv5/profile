@@ -1605,6 +1605,13 @@ git_fixup() {
     git rebase --interactive --autosquash "${1}~1"
   ' _
 }
+git_exec() {
+  local CMD="${1:?No command specified...}"
+  shift
+  git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
+    git rebase --interactive --exec "$1" "$2"
+  ' _ "$CMD"
+}
 
 ########################################
 # Rebasing
@@ -1957,6 +1964,7 @@ alias gco='git checkout'
 #alias gcoo='git checkout --ours'
 alias gcot='git_checkout_theirs'
 alias gcoo='git_checkout_ours'
+alias gcom='git checkout --merge' # revert to unresolved state
 # Reset aliases
 alias gre='git reset'
 alias grh='git reset HEAD'
