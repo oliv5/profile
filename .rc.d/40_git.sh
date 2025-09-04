@@ -1251,7 +1251,8 @@ git_gc() {
   git -c gc.reflogExpire=0 -c gc.reflogExpireUnreachable=0 -c gc.rerereresolved=0 -c gc.rerereunresolved=0 -c gc.pruneExpire=now gc "$@"
 }
 
-# Forced garbage-collector (use after git_purge_file) 
+# Forced garbage-collector (use after git_purge_file)
+# See https://git-annex.branchable.com/tips/Repositories_with_large_number_of_files/
 git_gc_purge() {
   # Purge known remotes refs
   rm -rf .git/refs/remotes/ .git/*_HEAD
@@ -1263,6 +1264,7 @@ git_gc_purge() {
   git fsck
   # Cleanup reflog & prune
   git reflog expire --expire-unreachable="${1:-now}" --all
+  git repack -d
   git gc --prune="${1:-now}"
 }
 
