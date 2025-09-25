@@ -191,7 +191,7 @@ clang_show_def() {
 }
 
 # Addr2line wrapper
-addr2line() {
+addr2line_absolute_addr() {
 	local BINARY="${1:?No binary specified...}"
 	local ENTRYPOINT_ADDR="${2:?No entrypoint base address specified...}"
 	local ENTRYPOINT_OFFSET="${3:?No entrypoint relative offset specified...}"
@@ -199,10 +199,19 @@ addr2line() {
 	local ADDR REL_ADDR
 	shift 3
 	echo "Using base offset = $(printf '0x%x' "$BASE_OFFSET")"
-	for ADDR; do
+	for ADDR in "${@:?No absolute address specified...}"; do
 		REL_ADDR="$(($ADDR - $BASE_OFFSET))"
 		echo "Convert address $(printf '0x%x' "$ADDR") to $(printf '0x%x' "$REL_ADDR")"
 		command addr2line -p -e "$BINARY" $(printf '0x%x' $((REL_ADDR)))
+	done
+}
+
+addr2line() {
+	local BINARY="${1:?No binary specified...}"
+	local ADDR
+	shift
+	for ADDR in "${@:?No relative address specified...}"; do
+		command addr2line -p -e "$BINARY" "${ADDR}"
 	done
 }
 
@@ -210,7 +219,7 @@ addr2line_gdb() {
 	local BINARY="${1:?No binary specified...}"
 	local ADDR
 	shift
-	for ADDR; do
-		gdb -q "$BINARY" -ex "info line *${ADDR}" -ex quit
+	for ADDR in "${@:?No relative address specified...}"; do
+		command gdb -q "$BINARY" -ex "info line *${ADDR}" -ex quit
 	done
 }
