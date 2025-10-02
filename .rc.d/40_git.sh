@@ -1607,6 +1607,13 @@ git_fixup() {
     git rebase --interactive --autosquash "${1}~1"
   ' _
 }
+git_amend() {
+  git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
+    { ! git diff --quiet || ! git diff --cached --quiet; } &&
+      git commit --fixup=reword:"$1" # Like --squash=
+    git rebase --interactive --autosquash "${1}~1"
+  ' _
+}
 git_exec() {
   local CMD="${1:?No command specified...}"
   shift
