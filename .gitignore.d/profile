@@ -92,9 +92,11 @@
 !/.config/profile/sourceinsight/si4/Settings/config_all.xml
 !/.config/profile/sourceinsight/si4/Settings/config_keymaps.xml
 !/.config/profile/sourceinsight/si4/Settings/config_master.xml
+!/.config/profile/sourceinsight/si4/Settings/layout_a.xml
 !/.config/profile/sourceinsight/si4/Settings/layout.xml
 !/.config/profile/sourceinsight/si4/Settings/themes.xml
 !/.config/profile/sourceinsight/si4/sourceinsight40126-setup.exe
+!/.config/profile/sourceinsight/si4/sourceinsight40141_7081-setup.exe
 !/.config/profile/sourceinsight/si4/sourceinsight4.playonlinux.desktop
 !/.config/profile/sourceinsight/si4/sourceinsight4.wine.desktop
 !/.config/profile/sourceinsight/si4/xterm.bat
@@ -1405,6 +1407,7 @@
 !/.pbin/desktop/hibernate.sh
 !/.pbin/desktop/hwctrl.sh
 !/.pbin/desktop/hyper-threading.sh
+!/.pbin/desktop/mk-desktop-files.sh
 !/.pbin/desktop/mount-private.sh
 !/.pbin/desktop/ngrok.sh
 !/.pbin/desktop/oodiff.sh
@@ -1439,8 +1442,10 @@
 !/.pbin/mount-private.sh
 !/.pbin/mr
 !/.pbin/openssl.sh
+!/.pbin/pack-bin.sh
 !/.pbin/pycscope
 !/.pbin/pypi-simple-search
+!/.pbin/relativize_libs.sh
 !/.pbin/repo
 !/.pbin/resources/cron.backup.template.sh
 !/.pbin/resources/cron.bundle.template.sh
@@ -1490,6 +1495,7 @@
 !/.pbin/upload.sh
 !/.pbin/vcsh
 !/.pbin/wol.sh
+!/.pbin/woof
 !/.pbin/woofy
 !/.profile
 !/.pylintrc
