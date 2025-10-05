@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Waydroid
+Exec=/bin/sh -c ':; export WAYLAND_DISPLAY=wayland-waydroid-1; weston --socket="/run/user/$(id -u)/$WAYLAND_DISPLAY" & sleep 1; waydroid session stop; waydroid session start; waydroid show-full-ui'
+Categories=X-WayDroid-App;
+X-Purism-FormFactor=Workstation;Mobile;
+Icon=waydroid
+NoDisplay=false

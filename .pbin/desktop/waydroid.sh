@@ -13,14 +13,30 @@ WIDTH=480 #600
 HEIGHT=800 #1000
 
 case "$1" in
-    start | run)
+    weston)
         weston --socket="/run/user/$(id -u)/$WAYLAND_DISPLAY_NAME" --width=$WIDTH --height=$HEIGHT & # weston tries to use existing $WAYLAND_DISPLAY if it is set, else it creates new --socket
+        ;;
+
+    run)
+        WAYLAND_DISPLAY="$WAYLAND_DISPLAY_NAME" waydroid session start &
+        sleep 1
         WAYLAND_DISPLAY="$WAYLAND_DISPLAY_NAME" waydroid show-full-ui &
+        ;;
+
+    start | run)
+       "$0" weston
+        sleep 1
+       "$0" run
         ;;
 
     stop | end)
         waydroid session stop
         pkill -f "weston --socket=.*/$WAYLAND_DISPLAY_NAME"
+        ;;
+
+    restart)
+        "$0" stop
+        "$0" start
         ;;
 
     kill)
@@ -57,6 +73,19 @@ case "$1" in
     rotate-off)
         sudo waydroid shell wm set-user-rotation lock
         ;;
+
+    # https://docs.waydro.id/usage/waydroid-prop-options
+    wifi)
+        shift
+        sudo waydroid prop set persist.waydroid.fake_wifi "${@:-*}"
+        ;;
+
+    "")
+        echo >&2 "export WAYLAND_DISPLAY=$WAYLAND_DISPLAY_NAME"
+        ps -def | grep 'weston\|waydroid'
+        ;;
+
+    *) echo >&2 "Unknown command '$1'";;
 
 esac
 unset WAYLAND_DISPLAY WAYLAND_DISPLAY_NAME
