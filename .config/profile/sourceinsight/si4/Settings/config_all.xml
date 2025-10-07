@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <SourceInsightConfiguration
-	AppVer="4.00.0126"
+	AppVer="4.00.0141"
 	AppVerMinReader="4.00.0032"
 	>
 	<!-- This is a Source Insight configuration file. -->
 	<!-- www.sourceinsight.com -->
 
 	<GeneralPreferences
-		OpenDlgProjOnly="1"
+		OpenDlgProjOnly="0"
 		UseGlobalConfig="1"
 		SleepInBackground="1"
 		UseSourceTips="1"
@@ -65,7 +65,15 @@
 			EnableOverviews="1"
 			EolMarkerType="0"
 			FontLigatures="1"
-			/>
+			>
+			<PanelTitleFont
+				name="Noto Sans Mono"
+				bold="1"
+				psize="11"
+				fpfamily="34"
+				charset="0"
+				/>
+		</GeneralDisplayOptions>
 		<ScrollBarOptions
 			AllowScaling="0"
 			ShowSymbols="1"
@@ -87,8 +95,8 @@
 		<OverviewOptions
 			IsVisible="0"
 			IsLocked="0"
-			ShowCurFunction="0"
-			ShowFunctions="1"
+			ShowCurFunction="1"
+			ShowFunctions="0"
 			ShowBookmarks="1"
 			ShowSourceTips="1"
 			ShowSelection="1"
@@ -103,12 +111,14 @@
 			MarkColor="#0080c0"
 			TextColor="#000000"
 			/>
-		<DefaultPanelFontAndColor
-			TextColor="#000000"
-			BackColor="#ffffff"
-			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
-		</DefaultPanelFontAndColor>
+		<SourceTipOptions>
+			<FontAndColor
+				TextColor="#000000"
+				BackColor="#f8f8f8"
+				>
+				<Font name="Noto Sans Mono" psize="8" fpfamily="34" charset="0" />
+			</FontAndColor>
+		</SourceTipOptions>
 	</DisplayPreferences>
 	<EditingPreferences
 		UseLineInsertSelection="0"
@@ -181,9 +191,15 @@
 		<Item Name="SavedChangeMarks" Color="#bdddba" />
 		<Item Name="CurrentLineIndicator" Color="#e6e6e6" />
 		<Item Name="EndofFile" Color="#c0c0c0" />
-		<Item Name="ApplicationBackground" Color="#808080" />
+		<Item Name="ApplicationBackground" Color="#dbe2ea" />
 		<Item Name="FrameText" Color="#000000" />
 		<Item Name="FrameBackground" Color="#dbe2ea" />
+		<DefaultPanelFontAndColor
+			TextColor="#000000"
+			BackColor="#ffffff"
+			>
+			<Font name="Noto Sans Mono" psize="8" fpfamily="34" charset="0" />
+		</DefaultPanelFontAndColor>
 	</DisplayColors>
 	<FilePreferences
 		ShareFiles="1"
@@ -324,6 +340,7 @@
 			>
 			<item Command="New Project..." />
 			<item Command="Open Project..." />
+			<item Command="Recent Projects" />
 			<item Command="Close Project" />
 			<item Command="Remove Project..." />
 			<item Command="---Menu Separator---" />
@@ -363,7 +380,7 @@
 			>
 			<item Command="Compare Files..." />
 			<item Command="Compare with Backup File..." />
-			<item Command="Directory Compare" />
+			<item Command="Compare Directories..." />
 			<item Command="---Menu Separator---" />
 			<item Command="Reformat Source Code" />
 			<item Command="Reformat Source Code Options..." />
@@ -414,7 +431,6 @@
 			<item Command="Link All Windows" />
 			<item Command="Pick Window..." />
 			<item Command="---Menu Separator---" />
-			<item Command="Pick Window..." />
 		</Menu>
 		<Menu
 			Name="Help"
@@ -431,21 +447,27 @@
 	</Menus>
 	<Keymaps>
 		<Main>
+			<item Command="Jump To Reference" Keycode="(CA)L" />
+			<item Command="Zoom Out" Keycode="(CS)," />
+			<item Command="Zoom In" Keycode="(CS)." />
+			<item Command="Toggle Comment Lines" Keycode="(C)7" />
+			<item Command="Function Up" Keycode="(C)PgUp" />
+			<item Command="Function Down" Keycode="(C)PgDn" />
+			<item Command="Select Function or Symbol" Keycode="(CS)PgDn" />
+			<item Command="Select Function or Symbol" Keycode="(CS)PgUp" />
+			<item Command="Select Block" Keycode="(CS)Down" />
+			<item Command="Select Block" Keycode="(CS)Up" />
 			<item Command="SnippetPrintfCpp" Keycode="(S)F8" Allocated="1" />
 			<item Command="SnippetPrintfC" Keycode="F8" Allocated="1" />
 			<item Command="SnippetDebugPrintfCpp" Keycode="(S)F7" Allocated="1" />
 			<item Command="SnippetDebugPrintfC" Keycode="F7" Allocated="1" />
 			<item Command="Insert Snippet" Keycode="(C)F7" />
 			<item Command="Select Word" Keycode="(CS)W" />
-			<item Command="Select Block" Keycode="(CS)PgDn" />
-			<item Command="Select Block" Keycode="(CS)PgUp" />
 			<item Command="Select Word" Keycode="(C)W" />
 			<item Command="Custom Commands..." Keycode="(CA)M" />
 			<item Command="Activate Context Menu" Keycode="(A)C" />
 			<item Command="Symbol Info..." Keycode="(CS)BackSpace" />
 			<item Command="Browse Project Symbols..." Keycode="(C)BackSpace" />
-			<item Command="Function Up" Keycode="(CA)Up" />
-			<item Command="Function Down" Keycode="(CA)Down" />
 			<item Command="Block Up" Keycode="(C)Up" />
 			<item Command="Block Down" Keycode="(C)Down" />
 			<item Command="Run Project" Keycode="F5" Allocated="1" />
@@ -632,8 +654,6 @@
 			<item Command="Save All" Keycode="(CS)S" />
 			<item Command="JumpAnywhere" Keycode="(CS)J" Allocated="1" />
 			<item Command="Select Line" Keycode="(C)L" />
-			<item Command="Select Function or Symbol" Keycode="(CS)Up" />
-			<item Command="Select Function or Symbol" Keycode="(CS)Down" />
 			<item Command="End Of Selection" Keycode="(CA)Right" />
 			<item Command="Beginning Of Selection" Keycode="(CA)Left" />
 			<item Command="Go To Next Reference Highlight" Keycode="(S)F2" />
@@ -1031,7 +1051,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1067,7 +1087,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1103,7 +1123,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1139,7 +1159,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="0"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1154,8 +1174,8 @@
 			AddToProject="1"
 			EmulateScreenFontsForPrinting="1"
 			LineUpWhiteSpace="1"
-			VisibleTabs="0"
-			VisibleSpaces="0"
+			VisibleTabs="1"
+			VisibleSpaces="1"
 			VisibleEOL="0"
 			ShowLineNumbers="1"
 			ShowRightMargin="0"
@@ -1172,10 +1192,10 @@
 			AutoInsertPairs="1"
 			ParsePatternSymbolType=""
 			AutoIndentMode="2"
-			IndentOpenBrace="1"
+			IndentOpenBrace="0"
 			IndentCloseBrace="0"
 			>
-			<ScreenFont name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1211,7 +1231,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1247,7 +1267,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1283,7 +1303,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1319,7 +1339,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1355,7 +1375,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1391,7 +1411,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1427,7 +1447,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1463,7 +1483,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1499,7 +1519,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1535,7 +1555,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1571,7 +1591,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1607,7 +1627,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1643,7 +1663,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1679,7 +1699,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1715,7 +1735,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1751,7 +1771,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1787,7 +1807,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1823,7 +1843,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1859,7 +1879,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1895,7 +1915,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1931,7 +1951,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -1967,7 +1987,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -2003,7 +2023,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -2039,7 +2059,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -2075,7 +2095,7 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 		<Type
@@ -2111,12 +2131,12 @@
 			IndentOpenBrace="1"
 			IndentCloseBrace="1"
 			>
-			<ScreenFont name="Consolas" psize="9" fpfamily="0" charset="0" />
+			<ScreenFont name="Noto Sans Mono" psize="10" fpfamily="49" charset="0" />
 			<PrinterFont name="Consolas" psize="9" fpfamily="0" charset="0" />
 		</Type>
 	</FileTypes>
 	<Styles
-		StyleAppVer="4.00.0126"
+		StyleAppVer="4.00.0141"
 		>
 		<Style Name="Default Text" />
 		<Style
@@ -2371,8 +2391,8 @@
 		<Style Name="Ref to C# Property" ParentStyle="Reference" />
 		<Style
 			Name="Mono Font View"
-			FontName="Courier New"
-			FontPitchFamily="1"
+			FontName="Noto Mono"
+			FontPitchFamily="49"
 			FontCharset="0"
 			/>
 		<Style Name="Declare C# Event" ParentStyle="Declaration" />
@@ -2457,7 +2477,7 @@
 	</FTPSites>
 	<RemoteAccess>
 		<RemoteAccessPreferences
-			NoTransparent="1"
+			NoTransparent="0"
 			NoLogoGraphics="1"
 			NoGradients="0"
 			NoAnimation="1"
@@ -2517,127 +2537,112 @@
 			<CustomParsing/>
 			<Ranges/>
 			<Keywords>
+				<Item Keyword="#define" Style="Keyword" />
+				<Item Keyword="#elif" Style="Directive" />
+				<Item Keyword="#else" Style="Directive" />
+				<Item Keyword="#endif" Style="Directive" />
+				<Item Keyword="#if" Style="Directive" />
+				<Item Keyword="#ifdef" Style="Directive" />
+				<Item Keyword="#ifndef" Style="Directive" />
+				<Item Keyword="#include" Style="Keyword" />
+				<Item Keyword="#pragma" Style="Keyword" />
+				<Item Keyword="#undef" Style="Keyword" />
 				<Item Keyword="(" Style="Delimiter" />
 				<Item Keyword=")" Style="Delimiter" />
-				<Item Keyword="{" Style="Delimiter" />
-				<Item Keyword="}" Style="Delimiter" />
-				<Item Keyword="[" Style="Delimiter" />
-				<Item Keyword="]" Style="Delimiter" />
 				<Item Keyword="," Style="Delimiter" />
 				<Item Keyword=";" Style="Delimiter" />
-				<Item Keyword="__try" Style="Control" />
-				<Item Keyword="__except" Style="Control" />
-				<Item Keyword="__finally" Style="Control" />
-				<Item Keyword="__cdecl" Style="Keyword" />
-				<Item Keyword="__asm" Style="Keyword" />
-				<Item Keyword="asm" Style="Keyword" />
-				<Item Keyword="assert" Style="Debug" />
 				<Item Keyword="Assert" Style="Debug" />
+				<Item Keyword="DWORD" Style="Keyword" />
+				<Item Keyword="FALSE" Style="Boolean" />
+				<Item Keyword="FAR" Style="Keyword" />
+				<Item Keyword="INT" Style="Keyword" />
+				<Item Keyword="LONG" Style="Keyword" />
+				<Item Keyword="NULL" Style="Null Value" />
+				<Item Keyword="SHORT" Style="Keyword" />
+				<Item Keyword="TRUE" Style="Boolean" />
+				<Item Keyword="UINT" Style="Keyword" />
+				<Item Keyword="VOID" Style="Keyword" />
+				<Item Keyword="WORD" Style="Keyword" />
+				<Item Keyword="[" Style="Delimiter" />
+				<Item Keyword="]" Style="Delimiter" />
+				<Item Keyword="asm" Style="Keyword" />
+				<Item Keyword="__asm" Style="Keyword" />
+				<Item Keyword="assert" Style="Debug" />
 				<Item Keyword="auto" Style="Control" />
 				<Item Keyword="bool" Style="Keyword" />
 				<Item Keyword="break" Style="Control" />
 				<Item Keyword="case" Style="Control" />
 				<Item Keyword="catch" Style="Control" />
 				<Item Keyword="cdecl" Style="Keyword" />
+				<Item Keyword="__cdecl" Style="Keyword" />
 				<Item Keyword="char" Style="Keyword" />
-				<Item Keyword="class" Style="Control" />
 				<Item Keyword="coclass" Style="Control" />
 				<Item Keyword="const" Style="Keyword" />
-				<Item Keyword="const_cast" Style="Keyword" />
 				<Item Keyword="continue" Style="Control" />
 				<Item Keyword="cout" Style="Keyword" />
-				<Item Keyword="default" Style="Control" />
-				<Item Keyword="#define" Style="Keyword" />
 				<Item Keyword="decltype" Style="Keyword" />
-				<Item Keyword="delete" Style="Control" />
+				<Item Keyword="default" Style="Control" />
 				<Item Keyword="do" Style="Control" />
 				<Item Keyword="double" Style="Keyword" />
 				<Item Keyword="dynamic_cast" Style="Keyword" />
-				<Item Keyword="DWORD" Style="Keyword" />
-				<Item Keyword="#elif" Style="Directive" />
 				<Item Keyword="else" Style="Control" />
-				<Item Keyword="#else" Style="Directive" />
-				<Item Keyword="#endif" Style="Directive" />
 				<Item Keyword="enum" Style="Control" />
-				<Item Keyword="except" Style="Control" />
-				<Item Keyword="exception" Style="Keyword" />
-				<Item Keyword="explicit" Style="Keyword" />
-				<Item Keyword="export" Style="Keyword" />
+				<Item Keyword="__except" Style="Control" />
 				<Item Keyword="extern" Style="Keyword" />
 				<Item Keyword="false" Style="Boolean" />
-				<Item Keyword="FALSE" Style="Boolean" />
-				<Item Keyword="FAR" Style="Keyword" />
 				<Item Keyword="far" Style="Keyword" />
-				<Item Keyword="final" Style="Keyword" />
+				<Item Keyword="__finally" Style="Control" />
 				<Item Keyword="float" Style="Keyword" />
 				<Item Keyword="for" Style="Control" />
 				<Item Keyword="fortran" Style="Keyword" />
-				<Item Keyword="friend" Style="Keyword" />
 				<Item Keyword="goto" Style="Control" />
-				<Item Keyword="HUGE" Style="Keyword" />
 				<Item Keyword="huge" Style="Keyword" />
 				<Item Keyword="if" Style="Control" />
-				<Item Keyword="#if" Style="Directive" />
-				<Item Keyword="#ifdef" Style="Directive" />
-				<Item Keyword="#ifndef" Style="Directive" />
-				<Item Keyword="#include" Style="Keyword" />
 				<Item Keyword="inline" Style="Keyword" />
-				<Item Keyword="INT" Style="Keyword" />
 				<Item Keyword="int" Style="Keyword" />
-				<Item Keyword="int8_t" Style="Keyword" />
 				<Item Keyword="int16_t" Style="Keyword" />
 				<Item Keyword="int32_t" Style="Keyword" />
 				<Item Keyword="int64_t" Style="Keyword" />
+				<Item Keyword="int8_t" Style="Keyword" />
 				<Item Keyword="interface" Style="Control" />
-				<Item Keyword="LONG" Style="Keyword" />
 				<Item Keyword="long" Style="Keyword" />
-				<Item Keyword="mutable" Style="Keyword" />
-				<Item Keyword="namespace" Style="Control" />
-				<Item Keyword="NEAR" Style="Keyword" />
-				<Item Keyword="NULL" Style="Null Value" />
 				<Item Keyword="near" Style="Keyword" />
-				<Item Keyword="new" Style="Control" />
-				<Item Keyword="operator" Style="Keyword" />
-				<Item Keyword="PASCAL" Style="Keyword" />
 				<Item Keyword="pascal" Style="Keyword" />
-				<Item Keyword="#pragma" Style="Keyword" />
-				<Item Keyword="private" Style="Keyword" />
-				<Item Keyword="protected" Style="Keyword" />
-				<Item Keyword="public" Style="Keyword" />
 				<Item Keyword="register" Style="Keyword" />
-				<Item Keyword="reinterpret_cast" Style="Keyword" />
-				<Item Keyword="REGISTER" Style="Keyword" />
 				<Item Keyword="return" Style="Control" />
-				<Item Keyword="SHORT" Style="Keyword" />
 				<Item Keyword="short" Style="Keyword" />
 				<Item Keyword="signed" Style="Keyword" />
 				<Item Keyword="sizeof" Style="Keyword" />
 				<Item Keyword="static" Style="Keyword" />
-				<Item Keyword="static_cast" Style="Keyword" />
 				<Item Keyword="struct" Style="Control" />
 				<Item Keyword="switch" Style="Control" />
-				<Item Keyword="template" Style="Control" />
-				<Item Keyword="this" Style="Keyword" />
-				<Item Keyword="throw" Style="Control" />
 				<Item Keyword="true" Style="Boolean" />
-				<Item Keyword="TRUE" Style="Boolean" />
 				<Item Keyword="try" Style="Control" />
+				<Item Keyword="__try" Style="Control" />
 				<Item Keyword="typedef" Style="Control" />
-				<Item Keyword="typeid" Style="Keyword" />
-				<Item Keyword="typename" Style="Keyword" />
-				<Item Keyword="UINT" Style="Keyword" />
-				<Item Keyword="#undef" Style="Keyword" />
 				<Item Keyword="union" Style="Control" />
 				<Item Keyword="unsigned" Style="Keyword" />
-				<Item Keyword="using" Style="Keyword" />
-				<Item Keyword="var" Style="Keyword" />
-				<Item Keyword="VOID" Style="Keyword" />
-				<Item Keyword="virtual" Style="Keyword" />
 				<Item Keyword="void" Style="Keyword" />
 				<Item Keyword="volatile" Style="Keyword" />
 				<Item Keyword="wchar_t" Style="Keyword" />
 				<Item Keyword="while" Style="Control" />
-				<Item Keyword="WORD" Style="Keyword" />
+				<Item Keyword="{" Style="Delimiter" />
+				<Item Keyword="}" Style="Delimiter" />
+				<Item Keyword="_Alignas" Style="Keyword" />
+				<Item Keyword="_Generic" Style="Keyword" />
+				<Item Keyword="_Atomic" Style="Keyword" />
+				<Item Keyword="_Noreturn" Style="Keyword" />
+				<Item Keyword="_Static_assert" Style="Keyword" />
+				<Item Keyword="_Thread_local" Style="Keyword" />
+				<Item Keyword="alignof" Style="Keyword" />
+				<Item Keyword="_Bool" Style="Keyword" />
+				<Item Keyword="_Imaginary" Style="Keyword" />
+				<Item Keyword="_Complex" Style="Keyword" />
+				<Item Keyword="restrict" Style="Keyword" />
+				<Item Keyword="interrupt" Style="Keyword" />
+				<Item Keyword="intmax_t" Style="Keyword" />
+				<Item Keyword="typeof" Style="Keyword" />
+				<Item Keyword="uintmax_t" Style="Keyword" />
 			</Keywords>
 		</Language>
 		<Language
@@ -7635,6 +7640,7 @@
 			IgnoreJavaPackages="1"
 			SupportMicrochipC="0"
 			DefaultHTMLScriptLanguage="JavaScript"
+			SupportOldStyleCFunctions="1"
 			/>
 	</ParsingOptions>
 	<Search
@@ -7654,7 +7660,7 @@
 				FindNonMatch="0"
 				FindOnePerLine="0"
 				FindBackward="0"
-				FindWholeWords="0"
+				FindWholeWords="1"
 				TouchFiles="0"
 				ReplacePreserveCase="0"
 				ReplaceConfirm="1"
@@ -7744,7 +7750,9 @@
 		</WebSearchEngineList>
 	</SearchWeb>
 	<Toolbars>
-		<MainToolbar>
+		<MainToolbar
+			Locked="0"
+			>
 			<Toolbars>
 				<Toolbar
 					Name="Browse"
@@ -7869,7 +7877,7 @@
 		<SymbolTypes All="1" />
 	</ProjectReport>
 	<SymbolPane
-		Width="254"
+		Width="308"
 		TextColor="#000000"
 		BackColor="#ffffff"
 		ShowChanges="1"
@@ -8146,7 +8154,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</BookmarkWindow>
 	<SnippetWindow>
@@ -8165,7 +8173,7 @@
 				TextColor="#000000"
 				BackColor="#ffffff"
 				>
-				<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+				<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 			</ListDisplay>
 		</SnippetWindowOptions>
 	</SnippetWindow>
@@ -8181,15 +8189,16 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ClipWindow>
 	<ContextWindow
 		IsVisible="1"
 		IsLocked="0"
-		IsMonoFontView="0"
+		IsMonoFontView="1"
 		ViewLineNumbers="1"
-		ShowOverview="0"
+		ShowOverview="1"
+		ShowOutlining="1"
 		PercentScale="100"
 		ShowBaseStructure="1"
 		BackColor="#ffffff"
@@ -8198,7 +8207,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Mono" psize="9" fpfamily="49" charset="0" />
 		</ListDisplay>
 		<TrackingOptions tracktype="1" InComments="0" InStrings="0" InAnyFile="0" />
 	</ContextWindow>
@@ -8216,11 +8225,11 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</DirectoryCompareWindow>
 	<FileCompareWindow
-		IsVisible="0"
+		IsVisible="1"
 		IsLocked="0"
 		ViewLineNumbers="1"
 		ShowOverview="1"
@@ -8237,7 +8246,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</FileCompareWindow>
 	<ProjectFileWindow
@@ -8253,7 +8262,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ProjectFileWindow>
 	<ProjectFileTypeWindow
@@ -8268,7 +8277,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ProjectFileTypeWindow>
 	<ProjectFolderWindow
@@ -8282,7 +8291,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ProjectFolderWindow>
 	<ProjectSymbolWindow
@@ -8342,7 +8351,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ProjectSymbolWindow>
 	<ProjectSymbolTypeWindow
@@ -8414,7 +8423,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</ProjectSymbolTypeWindow>
 	<WindowListWindow
@@ -8426,7 +8435,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</WindowListWindow>
 	<RelationWindow>
@@ -8437,7 +8446,7 @@
 				TextColor="#000000"
 				BackColor="#ffffff"
 				>
-				<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+				<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 			</ListOptions>
 			<GraphOptions
 				LayoutStyle="1"
@@ -8474,16 +8483,63 @@
 				ShowFileName="1"
 				AutoExpandLevels="1"
 				CodeMetricsType="0"
-				SortType="1"
+				SortType="2"
 				>
 				<TrackingOptions tracktype="1" InComments="0" InStrings="0" InAnyFile="0" />
-				<SymbolTypes All="1" />
+				<SymbolTypes>
+					<Type Name="Function" />
+					<Type Name="Macro" />
+					<Type Name="Structure" />
+					<Type Name="Union" />
+					<Type Name="Type Definition" />
+					<Type Name="Variable" />
+					<Type Name="Constant" />
+					<Type Name="Enumeration" />
+					<Type Name="Custom Tag" />
+					<Type Name="Editor Macro" />
+					<Type Name="Class" />
+					<Type Name="Member Function" />
+					<Type Name="Enum Constant" />
+					<Type Name="#-Directive" />
+					<Type Name="Label" />
+					<Type Name="Data Member" />
+					<Type Name="Interface" />
+					<Type Name="Resource" />
+					<Type Name="Class Placeholder" />
+					<Type Name="Function Template" />
+					<Type Name="Class Template" />
+					<Type Name="Class Template Placeholder" />
+					<Type Name="Package" />
+					<Type Name="Namespace" />
+					<Type Name="Token Macro" />
+					<Type Name="Code Block" />
+					<Type Name="Parsing Error" />
+					<Type Name="HTML or XML Element" />
+					<Type Name="HTML Title" />
+					<Type Name="Member Function Prototype" />
+					<Type Name="IDL Module" />
+					<Type Name="IDL Library" />
+					<Type Name="IDL Interface" />
+					<Type Name="CSS Rule Selector" />
+					<Type Name="C# Class Property" />
+					<Type Name="C# Indexer" />
+					<Type Name="C# Event" />
+					<Type Name="VHDL Entity" />
+					<Type Name="VHDL Architecture" />
+					<Type Name="VHDL Component" />
+					<Type Name="VHDL Process" />
+					<Type Name="VHDL Configuration" />
+					<Type Name="External Variable" />
+					<Type Name="Alias" />
+					<Type Name="Macro Event" />
+					<Type Name="Editor Macro Function" />
+				</SymbolTypes>
 				<CodeMetricsFilter CodeMetricsType="0" MinValue="0" MaxValue="0" />
 				<ViewRelationRules
-					ForTypes="References"
+					ForTypes="Referenced by Functions"
 					ForFunctions="References"
 					ForVariables="References"
-					ForClasses="Base Classes"
+					ForClasses="References"
 					ForFiles="Referenced by Modules"
 					/>
 			</RelationOptions>
@@ -8520,7 +8576,7 @@
 			TextColor="#000000"
 			BackColor="#ffffff"
 			>
-			<Font name="Tahoma" psize="10" fpfamily="34" charset="0" />
+			<Font name="Noto Sans Mono" psize="10" fpfamily="34" charset="0" />
 		</ListDisplay>
 	</FTPWindow>
 </SourceInsightConfiguration>
