@@ -76,6 +76,21 @@ alias ansi_rm='sed -i "s/\x1b\[[0-9;]*m//g"'
 # Find non-ascii characters
 alias ansi_show_non_ascii='grep --color="auto" -P -n "[^\x00-\x7F]"'
 
+# Remove non-ascii char
+show_non_ascii_line() {
+  for FILE in "${@:-/dev/stdin}"; do
+    awk '{for(i=1; i<=length; i++){c=substr($0,i,1); if (c ~ /[^ -~]/) print NR ": " $0}}' "$FILE"
+  done
+}
+
+# Force remove non-ascii char in file
+# https://techkluster.com/linux/find-non-ascii-chars/
+force_ascii() {
+  for FILE in "${@:-/dev/stdin}"; do
+    tr -d -c '[:print:]\t\n' < "$FILE"
+  done
+}
+
 # Success display function
 msg_success() {
   echo -ne "\33[32m[✔]\33[0m" "$@"
