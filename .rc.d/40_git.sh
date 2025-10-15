@@ -1415,7 +1415,7 @@ git_log_fzf() {
   if command -v fzf >/dev/null && [ $# -le 2 ]; then
     git log -n "$NUM" --pretty=format:'%h %s' --no-merges | fzf --no-sort | cut -c -7
   else
-    echo "${3:-$DEFAULT}"
+    git rev-parse "${3:-$DEFAULT}"
   fi
 }
 
@@ -1604,14 +1604,14 @@ git_fixup() {
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
     { ! git diff --quiet || ! git diff --cached --quiet; } &&
       git commit --fixup="$1" # Like --squash=
-    git rebase --interactive --autosquash "${1}~1"
+    GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash "${1}~1"
   ' _
 }
 git_amend() {
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
-    { ! git diff --quiet || ! git diff --cached --quiet; } &&
-      git commit --fixup=reword:"$1" # Like --squash=
-    git rebase --interactive --autosquash "${1}~1"
+    { git diff --quiet && git diff --cached --quiet; } &&
+      git commit --fixup=reword:"$1"
+    GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash "${1}~1"
   ' _
 }
 git_exec() {
@@ -1620,6 +1620,31 @@ git_exec() {
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
     git rebase --interactive --exec "$1" "$2"
   ' _ "$CMD"
+}
+git_edit() {
+  git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
+    set -e
+    { git diff --quiet && git diff --cached --quiet; }
+      HEAD="$(git rev-parse HEAD)"
+      TAG="_edit_temp_tag_$(date %+s)"
+      echo "Create backup tag $TAG on $HEAD"
+      git tag "$TAG"
+      echo "Jump back to $(git log -n1 --oneline "$1")"
+      git reset "${1}" --hard
+      git reset "${1}~1"
+      echo "Now edit this commit. Then exit the shell to go on."
+      /bin/sh
+      echo "List of commits to cherry pick:"
+      git rev-list --ancestry-path --reverse "${1}..${HEAD}"
+      for SHA in $(git rev-list --ancestry-path --reverse "${1}..${HEAD}"); do
+        git cherry-pick "$SHA"
+        if [ $? -ne 0 ]; then
+          echo "An error happened. Solve it then close the shell to go on."
+          /bin/sh
+        fi
+      done
+      git tag -d "$TAG"
+  ' _
 }
 
 ########################################
