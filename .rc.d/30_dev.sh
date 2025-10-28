@@ -115,6 +115,63 @@ _DSEXCLUDE="-not -path '*/.*' -and -not -type l"
 alias  dhh='FCASE=   FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_REF" SEXCLUDE="$_DSEXCLUDE" _fsed2'
 alias idhh='FCASE=-i FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_REF" SEXCLUDE="$_DSEXCLUDE" _fsed2'
 
+###########
+# Ctags based search
+ctags_ls() {
+	local TYPE="${1:+--c-kinds='$1'}" # use ctags --list-kinds=c
+	local NAME="${2:+| awk '${ACASE:+BEGIN{IGNORECASE=1\}} \$1 ~ /$2/ {\$1=\"\033[1;31m\" \$1 \"\033[0m\"; printf \$0\"\n\"}'}"
+	#local NAME="${2:+| grep ${GCASE} '$2'}"
+	local FILES="${3:-*.(cpp|c|h|hpp|hh)$}"
+	FARGS=-0 ff "$FILES" | eval xargs -r0 ctags -x --file-scope=no "$TYPE" "$NAME" 2>/dev/null
+}
+
+if command -v ctags >/dev/null; then
+	alias      def='ACASE=   ctags_ls ""'
+	alias      var='ACASE=   ctags_ls vl'
+	alias      loc='ACASE=   ctags_ls l'
+	alias     glob='ACASE=   ctags_ls v'
+	alias     func='ACASE=   ctags_ls f'
+	alias    proto='ACASE=   ctags_ls p'
+	alias     enum='ACASE=   ctags_ls e'
+	alias    class='ACASE=   ctags_ls c'
+	alias   struct='ACASE=   ctags_ls s'
+	alias    union='ACASE=   ctags_ls u'
+	alias   member='ACASE=   ctags_ls m'
+	alias  typedef='ACASE=   ctags_ls t'
+	alias   extern='ACASE=   ctags_ls x'
+	alias   define='ACASE=   ctags_ls d'
+	alias    macro='ACASE=   ctags_ls d'
+
+	alias     idef='ACASE=-i ctags_ls ""'
+	alias     ivar='ACASE=-i ctags_ls vl'
+	alias     iloc='ACASE=-i ctags_ls l'
+	alias    iglob='ACASE=-i ctags_ls v'
+	alias    ifunc='ACASE=-i ctags_ls f'
+	alias   iproto='ACASE=-i ctags_ls p'
+	alias    ienum='ACASE=-i ctags_ls e'
+	alias   iclass='ACASE=-i ctags_ls c'
+	alias  istruct='ACASE=-i ctags_ls s'
+	alias   iunion='ACASE=-i ctags_ls u'
+	alias  imember='ACASE=-i ctags_ls m'
+	alias itypedef='ACASE=-i ctags_ls t'
+	alias  iextern='ACASE=-i ctags_ls x'
+	alias  idefine='ACASE=-i ctags_ls d'
+	alias   imacro='ACASE=-i ctags_ls d'
+fi
+
+###########
+# Gcc/g++/clang list macros & definitions for single files
+gcc_ls_macros() {
+	gcc "$@" -dM -E - < /dev/null
+}
+gpp_ls_macros() {
+	g++ "$@" -dM -E - < /dev/null
+}
+clang_ls_macros() {
+	clang "$@" -dM -E - < /dev/null
+}
+
+###########
 # Parallel make (needs ipcmd tool)
 # https://code.google.com/p/ipcmd/wiki/ParallelMake
 pmake() {
@@ -177,17 +234,6 @@ uncrust() {
 	command -v uncrustify >/dev/null 2>&1 && echo "ERROR: cannot find uncrustify..." && return 1
 	local CFG="${XDG_CONFIG_HOME:-$HOME/.config}/uncrustify/${2:-$(uncrustify --version)}.cfg"
 	find "${1:?No source folder specified...}" -type f -regex '.*\.\(c\|h\|cpp\|cc\|hpp\)' -print0 | xargs -r0 -n1 -- uncrustify -c "$CFG" --no-backup -f
-}
-
-# Gcc/clang show definitions
-gcc_show_def() {
-	gcc "$@" -dM -E - < /dev/null
-}
-gpp_show_def() {
-	g++ "$@" -dM -E - < /dev/null
-}
-clang_show_def() {
-	clang "$@" -dM -E - < /dev/null
 }
 
 # Addr2line wrapper
