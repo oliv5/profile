@@ -591,15 +591,15 @@ git_extract() {
   #~ done
 #~ }
 
-# Sync local branches with 1 remote
+# Sync local repo with 1 remote
 git_sync() {
   local SRC_REMOTE="${1:?No source remote specified...}"
-  local REFS="${2:-*}"
-  shift 2
-  git fetch --tags "$SRC_REMOTE" &&
-    for REF in ${REFS:-"*"}; do
-      git fetch "$SRC_REMOTE" "refs/heads/$REF:refs/heads/$REF"
-    done
+  local REFS="$2"
+  git fetch --tags "$SRC_REMOTE" || return $?
+  for REF in ${REFS:-"*"}; do
+    #git fetch "$SRC_REMOTE" "refs/heads/$REF:refs/heads/$REF" # Fails when working on the local branch
+    git fetch "$SRC_REMOTE" "refs/{tags,heads}/$REF:refs/{tags,heads}/$REF"
+  done
 }
 
 # Sync 1 remote with another or the local repo ("heads")
@@ -607,16 +607,16 @@ git_sync() {
 git_sync_remote() {
   local SRC_REMOTE="${1:?No source remote specified...}"
   local DST_REMOTE="${2:?No source remote specified...}"
-  shift 2
+  local REFS="$3"
   if [ "$SRC_REMOTE" = "local" ]; then
     for REF in ${REFS:-"*"}; do
       git push "$DST_REMOTE" --tags "refs/heads/$REF:refs/heads/$REF"
     done
   else
-    git fetch --tags "$SRC_REMOTE" &&
-      for REF in ${REFS:-"*"}; do
-        git push "$DST_REMOTE" --tags "refs/remotes/$SRC_REMOTE/$REF:refs/heads/$REF"
-      done
+    git fetch --tags "$SRC_REMOTE" || return $?
+    for REF in ${REFS:-"*"}; do
+      git push "$DST_REMOTE" --tags "refs/remotes/$SRC_REMOTE/$REF:refs/heads/$REF"
+    done
   fi
 }
 
