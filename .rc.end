@@ -76,7 +76,7 @@ fi
 if [ -d "$RC_DIR/.pbin/resources/rga" ]; then
   path_append "$RC_DIR/.pbin/resources/rga"
   if command -v rga-fzf >/dev/null; then
-    bind '"\C-o": "\C-k \C-urga-fzf\n"'
+    bind '"\C-o": "\C-k \C-urga-fzf\C-m"'
   fi
 fi
 
