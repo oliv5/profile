@@ -199,6 +199,14 @@ docker_rm_img() {
     done
 }
 
+# Prune dangling elements
+docker_prune() {
+    docker container prune -f
+    docker image prune -f
+    docker volume prune -f
+    docker buildx prune
+}
+
 # Get docker run command
 docker_cmdline() {
     python3 - "$@" <<EOF
