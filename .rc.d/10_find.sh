@@ -203,7 +203,7 @@ _fsed() {
   _ffind "$FILES" ${SEXCLUDE} -type f \
     ${_CONFIRM:+-exec sh -c 'read -p "Processing file {} ? (enter/ctrl-c)" DUMMY' \;} \
     ${_BACKUP:+-execdir sh -c "grep '$IN' '{}' >/dev/null" \;} \
-    -execdir sed ${SEDOPT} --in-place${_BACKUP:+=$_BACKUP} ${_SHOW:+-e "\|$IN|{w /dev/stderr" -e "}"} -e "s|$IN|$OUT|g" "{}" \;
+    -execdir sed ${SEDOPT} --in-place${_BACKUP:+=$_BACKUP} ${_SHOW:+-e "\|$IN|{w /dev/stderr" -e "}"} -Ee "s|$IN|$OUT|g" "{}" \;
 }
 unset SFILES SEXCLUDE SNOCONFIRM
 alias   hh='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed'

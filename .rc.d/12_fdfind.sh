@@ -101,7 +101,7 @@ _fdsed1() {
   ${SNOCONFIRM:+true} read -p "Confirm ? (enter/ctrl-c) " _
   # Call find and sed
   __fdfind "$FILES" ${SEXCLUDE} -t f -0 |
-    xargs -r0 sed ${SEDOPT} --in-place -e "s|$IN|$OUT|g"
+    xargs -r0 sed ${SEDOPT} --in-place -Ee "s|$IN|$OUT|g"
 }
 unset SFILES SEXCLUDE SNOCONFIRM
 _fdsed() { _fdsed1 "$@"; }
