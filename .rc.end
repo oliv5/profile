@@ -72,6 +72,13 @@ if command -v vcsh >/dev/null 2>&1; then
     fi
   fi
 fi
+# https://github.com/phiresky/ripgrep-all
+if [ -d "$RC_DIR/.pbin/resources/rga" ]; then
+  path_append "$RC_DIR/.pbin/resources/rga"
+  if command -v rga-fzf >/dev/null; then
+    bind '"\C-o": "\C-k \C-urga-fzf\n"'
+  fi
+fi
 
 ################################
 # Disable TTY Software Flow Control (XON/XOFF flow control)

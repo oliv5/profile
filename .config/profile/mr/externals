@@ -48,6 +48,12 @@ install = cargo install --path . ; cp ./target/release/rg ../ ; cargo clean
 uninstall = cargo clean ; rm ../rg
 remove = rm -rf "${MR_REPO:-___unlikely___}"
 
+[${HOME}/.local/bin/ripgrep-all-repo]
+checkout = git clone https://github.com/phiresky/ripgrep-all "$MR_REPO"
+install = cargo install --locked ripgrep_all ; cargo clean
+uninstall = cargo clean ; rm ../rga
+remove = rm -rf "${MR_REPO:-___unlikely___}"
+
 [${HOME}/.local/bin/uv-repo]
 checkout = git clone https://github.com/astral-sh/uv "$MR_REPO"
 install =   cargo update ptr_meta_derive@0.3.0 --precise 0.3.0 -Znext-lockfile-bump ;
