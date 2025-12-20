@@ -1626,7 +1626,7 @@ git_edit() {
     set -e
     { git diff --quiet && git diff --cached --quiet; }
       HEAD="$(git rev-parse HEAD)"
-      TAG="_edit_temp_tag_$(date %+s)"
+      TAG="_edit_temp_tag_$(date +%s)"
       echo "Create backup tag $TAG on $HEAD"
       git tag "$TAG"
       echo "Jump back to $(git log -n1 --oneline "$1")"
