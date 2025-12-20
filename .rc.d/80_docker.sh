@@ -245,6 +245,12 @@ if __name__ == '__main__':
 EOF
 }
 
+# Test if in docker
+alias in_docker='docker_in_docker && echo "you are in docker" || echo "you are NOT in docker"'
+docker_in_docker() {
+    [ -e /.dockerenv ]
+}
+
 # Aliases
 alias docker_run_rm='docker_run --rm'
 alias docker_lsi='docker images'
