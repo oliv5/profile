@@ -31,9 +31,11 @@ gpg_export_all() {
 }
 
 # Shortcut for gpg-preset-passphrase not in the path
-gpg-preset-passphrase() {
+test -n "$BASH_VERSION" &&
+eval 'gpg-preset-passphrase() {
 	command "$(gpgconf --list-dirs libexecdir)"/gpg-preset-passphrase "$@"
 }
+'
 
 # Ask one passphrase and register it in the agent
 # allow-preset-passphrase must be in ~/.gnupg/gpg-agent.conf

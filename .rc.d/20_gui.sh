@@ -42,13 +42,11 @@ lsdisplay() {
 
 ################################
 show_windowing_system() {
-  loginctl show-session $(awk '/tty/ {print $1}' <(loginctl)) -p Type | awk -F= '{print $2}'
+  loginctl | awk '/tty/ {print $1}' | xargs loginctl show-session -p Type | awk -F= '{print $2}'
 }
 is_xwindow() {
-  local MGR="$(loginctl show-session $(awk '/tty/ {print $1}' <(loginctl)) -p Type | awk -F= '{print $2}' | grep -v x11)"
-  test -z "$MGR"
+  show_windowing_system | grep x11 >/dev/null
 }
 is_wayland() {
-  local MGR="$(loginctl show-session $(awk '/tty/ {print $1}' <(loginctl)) -p Type | awk -F= '{print $2}' | grep -v wayland)"
-  test -z "$MGR"
+  show_windowing_system | grep wayland >/dev/null
 }
