@@ -42,3 +42,6 @@ snap_update() {
 snap_update_all() {
   snap_exec snap refresh
 }
+
+# List packages
+alias snapg='snap list | grep -i'
