@@ -445,6 +445,10 @@ alias sysup='screen -c /dev/null -m sudo sh -c " \
     snap refresh; \
   command -v flatpak >/dev/null && \
     flatpak upgrade; \
+    flatpak uninstall --unused; \
+  command -v flatpak >/dev/null && \
+    flatpak --user upgrade; \
+    flatpak --user uninstall --unused; \
   set +x; \
   echo Done... press enter to quit; \
   read VAR; \
