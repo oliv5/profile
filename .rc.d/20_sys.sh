@@ -23,10 +23,23 @@ is_littleendian() {
 }
 
 ################################
-# Keyboad layout
-alias keyb_list='grep ^[^#] /etc/locale.gen'
-alias keyb_set='setxkbmap -layout'
-alias keyb_setfr='setxkbmap -layout fr'
+# X11 Keyboad layout
+alias keyb_xlist='grep ^[^#] /etc/locale.gen'
+alias keyb_xset='setxkbmap -layout'
+alias keyb_xsetfr='setxkbmap -layout fr'
+
+# Console keyboard layout
+alias keyb_list='localectl list-keymaps'
+alias keyb_set='sudo localectl set-keymap'
+alias keyb_setfr='sudo localectl set-keymap fr'
+alias keyb_set_tmp='sudo loadkeys'
+alias keyb_set_tmp_fr='sudo loadkeys fr'
+# https://www.claudiokuenzler.com/blog/1257/how-to-fix-missing-keymaps-debian-ubuntu-localectl-failed-read-list
+alias keyb_fix_debian() {
+  wget https://mirrors.edge.kernel.org/pub/linux/utils/kbd/kbd-2.5.1.tar.gz -O /tmp/kbd-2.5.1.tar.gz
+  cd /tmp/ && tar xzf kbd-2.5.1.tar.gz
+  sudo cp -Rp /tmp/kbd-2.5.1/data/keymaps/* /usr/share/keymaps/
+}
 
 # Fix Alt-Fxx keys
 # https://bugs.launchpad.net/ubuntu/+source/console-setup/+bug/520546
