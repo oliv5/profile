@@ -477,6 +477,17 @@ if [ -d "$HOME/miniconda3/bin" ]; then
   alias conda_bash='eval "$("/home/ola/miniconda3/bin/conda" "shell.bash" "hook" 2> /dev/null)"'
 fi
 
+# NPM env
+if command -v safe-npm >/dev/null; then
+  npm() {
+    if [ "$1" = "install" ]; then
+      command safe-npm "$@"
+    else
+      command npm "$@"
+    fi
+  }
+fi
+
 # Misc
 alias mo='mimeopen'
 alias xo='xdg-open'
