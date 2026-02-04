@@ -181,4 +181,6 @@
     "relationWindow.enableDeepSearch": false,
     "shared.includeFiles": "**/*.c,**/*.cpp,**/*.h,**/*.sh,**/*.make,**/makefile,**/Makefile",
     "shared.enableDatabaseMode": false,
+    "contextView.contextWindow.fixStickyScroll": true,
+    "contextView.contextWindow.minimap": false,
 }
