@@ -3,6 +3,15 @@ if exists('g:did_coc_loaded') || v:version < 800
   finish
 endif
 
+" OLA added
+if has('nvim-0.8.0')
+  echohl WarningMsg
+  echom "This version of coc.nvim does not support nvim > 0.8.0 !"
+  echohl None
+  sleep 2
+  finish
+endif
+
 function! s:checkVersion() abort
   let l:unsupported = 0
   if get(g:, 'coc_disable_startup_warning', 0) != 1
