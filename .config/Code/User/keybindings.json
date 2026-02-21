@@ -27,16 +27,16 @@
 // Escape
 { "key": "escape",                "command": "workbench.action.focusActiveEditorGroup", "when":"panelFocus" },
 { "key": "escape",                "command": "workbench.action.closeSidebar", "when":"sideBarFocus" },
-{ "key": "ctrl+escape",           "command": "extension.multiCommand.execute", "args":
-    { "sequence": [ "workbench.action.closeSidebar", "workbench.action.closePanel", "workbench.action.closeAuxiliaryBar" ] } },
-{ "key": "shift+escape",          "command": "extension.multiCommand.execute", "args":
-    { "sequence": [ "workbench.action.closeSidebar", "workbench.action.closePanel", "workbench.action.closeAuxiliaryBar" ] } },
+{ "key": "ctrl+escape",           "command": "runCommands", "args":
+    { "commands": [ "workbench.action.closeSidebar", "workbench.action.closePanel", "workbench.action.closeAuxiliaryBar" ] } },
+{ "key": "shift+escape",          "command": "runCommands", "args":
+    { "commands": [ "workbench.action.closeSidebar", "workbench.action.closePanel", "workbench.action.closeAuxiliaryBar" ] } },
 
 // F12 bar toggling
-{ "key": "f12",                   "command": "extension.multiCommand.execute", "when" : "sideBarVisible", "args":
-    { "sequence": [ "workbench.action.closeSidebar", "workbench.action.closePanel", "workbench.action.closeAuxiliaryBar" ] } },
-{ "key": "f12",                   "command": "extension.multiCommand.execute", "when" : "! sideBarVisible", "args":
-    { "sequence": [ "workbench.action.toggleSidebarVisibility", "workbench.action.togglePanel", "workbench.action.toggleAuxiliaryBar", "workbench.action.focusActiveEditorGroup" ] } },
+{ "key": "f12",                   "command": "runCommands", "when" : "sideBarVisible", "args":
+    { "commands": [ "workbench.action.closeSidebar", "workbench.action.closePanel", "workbench.action.closeAuxiliaryBar" ] } },
+{ "key": "f12",                   "command": "runCommands", "when" : "! sideBarVisible", "args":
+    { "commands": [ "workbench.action.toggleSidebarVisibility", "workbench.action.togglePanel", "workbench.action.toggleAuxiliaryBar", "workbench.action.focusActiveEditorGroup" ] } },
 { "key": "f12",                   "command": "workbench.action.closePanel", "when" : "panelVisible" },
 { "key": "alt+f12",               "command": "workbench.action.toggleActivityBarVisibility" },
 { "key": "shift+f12",             "command": "workbench.action.toggleSidebarVisibility" },
@@ -60,8 +60,8 @@
 { "key": "ctrl+alt+x",            "command": "workbench.view.extensions" },
 { "key": "ctrl+alt+g",            "command": "workbench.view.scm", "when": "workbench.scm.active" },
 { "key": "ctrl+alt+f",            "command": "workbench.view.search" },
-{ "key": "ctrl+e",                "command": "extension.multiCommand.execute", "args":
-    { "sequence": [ "workbench.view.explorer", "workbench.explorer.fileView.focus" ] } },
+{ "key": "ctrl+e",                "command": "runCommands", "args":
+    { "commands": [ "workbench.view.explorer", "workbench.explorer.fileView.focus" ] } },
 { "key": "ctrl+alt+l",            "command": "outline.toggleVisibility" },
 { "key": "ctrl+alt+r",            "command": "CppReferencesView.toggleVisibility" },
 
@@ -113,8 +113,8 @@
 { "key": "alt+down",              "command": "workbench.action.nextEditor", "when": "editorTextFocus" },
 
 // Go back to editor, stop debugging, close all other windows/panels/bars
-{ "key": "ctrl+w ctrl+w",         "command": "extension.multiCommand.execute", "args":
-    { "sequence": [ "workbench.action.debug.stop", "workbench.action.closePanel", "workbench.action.closeSidebar" ] } },
+{ "key": "ctrl+w ctrl+w",         "command": "runCommands", "args":
+    { "commands": [ "workbench.action.debug.stop", "workbench.action.closePanel", "workbench.action.closeSidebar" ] } },
 
 // Zooms
 { "key": "ctrl++",                "command": "workbench.action.zoomIn" },
@@ -153,15 +153,15 @@
 { "key": "f3",                    "command": "editor.action.nextSelectionMatchFindAction", "when": "editorFocus && editorHasSelection" },
 { "key": "shift+f3",              "command": "editor.action.previousMatchFindAction", "when": "editorFocus && !editorHasSelection" },
 { "key": "shift+f3",              "command": "editor.action.previousSelectionMatchFindAction", "when": "editorFocus && editorHasSelection" },
-{ "key": "ctrl+f3",               "command": "extension.multiCommand.execute", "when" : "editorFocus && editorHasSelection", "args":
-    { "sequence": [ "toggleFindWholeWord", "editor.action.nextSelectionMatchFindAction" ] } },
+{ "key": "ctrl+f3",               "command": "runCommands", "when" : "editorFocus && editorHasSelection", "args":
+    { "commands": [ "toggleFindWholeWord", "editor.action.nextSelectionMatchFindAction" ] } },
 
 // Search bar: open/toggle
 { "key": "ctrl+shift+f",    "command": "workbench.action.findInFiles", "when" : "!sideBarFocus" },
 { "key": "ctrl+shift+f",    "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 // Search bar: search & replace in all files
-{ "key": "ctrl+g",                "command": "extension.multiCommand.execute", "when" : "!sideBarFocus", "args":
-    { "sequence": [ "editor.action.addSelectionToNextFindMatch", "workbench.action.findInFiles" ] } },
+{ "key": "ctrl+g",                "command": "runCommands", "when" : "!sideBarFocus", "args":
+    { "commands": [ "editor.action.addSelectionToNextFindMatch", "workbench.action.findInFiles" ] } },
 { "key": "ctrl+g",                "command": "search.action.openInEditor", "when" : "hasSearchResult && searchViewletFocus" },
 // Search bar: navigation
 { "key": "f4",                    "command": "search.action.focusNextSearchResult", "when": "hasSearchResult || inSearchEditor" },
@@ -169,14 +169,14 @@
 { "key": "ctrl+f4",               "command": "search.action.clearSearchResults", "when": "hasSearchResult" },
 
 // Quick match / search options
-{ "key": "alt+c",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
-    { "sequence": [ "toggleFindCaseSensitive", "toggleSearchCaseSensitive" ] } },
-{ "key": "alt+r",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
-    { "sequence": [ "toggleFindRegex", "toggleSearchRegex" ] } },
-//{ "key": "alt+w",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
-//    { "sequence": [ "toggleFindWholeWord", "toggleSearchWholeWord" ] } },
-{ "key": "alt+x",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
-    { "sequence": [ "toggleFindWholeWord", "toggleSearchWholeWord" ] } },
+{ "key": "alt+c",               "command": "runCommands", "when" : "editorFocus", "args":
+    { "commands": [ "toggleFindCaseSensitive", "toggleSearchCaseSensitive" ] } },
+{ "key": "alt+r",               "command": "runCommands", "when" : "editorFocus", "args":
+    { "commands": [ "toggleFindRegex", "toggleSearchRegex" ] } },
+//{ "key": "alt+w",               "command": "runCommands", "when" : "editorFocus", "args":
+//    { "commands": [ "toggleFindWholeWord", "toggleSearchWholeWord" ] } },
+{ "key": "alt+x",               "command": "runCommands", "when" : "editorFocus", "args":
+    { "commands": [ "toggleFindWholeWord", "toggleSearchWholeWord" ] } },
 
 // Folding
 { "key": "ctrl+u",                "command": "-cursorUndo", "when": "textInputFocus"  },
@@ -244,12 +244,12 @@
 // Debugger
 { "key": "f5",                    "command": "workbench.action.debug.start", "when": "debuggersAvailable && !inDebugMode" },
 { "key": "f5",                    "command": "workbench.action.debug.continue", "when": "debuggersAvailable && inDebugMode" },
-{ "key": "f5",                    "command": "extension.multiCommand.execute", "when": "debuggersAvailable && debugState == 'running'", "args":
-    { "sequence": [ { "command": "workbench.action.tasks.runTask", "args": "Pause" }, "workbench.action.debug.pause" ] } },
-{ "key": "shift+f5",              "command": "extension.multiCommand.execute", "when": "debuggersAvailable", "args":
-    { "sequence": [ { "command": "workbench.action.tasks.runTask", "args": "Stop" }, "workbench.action.debug.stop" ] } },
-{ "key": "ctrl+f5",               "command": "extension.multiCommand.execute", "when": "debuggersAvailable && inDebugMode", "args":
-    { "sequence": [ { "command": "workbench.action.tasks.runTask", "args": "Stop" }, "workbench.action.debug.restart" ] } },
+{ "key": "f5",                    "command": "runCommands", "when": "debuggersAvailable && debugState == 'running'", "args":
+    { "commands": [ { "command": "workbench.action.tasks.runTask", "args": "Pause" }, "workbench.action.debug.pause" ] } },
+{ "key": "shift+f5",              "command": "runCommands", "when": "debuggersAvailable", "args":
+    { "commands": [ { "command": "workbench.action.tasks.runTask", "args": "Stop" }, "workbench.action.debug.stop" ] } },
+{ "key": "ctrl+f5",               "command": "runCommands", "when": "debuggersAvailable && inDebugMode", "args":
+    { "commands": [ { "command": "workbench.action.tasks.runTask", "args": "Stop" }, "workbench.action.debug.restart" ] } },
 { "key": "ctrl+shift+f5",         "command": "workbench.action.debug.selectandstart", "when": "debuggersAvailable && !inDebugMode" },
 { "key": "f10",                   "command": "workbench.action.debug.stepOver", "when": "debuggersAvailable && inDebugMode" },
 { "key": "shift+f10",             "command": "editor.debug.action.runToCursor", "when": "debuggersAvailable && inDebugMode" },
@@ -265,10 +265,10 @@
 { "key": "shift+f2",              "command": "workbench.debug.viewlet.action.copyValue", "when": "debuggersAvailable && watchExpressionsFocused" }, // Does not seem to work !
 
 // Tasks
-//{ "key": "f6",                    "command": "extension.multiCommand.execute", "when": "!inDebugMode", "args":
-    //{ "sequence": [ "closeMarkersNavigation", "workbench.action.tasks.build" ] } },
-// { "key": "ctrl+f6",               "command": "extension.multiCommand.execute", "when": "inDebugMode", "args":
-//     { "sequence": [ "closeMarkersNavigation", "workbench.action.debug.stop", "workbench.action.tasks.build", "workbench.action.debug.start" ] } },
+//{ "key": "f6",                    "command": "runCommands", "when": "!inDebugMode", "args":
+    //{ "commands": [ "closeMarkersNavigation", "workbench.action.tasks.build" ] } },
+// { "key": "ctrl+f6",               "command": "runCommands", "when": "inDebugMode", "args":
+//     { "commands": [ "closeMarkersNavigation", "workbench.action.debug.stop", "workbench.action.tasks.build", "workbench.action.debug.start" ] } },
 { "key": "f6",                    "command": "workbench.action.tasks.build", "when": "!inDebugMode" },
 { "key": "ctrl+alt+f6",           "command": "workbench.action.tasks.terminate", "when": "!inDebugMode" },
 { "key": "shift+f6",              "command": "workbench.action.tasks.runTask", "when": "!inDebugMode", "args": "Clean" },
