@@ -183,4 +183,5 @@
     "shared.enableDatabaseMode": false,
     "contextView.contextWindow.fixStickyScroll": true,
     "contextView.contextWindow.minimap": false,
+    "contextView.contextWindow.fixToken": true,
 }

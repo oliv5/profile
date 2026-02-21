@@ -218,10 +218,22 @@
 // Intellisense goto
 { "key": "ctrl+d d",              "command": "editor.action.goToDeclaration", "when": "editorHasDeclarationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 { "key": "ctrl+d e",              "command": "editor.action.revealDefinition", "when": "editorHasDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
-{ "key": "ctrl+backspace",        "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+backspace",        "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor && !config.referenceWindow.enable" },
+{ "key": "ctrl+d backspace",      "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 { "key": "ctrl+d c",              "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 { "key": "ctrl+d i",              "command": "editor.action.goToImplementation", "when": "editorHasImplementationProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 { "key": "ctrl+d t",              "command": "editor.action.goToTypeDefinition", "when": "editorHasTypeDefinitionProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+
+// Reference Search View (native extension)
+// https://deepwiki.com/microsoft/vscode-references-view/5-reference
+{ "key": "shift+alt+f12",         "command": "-references-view.findReferences", "when": "editorHasReferenceProvider" },
+
+// Relation window
+// https://marketplace.visualstudio.com/items?itemName=ytlee.symbol-relation-window
+{ "key": "ctrl+backspace",        "command": "relation-window.lookupReference", "when": "config.referenceWindow.enable" },
+{ "key": "ctrl+d r",              "command": "relation-window.lookupReference", "when": "config.referenceWindow.enable" },
+{ "key": "ctrl+g",                "command": "relation-window.lookupReference", "when": "config.referenceWindow.enable && searchViewletFocus" },
+{ "key": "ctrl+f4",               "command": "workbench.action.quickOpen", "when": "editorTextFocus", "args": "References" },
 
 // Quickfix proposals
 { "key": "ctrl+shift+space",      "command": "editor.action.quickFix", "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly" },
