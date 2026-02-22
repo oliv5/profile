@@ -285,6 +285,11 @@
 { "key": "ctrl+tab",              "command": "workbench.action.terminal.focusNext", "when": "terminalFocus" },
 { "key": "ctrl+shift+tab",        "command": "workbench.action.terminal.focusPrev", "when": "terminalFocus" },
 
+// Highlight-words
+// https://marketplace.visualstudio.com/items?itemName=rsbondi.highlight-words
+{ "key": "f2",                    "command": "highlightwords.addHighlight", "when": "editorTextFocus" },
+{ "key": "ctrl+f2",               "command": "highlightwords.removeAllHighlights", "when": "editorTextFocus" },
+
 //////////////////////////////////////////////////
 // Extensions
 
