@@ -245,6 +245,8 @@
 { "key": "ctrl+g",                "command": "relation-window.lookupReference", "when": "config.referenceWindow.enable && searchViewletFocus" },
 // { "key": "ctrl+g",                "command": "runCommands", "when": "config.referenceWindow.enable && searchViewletFocus", "args": {
     // "commands": [ "references-view.findReferences", "relation-window.lookupReference" ] } },
+//{ "key": "ctrl+g",               "command": "extension.multiCommand.execute", "when": "config.referenceWindow.enable && searchViewletFocus", "args":
+    //{ "interval": 1000, "sequence": [ "references-view.findReferences", "relation-window.lookupReference" ] } },
 
 // Quickfix proposals
 { "key": "ctrl+shift+space",      "command": "editor.action.quickFix", "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly" },
