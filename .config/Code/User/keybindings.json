@@ -23,6 +23,7 @@
 { "key": "ctrl+f12",              "command": "" },
 { "key": "shift+f12",             "command": "" },
 { "key": "ctrl+shift+f12",        "command": "" },
+{ "key": "ctrl+r",                "command": "-workbench.action.openRecent" },
 
 // Escape
 { "key": "escape",                "command": "workbench.action.focusActiveEditorGroup", "when":"panelFocus" },
@@ -157,25 +158,25 @@
     { "commands": [ "toggleFindWholeWord", "editor.action.nextSelectionMatchFindAction" ] } },
 
 // Search bar: open/toggle
-{ "key": "ctrl+shift+f",    "command": "workbench.action.findInFiles", "when" : "!sideBarFocus" },
-{ "key": "ctrl+shift+f",    "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
+{ "key": "ctrl+shift+f",          "command": "workbench.action.findInFiles", "when" : "!sideBarFocus" },
+{ "key": "ctrl+shift+f",          "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 // Search bar: search & replace in all files
 { "key": "ctrl+g",                "command": "runCommands", "when" : "!sideBarFocus", "args":
     { "commands": [ "editor.action.addSelectionToNextFindMatch", "workbench.action.findInFiles" ] } },
 { "key": "ctrl+g",                "command": "search.action.openInEditor", "when" : "hasSearchResult && searchViewletFocus" },
 // Search bar: navigation
-{ "key": "f4",                    "command": "search.action.focusNextSearchResult", "when": "hasSearchResult || inSearchEditor" },
-{ "key": "shift+f4",              "command": "search.action.focusPreviousSearchResult", "when": "hasSearchResult || inSearchEditor" },
+{ "key": "f4",                    "command": "search.action.focusNextSearchResult", "when": "(hasSearchResult || inSearchEditor) && view.workbench.view.search.visible" },
+{ "key": "shift+f4",              "command": "search.action.focusPreviousSearchResult", "when": "(hasSearchResult || inSearchEditor) && view.workbench.view.search.visible" },
 { "key": "ctrl+f4",               "command": "search.action.clearSearchResults", "when": "hasSearchResult" },
 
 // Quick match / search options
-{ "key": "alt+c",               "command": "runCommands", "when" : "editorFocus", "args":
+{ "key": "alt+c",                 "command": "runCommands", "when" : "editorFocus", "args":
     { "commands": [ "toggleFindCaseSensitive", "toggleSearchCaseSensitive" ] } },
-{ "key": "alt+r",               "command": "runCommands", "when" : "editorFocus", "args":
+{ "key": "alt+r",                 "command": "runCommands", "when" : "editorFocus", "args":
     { "commands": [ "toggleFindRegex", "toggleSearchRegex" ] } },
-//{ "key": "alt+w",               "command": "runCommands", "when" : "editorFocus", "args":
+//{ "key": "alt+w",                 "command": "runCommands", "when" : "editorFocus", "args":
 //    { "commands": [ "toggleFindWholeWord", "toggleSearchWholeWord" ] } },
-{ "key": "alt+x",               "command": "runCommands", "when" : "editorFocus", "args":
+{ "key": "alt+x",                 "command": "runCommands", "when" : "editorFocus", "args":
     { "commands": [ "toggleFindWholeWord", "toggleSearchWholeWord" ] } },
 
 // Folding
@@ -227,13 +228,23 @@
 // Reference Search View (native extension)
 // https://deepwiki.com/microsoft/vscode-references-view/5-reference
 { "key": "shift+alt+f12",         "command": "-references-view.findReferences", "when": "editorHasReferenceProvider" },
+{ "key": "ctrl+r r",              "command": "references-view.findReferences", "when": "editorHasReferenceProvider" },
+{ "key": "ctrl+r ctrl+r",         "command": "references-view.findReferences", "when": "editorHasReferenceProvider" },
+{ "key": "ctrl+r c",              "command": "references-view.showCallHierarchy", "when": "editorHasReferenceProvider" },
+{ "key": "ctrl+r ctrl+c",         "command": "references-view.showCallHierarchy", "when": "editorHasReferenceProvider" },
+{ "key": "f4",                    "command": "references-view.next", "when": "editorHasReferenceProvider && reference-list.hasResult && view.references-view.tree.visible && !view.workbench.view.search.visible" },
+{ "key": "shift+f4",              "command": "references-view.prev", "when": "editorHasReferenceProvider && reference-list.hasResult && view.references-view.tree.visible && !view.workbench.view.search.visible" },
+{ "key": "ctrl+f4",               "command": "runCommands", "when": "editorHasReferenceProvider", "args": {
+    "commands": [ "search.action.clearSearchResults", "references-view.clear" ] } },
+{ "key": "ctrl+g",                "command": "references-view.findReferences", "when": "editorHasReferenceProvider && searchViewletFocus" },
 
 // Relation window
 // https://marketplace.visualstudio.com/items?itemName=ytlee.symbol-relation-window
 { "key": "ctrl+backspace",        "command": "relation-window.lookupReference", "when": "config.referenceWindow.enable" },
 { "key": "ctrl+d r",              "command": "relation-window.lookupReference", "when": "config.referenceWindow.enable" },
 { "key": "ctrl+g",                "command": "relation-window.lookupReference", "when": "config.referenceWindow.enable && searchViewletFocus" },
-{ "key": "ctrl+f4",               "command": "workbench.action.quickOpen", "when": "editorTextFocus", "args": "References" },
+// { "key": "ctrl+g",                "command": "runCommands", "when": "config.referenceWindow.enable && searchViewletFocus", "args": {
+    // "commands": [ "references-view.findReferences", "relation-window.lookupReference" ] } },
 
 // Quickfix proposals
 { "key": "ctrl+shift+space",      "command": "editor.action.quickFix", "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly" },
