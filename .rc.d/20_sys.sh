@@ -35,7 +35,7 @@ alias keyb_setfr='sudo localectl set-keymap fr'
 alias keyb_set_tmp='sudo loadkeys'
 alias keyb_set_tmp_fr='sudo loadkeys fr'
 # https://www.claudiokuenzler.com/blog/1257/how-to-fix-missing-keymaps-debian-ubuntu-localectl-failed-read-list
-alias keyb_fix_debian() {
+keyb_fix_debian() {
   wget https://mirrors.edge.kernel.org/pub/linux/utils/kbd/kbd-2.5.1.tar.gz -O /tmp/kbd-2.5.1.tar.gz
   cd /tmp/ && tar xzf kbd-2.5.1.tar.gz
   sudo cp -Rp /tmp/kbd-2.5.1/data/keymaps/* /usr/share/keymaps/
