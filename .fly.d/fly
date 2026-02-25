@@ -1,0 +1,368 @@
+############ fly ##########
+# Author: Franck Jouvanceau
+###########################
+[ "$1" != source ] && unset _fly_loaded
+[ "$_fly_loaded" ] && return
+: "${FLY_MSG:=Bzzz Bzzz !!!}"
+echo "$FLY_MSG" >&2
+_fly_loaded=1
+: "${FLY_HOME:=$HOME}"
+: "${FLY_RC:=$HOME/.flyrc}"
+: "${_fly_github:=https://github.com}"
+: "${_fly_githubraw:=https://raw.githubusercontent.com}"
+: "${_fly_gitrepo:=joknarf/thefly}"
+: "${FLY_USER_RC:=true}"
+: "${FLY_ETC_RC:=true}"
+: "${_fly_uuid:=$(cat "$FLY_HOME/.fly.d/.flyuuid" 2>/dev/null || uuidgen)}"
+: "${_fly_tmpdir:="/tmp/.fly.\${UUID:-\$(id -u)}/$_fly_uuid"}"
+type gtar >/dev/null 2>&1 && _fly_tar=gtar || _fly_tar=tar
+[[ "$($_fly_tar --version 2>/dev/null)" = *busybox* ]] && {
+    _fly_taropts=( --exclude=.git --exclude=.github --exclude=.gitignore )
+} || _fly_taropts=( --no-xattrs --exclude-vcs )
+
+# OLA++
+_fly_taropts+=( -h --warning=no-file-removed)
+# OLA++
+
+function usage
+{
+    cat - <<'EOF'
+usage: fly <action> <options>
+$ fly add <gituser/reponame>    # add plugin from github repository
+$ fly del <plugin>              # remove plugin with name <plugin> (repo)
+$ fly update <plugin>           # update plugin from github
+$ fly updateall                 # update all plugins from github
+$ fly source                    # source the plugins for current shell (*.plugin.<shell>)
+$ fly upgrade                   # upgrade fly from github joknarf/thefly
+$ flyls                         # list plugins for current shell
+$ flysh <shell>                 # change current shell with fly env
+$ flyas [<user>] [<shell>]      # change user with your fly env (default <user>: root,<shell>: <user> shell)
+$ flyto <ssh options>           # connect to server through ssh with your fly env
+$ flysuto <user> <ssh options>  # use sudo <user> to connect to server through ssh with your fly env
+
+aliases:
+$ fbash                         # flysh bash
+$ fksh                          # flysh ksh
+$ fzsh                          # flysh zsh
+
+$ fsudo                         # flyas
+$ fsudob                        # flyas with bash
+$ fsudok                        # flyas with ksh
+$ fusdoz                        # flyas with zsh
+
+$ fssh                          # flyto
+$ fsshb                         # flyto with bash
+$ fsshk                         # flyto with ksh
+$ fsshz                         # flyto with zsh
+
+$ fsuto                        # flysuto
+$ fsussh                       # flysuto
+
+# fly environment files:
+~/.fly.d/.flyrc                 # common environment
+~/.fly.d/.bashrc                # specific bash environment
+~/.fly.d/.kshrc                 # specific ksh environment
+~/.fly.d/.zshrc                 # specific zsh environment
+EOF
+}
+
+function _fly_zsh_glob
+{
+    [ "${FLY_SHELL##*/}" = "zsh" ] || return 0
+    case "$1" in
+    fix)   [[ ! -o nonomatch ]] && _fly_zsh_nonomatch=1 && setopt nonomatch;;
+    reset) [ "$_fly_zsh_nomatch" ] && unset _fly_zsh_nonomatch && unsetopt nonomatch;;
+    esac
+}
+
+function _fly_login_rc
+{
+    cat - <<EOF >"$FLY_HOME/.fly.d/.fly.lib/.login"
+    FLY_HOME="${1:-$FLY_HOME}"
+    FLY_USER_RC="$FLY_USER_RC"
+    FLY_ETC_RC="$FLY_ETC_RC"
+    FLY_SHELL="$_fly_destshell"
+    unset _fly_loaded
+    . "${1:-$FLY_HOME}/.fly.d/fly" login
+    FLY_USER_RC="true"
+    FLY_ETC_RC="true"
+EOF
+}
+
+_fly_lib="$FLY_HOME/.fly.d/.fly.lib"
+. "$_fly_lib/.fshell"
+
+alias fly=". $FLY_HOME/.fly.d/fly"
+
+alias flysh='_fly shell'
+alias fbash='_fly shell bash'
+alias fzsh='_fly shell zsh'
+alias fksh='_fly shell ksh'
+
+alias flyto='_fly ssh'
+alias fssh='_fly ssh'
+alias fsshb='_fly_destshell=bash _fly ssh'
+alias fsshz='_fly_destshell=zsh _fly ssh'
+alias fsshk='_fly_destshell=ksh _fly ssh'
+
+alias fto='_fly ssh'
+alias bto='_fly_destshell=bash _fly ssh'
+alias zto='_fly_destshell=zsh _fly ssh'
+alias kto='_fly_destshell=ksh _fly ssh'
+
+alias flyas='_fly sudo'
+alias fsudo='_fly sudo'
+alias fsub='_fly_destshell=bash _fly sudo'
+alias fsuz='_fly_destshell=zsh _fly sudo'
+alias fsuk='_fly_destshell=ksh _fly sudo'
+
+alias fsu='_fly sudo'
+alias bsu='_fly_destshell=bash _fly sudo'
+alias ksu='_fly_destshell=ksh _fly sudo'
+alias zsu='_fly_destshell=zsh _fly sudo'
+
+alias flyls='_fly list'
+alias flypack='_fly pack'
+alias cdfly='cd $FLY_HOME/.fly.d'
+
+alias flysudossh='_fly sudossh'
+alias flysuto='_fly sudossh'
+alias fsuto='_fly sudossh'
+alias fsussh='_fly sudossh'
+alias fsutob=' _fly_destshell=bash _fly sudossh'
+alias fsutok=' _fly_destshell=ksh _fly sudossh'
+alias fsutoz=' _fly_destshell=zsh _fly sudossh'
+
+case "$1" in
+    help)
+        usage
+    ;;
+    login)      
+        shift 
+        . "$_fly_lib/.login.${FLY_SHELL##*/}"
+        . "$_fly_lib/.source_plugins"
+    ;;
+    loginshell|install)
+        shift
+        _fly_login_rc
+        . "$_fly_lib/.loginshell" "$FLY_HOME" "$_fly_destshell"
+    ;;
+    source|activate)
+        shift
+        . "$_fly_lib/.source_plugins" "$1"
+    ;;
+    add)
+        shift
+        [ -d "$FLY_HOME/.fly.d/.git" ] && {
+            (\cd "$FLY_HOME/.fly.d" && git submodule add "$_fly_github/$1" "plugins/${1##*/}" 2>/dev/null)
+        } || (\cd "$FLY_HOME/.fly.d/plugins" && git clone "$_fly_github/$1" -q >/dev/null)
+        (\cd "$FLY_HOME/.fly.d" && git config -f ".gitmodules submodule.plugins/${1##*/}.shallow" true >/dev/null 2>/dev/null)
+        ln -s ../plugins/${1##*/} $FLY_HOME/.fly.d/plugins.d/50-${1##*/}
+        set --
+        . "$_fly_lib/.source_plugins" "${1#*/}"
+    ;;
+    del)
+        shift
+        [ ! "$1" ] && echo "usage: fly del <plugin>" >&2 && return 1
+        [ ! -d "$FLY_HOME/.fly.d/plugins/${1##*/}" ] && echo "plugin ${1##*/} not found" >&2 && return 1
+        [ -d "$FLY_HOME/.fly.d/.git" ] && {
+            (\cd "$FLY_HOME/.fly.d" && git submodule deinit -f "plugins/${1##*/}" && \
+                git add .gitmodules
+                git rm --cached "plugins/${1##*/}"
+                git config -f .gitmodules --remove-section "submodule.plugins/${1##*/}"
+            ) 2>/dev/null
+        } 
+        rm -rf "$FLY_HOME/.fly.d/plugins/${1##*/}" "$FLY_HOME/.fly.d/.git/modules/plugins/${1##*/}" "$FLY_HOME/.fly.d/plugins.d/"??-"${1##*/}"
+    ;;
+    update)
+        shift
+        [ ! "$1" ] && echo "usage: fly update <plugin>" >&2 && return 1 
+        (\cd "$FLY_HOME/.fly.d/plugins/${1#*/}" && git pull origin "$(git rev-parse --abbrev-ref HEAD)")
+        . "$_fly_lib/.source_plugins" "${1#*/}"
+    ;;
+    updateall)
+        shift
+        _fly_zsh_glob fix
+        for plugin in $(ls -d "$FLY_HOME/.fly.d/plugins"/*/.git) ;do
+            [ -d "$plugin" ] && (\cd "$plugin/.." && git pull origin "$(git rev-parse --abbrev-ref HEAD)")
+            [ -s "$plugin" ] && submodule=1
+        done
+        [ "$submodule" ] && (\cd $FLY_HOME/.fly.d && { 
+            git submodule update --remote --merge 2>/dev/null
+            git submodule foreach git pull 2>/dev/null
+        })
+        _fly_zsh_glob reset
+        . "$_fly_lib/.source_plugins"
+    ;;
+    upgrade)
+        shift
+        . <(curl -s -L -H 'Pragma: no-cache' -H 'Cache-Control: no-cache' "$_fly_githubraw/$_fly_gitrepo/main/thefly") install
+    ;;
+esac
+
+function _fly_package
+{
+    [ "$FLY_RC" ] && [ -r "$FLY_RC" ] && cp "$FLY_RC" "$FLY_HOME/.fly.d/.fly.lib"
+    $_fly_tar -czf - -C "$FLY_HOME" "${_fly_taropts[@]}" --exclude=README.md --exclude='plugins/*/.*' --exclude '*/*/tests' .fly.d
+}
+
+function _fly_xpretar
+{
+    printf 'FLY_HOME="%s";' "$_fly_tmpdir"
+    printf 'type gtar >/dev/null 2>&1 && _fly_tar=gtar || _fly_tar=tar;'
+    printf 'umask 077;mkdir -p "$FLY_HOME";rm -rf "$FLY_HOME/.fly.d";'
+    printf '! chmod 700 "$FLY_HOME" && echo "Not owner of $FLY_HOME. Abort" >&2 && exit 1;'
+}
+
+function _fly_xpackage
+{   
+    printf '$_fly_tar -xmzf - -C "$FLY_HOME" --no-same-owner'
+}
+
+function _fly_user_shell
+{
+  typeset user="$1" userdef
+  userdef="$(getent passwd "$user" 2>/dev/null)" && echo "${userdef##*:}" && return
+  userdef="$(dscl . -read "Users/$user" UserShell 2>/dev/null)" && echo "${userdef#*: }" && return
+  awk -F: '$1==user{print $NF}' user="$user" /etc/passwd
+}
+
+function _fly_sudo
+{
+    typeset user="${1:-root}"
+    [ "$_fly_destshell" ] || _fly_destshell="$(_fly_user_shell "$user")"
+    [[ "$_fly_destshell" = */sh ]] && _fly_destshell="$FLY_SHELL"
+    [[ "$_fly_destshell" = *sh ]] || _fly_destshell="$FLY_SHELL"
+    _fly_login_rc "$_fly_tmpdir"
+    \cd /
+    _fly_pkg_warp "$user" |SHELL="$_fly_destshell" sudo -Hsu "$user"
+    \cd "$OLDPWD"
+    unset _fly_destshell
+}
+
+function _fly_ssh_ok
+{
+    typeset ssh_ver ssh_maj ssh_min
+    _fly_ssh_ok=false
+    type ssh >/dev/null 2>&1 || return
+    typeset ssh_ver="$(ssh -V 2>&1)"
+    ssh_ver="${ssh_ver%% *}";ssh_ver="${ssh_ver#*_}";ssh_ver="${ssh_ver%p*}"
+    [[ "$ssh_ver" = *.*.* ]] && ssh_ver="${ssh_ver%.*}"
+    ssh_min=${ssh_ver#*.}
+    ssh_maj=${ssh_ver%.*}
+    [ "$ssh_maj" -gt 8 ] && _fly_ssh_ok=true
+    # ssh 8.0 RemoteCommand buffer too short
+    [ "$ssh_maj" = 8 ] && [ "$ssh_min" -gt 0 ] && _fly_ssh_ok=true
+}
+
+function _fly_package_zfx
+{
+    typeset b64opt
+    echo ok |base64 -w0 >/dev/null 2>&1 && b64opt='-w0'
+    cat - <<EOF
+$(_fly_xpretar) base64 -d <<<'$(_fly_package |base64 $b64opt)' |$(_fly_xpackage)
+EOF
+
+}
+
+function _fly_pack
+{
+    cat - <<EOF
+[ "\$1" = install ] && FLY_HOME="\$HOME" || $(_fly_package_zfx)
+[[ "\$1" = *sh ]] && _fly_destshell="\$1" && shift
+. "\$FLY_HOME/.fly.d/fly" \${1:-loginshell}
+EOF
+}
+
+function _fly_pkg_warp
+{
+    # Old sudo keeps USER=root when sudo from root
+    [ "$1" ] && echo "USER=$1"
+    cat - <<EOF
+$(_fly_package_zfx)
+. "$_fly_tmpdir/.fly.d/.fly.lib/.loginshell" "$_fly_tmpdir" "$_fly_destshell"
+EOF
+}
+
+function _fly_sudo_ssh
+{
+    typeset user="$1"
+    shift
+    sudo -Hsu "$user" <<<"$(_fly_package_zfx);exec <&1;. \$FLY_HOME/.fly.d/fly;_fly_destshell=$_fly_destshell _fly_ssh $@;exit"
+}
+
+function _fly_ssh
+{
+    ! $_fly_ssh_ok && { _fly_ssh2 "$@"; return $?; } 
+    typeset ssh_config cmd c i
+    _fly_login_rc "$_fly_tmpdir"
+    cmd="$(_fly_pkg_warp)"
+    [ ${#cmd} -gt 130000 ] && { _fly_ssh2 "$@"; return $?; }
+    for i in "$@";do
+       [ "$i" = -F ] && shift && c=1 && continue
+       [ "$c" ] && unset c && ssh_config="Include $i" && shift && continue
+       shift
+       set -- "$@" "$i"
+    done
+    [ ! "$ssh_config" ] && [ -f ~/.ssh/config ] && ssh_config="Include $HOME/.ssh/config"
+    cmd="${cmd//$'\n'/;}"
+    cat - <<_EOF_ >"$FLY_HOME/.fly_ssh"
+RequestTTY yes
+RemoteCommand $cmd
+$ssh_config
+_EOF_
+    \cd $FLY_HOME;ssh -F .fly_ssh "$@";\cd $OLDPWD
+}
+
+function _fly_ssh2
+{
+    _fly_login_rc "$_fly_tmpdir"
+    _fly_package | ssh -o LogLevel=Error "$@" "$(_fly_xpretar) $(_fly_xpackage)" || return $?
+    ssh "$@" -t '. '"$_fly_tmpdir"'/.fly.d/.fly.lib/.loginshell '"$_fly_tmpdir"' '"$_fly_destshell"''
+}
+
+
+function _fly
+{
+    typeset plugin submodule
+    case "$1" in
+        list)
+            _fly_zsh_glob fix
+            (\cd "$FLY_HOME/.fly.d/plugins" && ls -1 -- */*.plugin.${FLY_SHELL##*/})
+            _fly_zsh_glob reset
+        ;;
+        shell)
+            shift
+            [ "$1" ] && ! type "$1" >/dev/null 2>&1 && echo "Cannot find shell $1" >&2 && return 1
+            _fly_destshell="${1:-$FLY_SHELL}"; _fly_login_rc; . "$FLY_HOME/.fly.d/.fly.lib/.loginshell" "$FLY_HOME" "$_fly_destshell"
+        ;;
+        ssh|to) 
+            shift
+            [ ! "$1" ] && echo "fly: error: missing destination/ssh params" && return 1
+            _fly_ssh "$@"
+        ;;
+        sudo|as) 
+            shift;
+            [ "$2" ] && ! type "$2" >/dev/null 2>&1 && echo "Cannot find shell $2" >&2 && return 1
+            _fly_destshell="${2:-$_fly_destshell}"
+            _fly_sudo "$1"
+        ;;
+        sudossh|suto)
+            shift
+            [ ! "$1" ] && echo "fly: error: missing user" && return 1
+            [ ! "$2" ] && echo "fly: error: missing destination/ssh params" && return 1
+            _fly_sudo_ssh "$@"
+        ;;
+        pack)
+            shift
+            _fly_pack
+        ;;
+        *) usage;return 1;;
+    esac
+}
+
+_fly_ssh_ok
+
+
+unset _fly_destshell
+set --

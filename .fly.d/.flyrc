@@ -1,0 +1,6 @@
+# If FLY_HOME is not in HOME
+if [ "${FLY_HOME##$HOME}" != "$FLY_HOME" ]; then
+    if [ -d "$FLY_HOME/.fly.d/bin" ]; then
+        export PATH="$PATH:$FLY_HOME/.fly.d/bin"
+    fi
+fi
