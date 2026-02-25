@@ -111,7 +111,7 @@ primerun() {
 # VGA switcheroo (nouveau driver)
 # https://01.org/linuxgraphics/gfx-docs/drm/gpu/vga-switcheroo.html
 # https://unix.stackexchange.com/questions/568378/nvidia-optimus-with-nouveau-drivers
-if grep -i switcheroo /boot/config-* >/dev/null && lsmod | grep nouveau >/dev/null; then
+if grep -i switcheroo /boot/config-* >/dev/null 2>&1 && lsmod | grep nouveau >/dev/null; then
   vgaswitcheroo_status() {
     sudo cat /sys/kernel/debug/vgaswitcheroo/switch
   }
