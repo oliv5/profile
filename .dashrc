@@ -10,7 +10,7 @@ case $- in
 esac
 
 # Find local dir
-LOCAL_DIR="$(dirname "$0")"
+LOCAL_DIR="$(dirname "$ENV")" # from the ENV variable
 
 # Load .profile when not already done
 if [ -z "$ENV_PROFILE" ]; then
@@ -54,8 +54,10 @@ fi
 export ENV_DASHRC=$((ENV_DASHRC+1))
 
 # Bootstrap user profile
-if [ -r "$HOME/.rc" ]; then
-  . "$HOME/.rc"
+if [ -r ~/.rc ]; then
+  . ~/.rc
+elif [ -r "$LOCAL_DIR"/.rc ]; then
+  . "$LOCAL_DIR"/.rc
 fi
 
 # History (use 'fc')
