@@ -26,12 +26,6 @@ export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
 # Declare user script (posix shells only)
 export ENV="$RC_DIR/.dashrc"
 
-# Load local profile script
-if [ -r "$RC_DIR_LOCAL/.profile.local" ]; then
-  export ENV_PROFILE_LOCAL=$((ENV_PROFILE_LOCAL+1))
-  . "$RC_DIR_LOCAL/.profile.local"
-fi
-
 # Exports
 export PATH
 

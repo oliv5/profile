@@ -2,17 +2,17 @@
 # ~/.dashrc: executed by dash(1) for non-login shells.
 # Inspired by .bashrc
 
-# Load .profile when not already done
-if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
-  . "$HOME/.profile"
-fi
-
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 case $- in
   *i*) ;;
   *) return;;
 esac
+
+# Load .profile when not already done
+if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
+  . "$HOME/.profile"
+fi
 
 # for setting history length see HISTSIZE in dash(1)
 HISTSIZE=1000
