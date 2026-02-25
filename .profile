@@ -10,6 +10,9 @@ umask 022
 #  . /etc/profile
 #fi
 
+# Find local dir
+LOCAL_DIR="$(test -n "$BASH_VERSION" && dirname "${BASH_SOURCE[0]}" || dirname "$0")"
+
 # Misc variables
 [ -z "$USER" ] && export USER="$({ id -un 2>/dev/null || id -u; } | awk '{print $1; exit}')"
 [ -z "$HOME" ] && export HOME="$(awk -F: '/'$USER'/ {print $6; exit}' /etc/passwd || echo "/home/$USER")"
@@ -20,11 +23,15 @@ umask 022
 
 # Set global variables
 export ENV_PROFILE=$((ENV_PROFILE+1))
-export RC_DIR="${RC_DIR:-$HOME}"
-export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
+export RC_DIR="${RC_DIR:-$LOCAL_DIR}"
+export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$LOCAL_DIR}"
 
 # Declare user script (posix shells only)
-export ENV="$RC_DIR/.dashrc"
+if [ -r ~/.dashrc ]; then
+  export ENV=~/.dashrc
+elif [ -r "$LOCAL_DIR"/.dashrc ]; then
+  export ENV="$LOCAL_DIR"/.dashrc
+fi
 
 # Exports
 export PATH

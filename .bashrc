@@ -10,11 +10,16 @@ case $- in
     *) return;;
 esac
 
+# Find local dir
+LOCAL_DIR="$(dirname "${BASH_SOURCE[0]}")"
+
 # Load .profile when not already done
-if [ -z "$ENV_PROFILE" ] && [ -z "$ENV_BASHRC" ] && [ -r ~/.profile ]; then
-  export ENV_BASHRC=1 # no re-entrance
-  . ~/.profile
-  export ENV_BASHRC=0
+if [ -z "$ENV_PROFILE" ]; then
+  if [ -r ~/.profile ]; then
+    . ~/.profile
+  elif [ -r "$LOCAL_DIR"/.profile ]; then
+    "$LOCAL_DIR"/.profile
+  fi
 fi
 
 # execute system wide bashrc
@@ -148,6 +153,8 @@ export HISTIGNORE='&:[ ]*' # Avoid duplicates in history
 # Bootstrap user profile
 if [ -r ~/.rc ]; then
   . ~/.rc
+elif [ -r "$LOCAL_DIR"/.rc ]; then
+  . "$LOCAL_DIR"/.rc
 fi
 
 # make sure this is the last line
