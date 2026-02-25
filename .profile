@@ -13,18 +13,8 @@ umask 022
 # Find local dir
 LOCAL_DIR="$(test -n "$BASH_VERSION" && dirname "${BASH_SOURCE[0]}" || dirname "$0")"
 
-# Misc variables
-[ -z "$USER" ] && export USER="$({ id -un 2>/dev/null || id -u; } | awk '{print $1; exit}')"
-[ -z "$HOME" ] && export HOME="$(awk -F: '/'$USER'/ {print $6; exit}' /etc/passwd || echo "/home/$USER")"
-[ -z "$LOGINNAME" ] && export LOGINNAME="$USER"
-[ -z "$HOSTNAME" ] && export HOSTNAME="$({ hostname 2>/dev/null || uname -n; } | head -n 1)"
-[ -z "$DOMAIN" ] && export DOMAIN="$(hostname -d 2>/dev/null | head -n 1)"
-[ -z "$DISPLAY" ] && export DISPLAY=":0"
-
 # Set global variables
 export ENV_PROFILE=$((ENV_PROFILE+1))
-export RC_DIR="${RC_DIR:-$LOCAL_DIR}"
-export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$LOCAL_DIR}"
 
 # Declare user script (posix shells only)
 if [ -r ~/.dashrc ]; then

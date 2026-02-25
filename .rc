@@ -1,10 +1,6 @@
 #!/bin/sh
 # Main user profile script
 # It should be kept compatible with all shells (dash, bash,...)
-if [ -z "$HOME" ]; then
-  echo >&2 ".rc: \$HOME is not defined... Abort !"
-  return 1
-fi
 
 # Main source function
 rc_source() {
@@ -219,6 +215,26 @@ rc_remove_hook() {
 }
 
 ################################
+# System variables
+[ -z "$USER" ] && export USER="$({ id -un 2>/dev/null || id -u; } | awk '{print $1; exit}')"
+[ -z "$HOME" ] && export HOME="$(awk -F: '/'$USER'/ {print $6; exit}' /etc/passwd || echo "/home/$USER")"
+[ -z "$LOGINNAME" ] && export LOGINNAME="$USER"
+[ -z "$HOSTNAME" ] && export HOSTNAME="$({ hostname 2>/dev/null || uname -n; } | head -n 1)"
+[ -z "$DOMAIN" ] && export DOMAIN="$(hostname -d 2>/dev/null | head -n 1)"
+[ -z "$DISPLAY" ] && export DISPLAY=":0"
+
+if [ -z "$HOME" ]; then
+  echo >&2 ".rc: \$HOME is not defined... Abort !"
+  return 1
+elif ! [ -d "$HOME" ]; then
+  echo >&2 ".rc: \$HOME='$HOME' does not exist... Abort !"
+  return 2
+fi
+
+# RC variables
+[ -z "$RC_DIR" ] && export RC_DIR="$(test -n "$BASH_VERSION" && dirname "${BASH_SOURCE[0]}" || dirname "$0")"
+[ -z "$RC_DIR_LOCAL" ] && export RC_DIR_LOCAL="$RC_DIR"
+
 # Interactive shells
 if [ -t "0" ] || ! [ -p /dev/stdin ]; then
   # Global aliases
