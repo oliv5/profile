@@ -129,16 +129,6 @@ fi
 # Set load flag
 export ENV_BASHRC=$((ENV_BASHRC+1))
 
-# Load local .bashrc
-if [ -r "$RC_DIR_LOCAL/.bashrc.local" ]; then
-  . "$RC_DIR_LOCAL/.bashrc.local"
-fi
-
-# Bootstrap user profile
-if [ -r ~/.rc ]; then
-  . ~/.rc
-fi
-
 # Reload ~/.inputrc in an interactive shell only
 if [ -f ~/.inputrc ]; then
   case $- in
@@ -153,7 +143,12 @@ export IGNOREEOF=1
 export HISTSIZE=5000
 export HISTFILESIZE=5000
 export HISTCONTROL=ignoreboth
-export HISTIGNORE='&:[ ]*'	# Avoid duplicates in history
+export HISTIGNORE='&:[ ]*' # Avoid duplicates in history
+
+# Bootstrap user profile
+if [ -r ~/.rc ]; then
+  . ~/.rc
+fi
 
 # make sure this is the last line
 # to ensure a good return code
