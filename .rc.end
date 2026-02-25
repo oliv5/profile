@@ -79,6 +79,11 @@ if [ -d "$RC_DIR/.pbin/resources/rga" ]; then
     bind '"\C-o": "\C-k \C-urga-fzf\C-m"'
   fi
 fi
+# https://github.com/joknarf/thefly
+if [ -r "$HOME"/.fly.d/fly ]; then
+  export FLY_MSG="Loading fly..."
+  . "$HOME"/.fly.d/fly 2>&1
+fi
 
 ################################
 # Disable TTY Software Flow Control (XON/XOFF flow control)
