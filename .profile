@@ -17,10 +17,12 @@ LOCAL_DIR="$(test -n "$BASH_VERSION" && dirname "${BASH_SOURCE[0]}" || dirname "
 export ENV_PROFILE=$((ENV_PROFILE+1))
 
 # Declare user script (posix shells only)
-if [ -r ~/.dashrc ]; then
-  export ENV=~/.dashrc
-elif [ -r "$LOCAL_DIR"/.dashrc ]; then
-  export ENV="$LOCAL_DIR"/.dashrc
+if [ -z "$ENV" ]; then
+  if [ -r ~/.dashrc ]; then
+    export ENV=~/.dashrc
+  elif [ -r "$LOCAL_DIR"/.dashrc ]; then
+    export ENV="$LOCAL_DIR"/.dashrc
+  fi
 fi
 
 # Exports
