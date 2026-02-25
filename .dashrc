@@ -9,9 +9,16 @@ case $- in
   *) return;;
 esac
 
+# Find local dir
+LOCAL_DIR="$(dirname "$0")"
+
 # Load .profile when not already done
-if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
-  . "$HOME/.profile"
+if [ -z "$ENV_PROFILE" ]; then
+  if [ -r ~/.profile ]; then
+    . ~/.profile
+  elif [ -r "$LOCAL_DIR"/.profile ]; then
+    "$LOCAL_DIR"/.profile
+  fi
 fi
 
 # for setting history length see HISTSIZE in dash(1)
