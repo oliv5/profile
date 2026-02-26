@@ -57,15 +57,16 @@ rc_source() {
   # Source script from list
   rc_sourcelist() {
     local FILE
-    for FILE in $(cat "$@" 2>/dev/null | sort -u); do
-      if [ -r "$RC_DIR/$FILE" ]; then
-        rc_sourcefiles "$RC_DIR/$FILE"
-      fi
-      if [ "$RC_DIR" != "$RC_DIR_LOCAL" ] && [ -r "$RC_DIR_LOCAL/$FILE" ]; then
-        rc_sourcefiles "$RC_DIR_LOCAL/$FILE"
-      fi
-    done
-}
+    if [ "$RC_DIR" = "$RC_DIR_LOCAL" ]; then
+      for FILE in $(cat "$@" 2>/dev/null | sort -u); do
+        rc_sourcefiles "$RC_DIR/"$FILE # no quotes to catch *.sh
+      done
+    else
+      for FILE in $(cat "$@" 2>/dev/null | sort -u); do
+        rc_sourcefiles "$RC_DIR/"$FILE "$RC_DIR_LOCAL/"$FILE # no quotes to catch *.sh
+      done
+    fi
+  }
 
   # Source module '*.sh' after expension
   # Note: don't quote $@ below, we want shell expension
@@ -129,7 +130,7 @@ rc_source() {
   set +f # Enable glob expansion
   local PATTERN
   for PATTERN in "${RC_ALL:-$@}"; do
-    if [ $# -eq 0 ] && [ -z "$RC_ALL" ] && [ -r "$RC_DIR/.rc.autoload" -o -r "$RC_DIR_LOCAL/.rc.local.autoload" ]; then # Load from list
+    if [ $# -eq 0 ] && [ -z "$RC_ALL" ]; then # Load from list
       rc_sourcelist "$RC_DIR/.rc.autoload" "$RC_DIR_LOCAL/.rc.local.autoload"
       continue
     elif [ -f "$PATTERN" ] && [ -z "${PATTERN%%*.sh}" ]; then # Load explicit .sh files
@@ -151,10 +152,10 @@ rc_source() {
       fi
       if [ -d "$RC_DIR_LOCAL" ]; then
         local DIR="$RC_DIR_LOCAL/.rc.local.d"
-        for LOOP in $(seq 1); do
+        #for LOOP in $(seq 1); do # to load all subfolders
           rc_sourcemod "$DIR/*$PATTERN*.sh"
-          DIR="$DIR/*/"
-        done
+        #  DIR="$DIR/*/"
+        #done
       fi
     fi
   done
