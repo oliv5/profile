@@ -435,30 +435,36 @@ log() {
 }
 
 # system upgrade
-alias sysup='screen -c /dev/null -m sudo sh -c " \
-  set +e; set -x; \
-  echo System update starting...; \
-  command -v apt-get >/dev/null && \
-    apt-get update && \
-    apt-get full-upgrade && \
-    apt-get autoremove; \
-  command -v pkcon >/dev/null && \
-    pkcon refresh && \
-    pkcon get-updates && \
-    pkcon update; \
-  command -v snap >/dev/null && \
-    snap refresh; \
-  command -v flatpak >/dev/null && \
-    flatpak upgrade; \
-    flatpak uninstall --unused; \
-  command -v flatpak >/dev/null && \
-    flatpak --user upgrade; \
-    flatpak --user uninstall --unused; \
-  set +x; \
-  echo Done... press enter to quit; \
-  read VAR; \
-  screen -X quit; \
-"'
+alias sysup='sys_up'
+sys_up() {
+  local APT_YES="${1:+-y}"
+  local PKCON_YES="${1:+-y}"
+  local FLATPAK_YES="${1:+-y}"
+  screen -c /dev/null -m sudo sh -c "
+  set +e; set -x;
+  echo System update starting...;
+  command -v apt-get >/dev/null &&
+    apt-get update &&
+    apt-get full-upgrade $PKCON_YES &&
+    apt-get autoremove PKCON_YES;
+  command -v pkcon >/dev/null &&
+    pkcon refresh &&
+    pkcon get-updates &&
+    pkcon update $PKCON_YES;
+  command -v snap >/dev/null &&
+    snap refresh;
+  command -v flatpak >/dev/null &&
+    flatpak upgrade $FLATPAK_YES;
+    flatpak uninstall --unused;
+  command -v flatpak >/dev/null &&
+    flatpak --user upgrade $FLATPAK_YES;
+    flatpak --user uninstall --unused;
+  set +x;
+  echo Done... press enter to quit;
+  read VAR;
+  screen -X quit;
+"
+}
 
 # KDEconnect/GSconnect
 if [ -f "$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js" ]; then
