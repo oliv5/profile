@@ -2012,6 +2012,7 @@ alias gcp='git cherry-pick'
 # Rebase aliases
 alias grb='git_rebase'
 alias grbi='git_rebase_interactive'
+alias grbc='GIT_EDITOR=true git rebase --continue'
 # Fetch/pull/push aliases
 alias gpu='git push'
 alias gpuu='git push -u'
