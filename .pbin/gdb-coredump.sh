@@ -1,4 +1,6 @@
 #!/bin/sh
+
+# Case for systemd-coredump
 if command -v coredumpctl >/dev/null; then
     echo "List of last coredump files"
     sudo coredumpctl list --no-pager -n 10
@@ -14,6 +16,12 @@ if command -v coredumpctl >/dev/null; then
 else
     DIR="$(sysctl kernel.core_pattern | awk -F' ' '{print $3}' 2>&1)"
     DIR="${DIR%/*}"
+
+    # Case of |/usr/share/apport/apport
+    if echo "${DIR}" | grep -sq -e '\|/.*apport'; then
+        DIR=/var/crash
+    fi
+
     echo "Coredump files folder: $DIR"
     echo "Last coredump files"
 
