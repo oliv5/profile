@@ -1,7 +1,7 @@
 #!/bin/sh
 if command -v coredumpctl >/dev/null; then
     echo "List of last coredump files"
-    sudo coredumpctl info --no-pager
+    sudo coredumpctl list --no-pager -n 10
     echo
     read -p "Coredump file to debug (empty=last): " COREDUMP
     if [ -z "$COREDUMP" ]; then
