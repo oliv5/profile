@@ -18,12 +18,17 @@ else
     DIR="${DIR%/*}"
 
     # Case of |/usr/share/apport/apport
-    if echo "${DIR}" | grep -sq -e '\|/.*apport'; then
+    if echo "${DIR}" | grep -sq -e '|/.*apport'; then
         DIR=/var/crash
     fi
 
     echo "Coredump files folder: $DIR"
     echo "Last coredump files"
+
+    if ! [ -d "$DIR" ]; then
+        echo >&2 "Cannot find folder '$DIR'... abort !"
+        exit 1
+    fi
 
     ls -lt "$DIR" | tail -n +2 | head -n 8
     echo
