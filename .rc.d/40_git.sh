@@ -1148,7 +1148,7 @@ git_subtree_update() {
 # https://git-scm.com/docs/git-filter-branch
 
 # Amend author/committer names & emails
-git_amend_names() {
+git_update_author() {
 (
   # Run in a subshell because we need to export lots of variables
   # Identify who/what the amend is about
@@ -1190,37 +1190,36 @@ git_amend_names() {
 }
 
 # Amend commit log (with git filter-branch).
-git_amend_log() {
+git_update_log() {
   ( set -e
     local FROM="$(git_hash ${1:?No SHA1_1 specified...})"
     local NEWLOG="${2:?No new log specified...}"
     local TO="${3:-$(git_branch)}"
     local BRANCH="${4:-$(git_branch)}"
     git_modified && return 1
-    #git_tag_create "git_amend_log"
-    git branch _tmp_git_amend_log "${TO}"
+    git branch _tmp_git_update_log "${TO}"
     local SCRIPT="if [ \"\$GIT_COMMIT\" = \"$FROM\" ]; then echo \"$NEWLOG\"; else cat; fi"
-    git filter-branch -f --msg-filter "$SCRIPT" -- ${FROM}^.._tmp_git_amend_log || true
+    git filter-branch -f --msg-filter "$SCRIPT" -- ${FROM}^.._tmp_git_update_log || true
     echo "Previous head was: $(git_hash)"
-    git update-ref refs/heads/"$BRANCH" refs/heads/_tmp_git_amend_log
-    git branch -d _tmp_git_amend_log
+    git update-ref refs/heads/"$BRANCH" refs/heads/_tmp_git_update_log
+    git branch -d _tmp_git_update_log
   )
 }
 
 # Amend commit file (with git filter-branch).
-git_amend_file() {
+git_update_file() {
   ( set -e
     local FROM="$(git_hash ${1:?No SHA1_1 specified...})"
     local TO="${2:-$(git_branch)}"
     local BRANCH="${3:-$(git_branch)}"
     ! git_modified && return 1
     git stash
-    git branch _tmp_git_amend_log "${TO}"
+    git branch _tmp_git_update_file "${TO}"
     local SCRIPT="git stash show -p | git apply"
-    git filter-branch -f --tree-filter "$SCRIPT" -- ${FROM}.._tmp_git_amend_log || true
+    git filter-branch -f --tree-filter "$SCRIPT" -- ${FROM}.._tmp_git_update_file || true
     echo "Previous head was: $(git_hash)"
-    git update-ref refs/heads/"$BRANCH" refs/heads/_tmp_git_amend_log
-    git branch -d _tmp_git_amend_log
+    git update-ref refs/heads/"$BRANCH" refs/heads/_tmp_git_update_file
+    git branch -d _tmp_git_update_file
     git stash pop
   )
 }
