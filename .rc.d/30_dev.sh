@@ -112,10 +112,10 @@ alias itypedef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGE
 # Dev replace
 _DSEXCLUDE="-not -path */.svn* -and -not -path */.git* -and -not -type l"
 #~ _DSEXCLUDE="-not -path '*/.*' -and -not -type l" # issue with quotes
-alias  dhh='FCASE=   FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_REF" SEXCLUDE="$_DSEXCLUDE" _fsed'
-alias idhh='FCASE=-i FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_REF" SEXCLUDE="$_DSEXCLUDE" _fsed'
-alias  hhc='FCASE=   FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_C|$_DGEXT_H" SEXCLUDE="$_DSEXCLUDE" _fsed'
-alias ihhc='FCASE=-i FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_C|$_DGEXT_H" SEXCLUDE="$_DSEXCLUDE" _fsed'
+alias  hhr='FCASE=   FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_REF" SEXCLUDE="$_DSEXCLUDE" SNOCONFIRM=1 _fsed'
+alias ihhr='FCASE=-i FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_REF" SEXCLUDE="$_DSEXCLUDE" SNOCONFIRM=1 _fsed'
+alias  hhc='FCASE=   FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_C|$_DGEXT_H" SEXCLUDE="$_DSEXCLUDE" SNOCONFIRM=1 _fsed'
+alias ihhc='FCASE=-i FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_C|$_DGEXT_H" SEXCLUDE="$_DSEXCLUDE" SNOCONFIRM=1 _fsed'
 
 ###########
 # Ctags based search
