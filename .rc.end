@@ -150,7 +150,7 @@ ssh_add_wrapper() {
       fi
   fi
   ssh_agent
-  KEYS="$(ssh-add -l -E sha256)"
+  KEYS="$(ssh-add -l -E sha256 | sort -k 3)"
   for KEY; do
     if [ -r "$KEY" ]; then
       FINGERPRINT="$(ssh-keygen -l -E SHA256 -f "$(readlink -f "$KEY")" 2>/dev/null | cut -d' ' -f 1-2)"
@@ -270,6 +270,8 @@ ffo1() { ff1 "${@:-""}"  | xargs -r0 mimeopen; }
 ffc()  { ff0 "${@:-""}"  | xargs -r0 cat ; }
 ffc1() { ff1 "${@:-""}"  | xargs -r0 cat ; }
 ffwc() { ff0 "${@:-""}"  | wc --files0-from=- -l; }
+fftxza(){ ff0 "${@:-""}" | xargs -r0 -I{} env XZ_OPT=${XZ_OPT:--9} tar -cvJf "{}.txz" "{}"; }
+fftxzd(){ ff0 "${@:-""}" | xargs -r0 -I{} tar -xvJf "{}.txz" -C "./$(basename {} txz)/"; }
 
 # Grep & open
 refv()  { ${VI:-gvim} $(ref "$@" | awk -F: '{print $1 " +" $2}'); }
