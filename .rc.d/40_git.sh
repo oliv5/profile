@@ -596,10 +596,19 @@ git_sync() {
   local SRC_REMOTE="${1:?No source remote specified...}"
   local REFS="$2"
   git fetch --tags "$SRC_REMOTE" || return $?
-  for REF in ${REFS:-"*"}; do
-    #git fetch "$SRC_REMOTE" "refs/heads/$REF:refs/heads/$REF" # Fails when working on the local branch
-    git fetch "$SRC_REMOTE" "refs/{tags,heads}/$REF:refs/{tags,heads}/$REF"
+  #git fetch "$SRC_REMOTE" "refs/heads/*:refs/heads/*" # Fails when working on the local branch
+  WHAT=""
+  if [ -z "$REFS" ]; then
+    # List all local/remote branches, skip the current local one
+    REFS="$(git show-ref --heads | grep -v $(git rev-parse HEAD) | cut -d' ' -f2)"
+    # Pull the current local one if it exists
+    git pull "$SRC_REMOTE" --rebase
+  fi
+  # Build list of references to pull
+  for REF in $REFS; do
+    WHAT="${WHAT:+$WHAT }$REF:$REF"
   done
+  git fetch "$SRC_REMOTE" $WHAT
 }
 
 # Sync 1 remote with another or the local repo ("heads")
