@@ -81,8 +81,10 @@ if [ -d "$RC_DIR/.pbin/resources/rga" ]; then
 fi
 # https://github.com/joknarf/thefly
 if [ -r "$HOME"/.fly.d/fly ]; then
-  export FLY_MSG="Loading fly..."
-  . "$HOME"/.fly.d/fly 2>&1
+  if dpkg -s uuid-runtime >/dev/null 2>&1; then
+    export FLY_MSG="Loading fly..."
+    . "$HOME"/.fly.d/fly 2>&1
+  fi
 fi
 
 ################################
