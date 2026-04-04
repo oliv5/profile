@@ -86,6 +86,14 @@ if [ -r "$HOME"/.fly.d/fly ]; then
 fi
 
 ################################
+# pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+if [ -d "$PYENV_ROOT"/bin ]; then
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init - bash)"
+fi
+
+################################
 # Disable TTY Software Flow Control (XON/XOFF flow control)
 # https://unix.stackexchange.com/questions/72086/ctrl-s-hangs-the-terminal-emulator
 if shell_isinteractive; then
