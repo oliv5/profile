@@ -806,6 +806,9 @@ _annex_transfer() {
   # 2) get, copy and drop the remote files
   echo "Get/copy remote files..."
   git annex find --include='*' $SELECTED --print0 "$@" | xargs -0 -r sh -c '
+    annex_version() {
+      echo "${1:-$(git annex version 2>/dev/null | awk -F": " "/git-annex version:/ {print \$2}")}" | awk -F"." "{printf \"%.d%.8d\n\",\$1,\$2\$3\$4}"
+    }
     annex_isexported() {
       git show git-annex:remote.log | grep "exporttree=yes.*name=$1" >/dev/null
     }
@@ -831,15 +834,17 @@ _annex_transfer() {
         # Transfer the listed files so far, if any
         if [ $# -gt 0 ]; then
           $DBG git annex get ${FROM:+--from "$FROM"} "$@"
-          for REPO in $REPOS; do
-            if [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
-              $DBG git annex push "$REPO" --fast "$@"
-            elif annex_isexported "$REPO"; then
-              $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
-            else
-              $DBG git annex copy --to "$REPO" "$@"
-            fi
-          done
+          if [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
+            $DBG git annex push $REPOS
+          else
+            for REPO in $REPOS; do
+              if annex_isexported "$REPO"; then
+                $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
+              else
+                $DBG git annex copy --to "$REPO" "$@"
+              fi
+            done
+          fi
           $DBG git annex drop "$@"
         fi
         # Empty list
