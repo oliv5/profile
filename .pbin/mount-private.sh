@@ -2,6 +2,7 @@
 # Try to detect which type of encrypted container is used
 DM_CRYPT_FILE="$HOME/.private/private.img"
 ECRYPTFS_FILE="$HOME/.private/private.sig"
+RC_DIR="${RC_DIR:-$HOME}"
 
 if [ -x "$HOME/bin/mount_private.sh" ]; then
     echo >&2 "Found local mount_private.sh script !"
