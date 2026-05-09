@@ -1,7 +1,9 @@
 [Desktop Entry]
 Name=Mount private folder
-Exec=/bin/sh -c 'exec $HOME/.pbin/mount-private.sh'
-Icon=dialog-password
-Terminal=true
+#Exec=/bin/sh -c "exec ~/.pbin/mount-private.sh"
+Exec=/usr/bin/gnome-terminal -- /bin/sh -c "exec ~/.pbin/mount-private.sh; exec bash"
+#Exec=/usr/bin/xterm -hold -e 'sh -c "exec ~/.pbin/mount-private.sh"'
+Icon=/home/ola/.local/share/icons/dialog-password.png
+Terminal=false
 Type=Application
 StartupNotify=true
