@@ -185,5 +185,6 @@
     "contextView.contextWindow.minimap": false,
     "contextView.contextWindow.fixToken": true,
     "C_Cpp.copilotHover": "disabled",
-    "chat.disableAIFeatures": true
+    "chat.disableAIFeatures": true,
+    "claudeCode.preferredLocation": "panel"
 }
