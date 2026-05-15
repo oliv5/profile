@@ -996,48 +996,36 @@ _annex_copy() {
   local FORCE="${FORCE:+--force}"
   local ALL="${ALL:+--all}"
   local DROP="${DROP:+--want-drop}"
-  local FROM=" ${FROM:---from-anywhere} " # add space prefix/suffix
-  local TO=" ${TO} " # add space prefix/suffix
+  local FROM=" ${FROM:---from-anywhere} " # add 2 spaces in prefix/suffix
+  local TO=" ${TO:---to-here} " # add 2 spaces in prefix/suffix
   annex_exists && ! annex_bare || return 1
   if [ $(annex_version) -le $(annex_version 10.20230626) ]; then
     echo >&2 "Not supported: git annex copy --from X --to Y"
     return 1
   fi
-  # Copy from remotes
-  for REMOTE in $FROM; do
-    if annex_isexported "$REMOTE"; then
-      # Exported remotes: cannot drop files, no "move" nor "unused"
-      [ -n "$UNUSED" ] && continue
-      $DBG git annex copy --from "$REMOTE" ${ALL:-"${@:---want-get}"} ${FAST} ${FORCE} || return $?
-      continue
+  if [ -n "$UNUSED" ]; then
+    $DBG git annex unused || return $?
+  fi
+  for DST in ${TO}; do
+    local TO_DST=""
+    if [ "$DST" != "--to-here" ]; then
+      TO_DST="--to $DST"
     fi
-    if [ -n "$UNUSED" ]; then
-      $DBG git annex unused --from "$REMOTE" || return $?
-    fi
-    if [ -n "$DROP" ] && [ "${FROM%% $REMOTE *}" != "$FROM" ]; then
-      $DBG git annex move --from "$REMOTE" ${UNUSED:-${ALL:-"${@:---want-get}"}} ${FAST} ${FORCE} || return $?
-      if [ -n "$UNUSED" ]; then
-        $DBG git annex dropunused --from "$REMOTE" all ${FORCE} || return $?
+    for SRC in ${FROM}; do
+      local FROM_SRC="$SRC"
+      if [ "$SRC" != "--from-anywhere" ]; then
+        FROM_SRC="--from $SRC"
       fi
-    else
-      $DBG git annex copy --from "$REMOTE" ${UNUSED:-${ALL:-"${@:---want-get}"}} ${FAST} ${FORCE} || return $?
-    fi
-  done
-  # Copy to remotes
-  if [ "$TO" != "  " ]; then
-    if [ -n "$UNUSED" ]; then
-      $DBG git annex unused || return $?
-    fi
-    for REMOTE in $TO; do
-      if [ -n "$DROP" ] && [ "${TO%% $REMOTE *}" != "$TO" ]; then
-        $DBG git annex move --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-${DROP}}"}} ${FAST} ${FORCE} || return $?
+      # Drop & last repo == move
+      if [ -n "$DROP" ] && [ "${TO%% $DST *}" != "$TO" -o "${FROM%% $SRC *}" != "$FROM" ]; then
+        $DBG git annex move ${FROM_SRC} ${TO_DST} ${UNUSED:-${ALL:-${@:-${DROP}}}} ${FAST} ${FORCE} || return $?
       else
-        $DBG git annex copy --to "$REMOTE" ${UNUSED:-${ALL:-"${@:-${DROP}}"}} ${FAST} ${FORCE} || return $?
+        $DBG git annex copy ${FROM_SRC} ${TO_DST} ${UNUSED:-${ALL:-${@:-${DROP}}}} ${FAST} ${FORCE} || return $?
       fi
     done
-    if [ -n "$DROP" ]; then
-      $DBG git annex drop ${UNUSED:-${ALL:-"${@:-${DROP:+--auto}}"}} ${FAST} ${FORCE} || return $?
-    fi
+  done
+  if [ -n "$DROP" ]; then
+    $DBG git annex drop ${UNUSED:-${ALL:-${@:-${DROP:+--auto}}}} ${FAST} ${FORCE} || return $?
     if [ -n "$UNUSED" ]; then
       $DBG git annex dropunused all ${FORCE} || return $?
     fi
