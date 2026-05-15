@@ -72,8 +72,18 @@ cat <<EOF
   for REMOTE in $(git_remotes); do
     git_gcrypt_remotes "$REMOTE" && echo "Disable push in remote $REMOTE" && git_push_disable "$REMOTE"
   done
-    # Autosquash all interactive rebases
+  # Autosquash all interactive rebases
   git config --global rebase.autosquash true
+  # Global commit-signing
+  git config --global gpg.format ssh
+  git config --global user.signingkey ~/.ssh/id_ed25519.pub
+  git config --global commit.gpgsign true
+  git config --global tag.gpgsign true
+  # Local commit-signing
+  git config gpg.format ssh
+  git config user.signingkey ~/.ssh/id_ed25519.pub
+  git config commit.gpgsign true
+  git config tag.gpgsign true
 EOF
 }
 
@@ -358,7 +368,7 @@ git_branch_delete_local() {
   for REFS; do
     local BRANCH="${REFS#*/}"
     echo "Delete local branch '$BRANCH'"
-    git tag "$(git_name deleted.local)" "refs/head/$BRANCH" &&
+    git -c tag.gpgSign=false tag "$(git_name deleted.local)" "refs/head/$BRANCH" &&
       git branch -d "$BRANCH"
   done
 }
@@ -369,7 +379,7 @@ git_branch_delete_remote() {
     local REMOTE="${REFS%%/*}"
     local BRANCH="${REFS#*/}"
     echo "Delete remote branch '$REFS'"
-    git tag "$(git_name deleted.remote.${REMOTE#*/})" "remotes/$REFS" && {
+    git -c tag.gpgSign=false tag "$(git_name deleted.remote.${REMOTE#*/})" "remotes/$REFS" && {
       git push "$REMOTE" ":$BRANCH" || git branch -rd "$REFS"
     }
   done
@@ -1478,7 +1488,7 @@ git_find_bin() {
 ########################################
 # Create a tag
 git_tag_create() {
-  git tag "tag_$(date +%Y%m%d-%H%M%S).${2:-$(git_branch)}${1:+_$1}" ${2:+"$2"}
+  git -c tag.gpgSign=false tag "tag_$(date +%Y%m%d-%H%M%S).${2:-$(git_branch)}${1:+_$1}" ${2:+"$2"}
 }
 
 # Delete a tag totally (local & remotes)
@@ -1573,7 +1583,7 @@ git_tag_rename() {
     local MSG="$(git for-each-ref "refs/tags/${OLD##refs/tags/}" --format='%(contents)')"
     git tag -a -m "$MSG" "$NEW" "$OLD"^{} || return 3 # ^{} makes sure it references the underlying commit and not the old annotated tag
   else
-    git tag "$NEW" "$OLD" || return 3
+    git -c tag.gpgSign=false tag "$NEW" "$OLD" || return 3
   fi
   git tag -d "$OLD"
   if [ -n "$REMOTE" ]; then
@@ -1636,12 +1646,13 @@ git_edit() {
       HEAD="$(git rev-parse HEAD)"
       TAG="_edit_temp_tag_$(date +%s)"
       echo "Create backup tag $TAG on $HEAD"
-      git tag "$TAG"
+      git -c tag.gpgSign=false tag "$TAG"
       echo "Jump back to $(git log -n1 --oneline "$1")"
       git reset "${1}" --hard
       git reset "${1}~1"
       echo "Now edit this commit. Then exit the shell to go on."
       /bin/sh
+      set +e
       echo "List of commits to cherry pick:"
       git rev-list --ancestry-path --reverse "${1}..${HEAD}"
       for SHA in $(git rev-list --ancestry-path --reverse "${1}..${HEAD}"); do
