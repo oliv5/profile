@@ -1041,13 +1041,13 @@ annex_copy_missing() {
     echo >&2 "Not supported: git annex copy --from X --to Y"
     return 1
   elif [ $(annex_version) -le $(annex_version 10.20231129) ]; then
-    for REPO in ${@:-$(annex_enabled)}; do
+    for REPO in ${TO:-${@:-$(annex_enabled)}}; do
       echo "Process $(annex_remotes $REPO) ($REPO) ..."
       git annex find --include='*' --not --in "$REPO" --print0 |
         xargs -r0 git annex copy --to "$REPO" ${FROM:---from-anywhere}
     done
   else
-    for REPO in ${@:-$(annex_enabled)}; do
+    for REPO in ${TO:-${@:-$(annex_enabled)}}; do
       echo "Process $(annex_remotes $REPO) ($REPO) ..."
       git annex copy --include='*' --not --in "$REPO" --to "$REPO" ${FROM:---from-anywhere}
     done
@@ -1060,7 +1060,7 @@ annex_copy_wanted() {
     echo >&2 "Not supported: git annex copy --from X --to Y"
     return 1
   elif [ $(annex_version) -le $(annex_version 10.20231129) ]; then
-    for REPO in ${@:-$(annex_enabled)}; do
+    for REPO in ${TO:-${@:-$(annex_enabled)}}; do
       echo "Process $(annex_remotes $REPO) ($REPO) ..."
       if [ -z "$(git annex wanted "$REPO")$(git annex required "$REPO")" ]; then
         echo >&2 "Warning: this repo does not want anything! Use annex_copy_missing instead..."
@@ -1069,7 +1069,7 @@ annex_copy_wanted() {
         xargs -r0 git annex copy --to "$REPO" ${FROM:---from-anywhere}
     done
   else
-    for REPO in ${@:-$(annex_enabled)}; do
+    for REPO in ${TO:-${@:-$(annex_enabled)}}; do
       echo "Process $(annex_remotes $REPO) ($REPO) ..."
       if [ -z "$(git annex wanted "$REPO")$(git annex required "$REPO")" ]; then
         echo >&2 "Warning: this repo does not want anything! Use annex_copy_missing instead..."
