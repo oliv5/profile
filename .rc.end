@@ -446,7 +446,7 @@ log() {
   sudo tail "/var/log/${LOG}" "$@"
 }
 
-# system upgrade
+# system upgrade / cleanup
 alias sysup='sys_up'
 sys_up() {
   local APT_YES="${1:+-y}"
@@ -456,9 +456,9 @@ sys_up() {
   set +e; set -x;
   echo System update starting...;
   command -v apt-get >/dev/null &&
-    apt-get update &&
-    apt-get full-upgrade $PKCON_YES &&
-    apt-get autoremove PKCON_YES;
+    apt-get update $APT_YES &&
+    apt-get full-upgrade $APT_YES &&
+    apt-get autoremove APT_YES;
   command -v pkcon >/dev/null &&
     pkcon refresh &&
     pkcon get-updates &&
@@ -471,6 +471,29 @@ sys_up() {
   command -v flatpak >/dev/null &&
     flatpak --user upgrade $FLATPAK_YES;
     flatpak --user uninstall --unused;
+  set +x;
+  echo Done... press enter to quit;
+  read VAR;
+  screen -X quit;
+"
+}
+
+sys_clean() {
+  local APT_YES="${1:+-y}"
+  screen -c /dev/null -m sudo sh -c "
+  set +e; set -x;
+  echo System cleanup starting...;
+  command -v apt-get >/dev/null &&
+    sudo apt-get autoremove
+  command -v npm >/dev/null &&
+    npm prune &&
+    npm cache clean --force &&
+    npm cache verify
+  [ -d .cargo/registry ] &&
+    rm -r .cargo/registry
+  command -v rustup >/dev/null &&
+    rustup toolchain list &&
+    echo 'Consider `rustup toolchain uninstall $(rustup toolchain list | grep -v default | grep -v active)`'
   set +x;
   echo Done... press enter to quit;
   read VAR;
@@ -510,6 +533,21 @@ if command -v safe-npm >/dev/null; then
     fi
   }
 fi
+
+# Pip helpers
+pip_ls_sizes() {
+  # Source - https://stackoverflow.com/a/60850841
+  pip list \
+  | tail -n +3 \
+  | awk '{print $1}' \
+  | xargs pip show \
+  | grep -E 'Location:|Name:' \
+  | cut -d ' ' -f 2 \
+  | paste -d ' ' - - \
+  | awk '{print $2 "/" tolower($1)}' \
+  | xargs du -sh 2> /dev/null \
+  | sort -hr
+}
 
 # Misc
 alias mo='mimeopen'

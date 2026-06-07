@@ -244,9 +244,8 @@ umount_private_encfs() {
 if command -v cryptsetup >/dev/null 2>&1; then
 setup_dmcrypt() {
   local IMG="${1:?Missing image source file...}"
-  local DST="${2:?Missing dest directory...}"
-  local SIZE="${3:?Missing image file size (ex: 1024M)...}"
-  local FTYPE="${4:-ext4}"
+  local SIZE="${2:?Missing image file size (ex: 1024M)...}"
+  local FTYPE="${3:-ext4}"
   local NAME="$(basename "$IMG" .img)"
   local MAP="/dev/mapper/$NAME"
   if [ -e "$IMG" ]; then

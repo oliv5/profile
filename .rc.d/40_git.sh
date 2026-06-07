@@ -1121,11 +1121,13 @@ git_ls_commit() {
 # List binary files in commit/rev
 # https://stackoverflow.com/questions/30689384/find-all-binary-files-in-git-head
 git_ls_bin() {
-  local REVLIST="$1"
-  [ "$REVLIST" = "all" ] && REVLIST="$(git rev-list --all | xargs)" ||
-  [ "$REVLIST" = "branches" ] && REVLIST="$(git rev-list --branches | xargs)" ||
-  [ "$REVLIST" = "tags" ] && REVLIST="$(git rev-list --tags | xargs)"
-  bash -c 'comm -13 <(git grep --null -Il "" $1 -- | sort -u) <(git grep --null -al "" $1 -- | sort -u)' _ "$REVLIST" | xargs -r0 du -hc | sort -h
+  local REV="$1"
+  bash -c 'comm -13 -z <(git grep --null -Icl "" "$@" -- | sort -zu) <(git grep --null -cl "" "$@" -- | sort -zu)' _ "$@" |
+    cut -z -d: -f2 |
+    du -0 -hc --files0-from=- |
+    xargs -r0 -n1
+  # Equivalent: diff <(git grep -Ic "") <(git grep -c "") | grep '^>' | cut -d : -f 1 | cut -d ' ' -f 2-
+  # Equivalent: comm -13 -z <(git grep --null -Icl "" | sort -zu) <(git grep --null -cl "" | sort -zu) | xargs -r0 -n1
 }
 
 # List all ignored files search patterns
@@ -1630,6 +1632,11 @@ git_amend() {
     { git diff --quiet && git diff --cached --quiet; } &&
       git commit --fixup=reword:"$1"
     GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash "${1}~1"
+  ' _
+}
+git_revert() {
+  git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
+    git revert "$1"
   ' _
 }
 git_exec() {
