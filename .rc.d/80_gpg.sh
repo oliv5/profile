@@ -3,7 +3,9 @@
 # Test GPG encryption key
 gpg_test_key() {
 	local WHO="${1:?No recipient specified...}"
-	echo "1234" | gpg --no-use-agent -o /dev/null --local-user "$WHO" -as - && echo "The correct passphrase was entered for this key"
+	# gpg option "--no-use-agent" is deprecated
+	killall gpg-agent
+	echo "1234" | gpg -o /dev/null --local-user "$WHO" -as - && echo "The correct passphrase was entered for this key"
 }
 
 # Exports
