@@ -1037,7 +1037,7 @@ annex_unload() { UNUSED=1 DROP=1 _annex_copy "$@"; }
 
 annex_copy_missing() {
   local FROM="${FROM:+--from $FROM}"
-  if [ $(annex_version) -le $(annex_version 10.20230626) ]; then
+  if [ $(annex_version) -lt $(annex_version 10.20230626) ]; then
     echo >&2 "Not supported: git annex copy --from X --to Y"
     return 1
   elif [ $(annex_version) -le $(annex_version 10.20231129) ]; then
