@@ -1146,9 +1146,34 @@ git_cat() {
 }
 
 ########################################
-# Subtrees
+# Git submodules
+# https://medium.com/@nitishgangwar/git-submodules-the-honest-guide-i-wish-i-had-4995fff74035
+git_submodules_help() {
+  cat <<-EOF
+### Git submodules cheat sheet
+# Add
+git submodule add <url> <path>
+# Clone
+git clone --recurse-submodules <repo>
+# Init/Update
+git submodule update --init --recursive
+git submodule update --remote <path>
+# Track a branch
+git submodule set-branch --branch main <path>
+# Show status / diff
+git submodule status
+git diff --submodule
+# Remove
+git rm -f <path>
+rm -rf .git/modules/<path>
+git config -f .gitmodules --remove-section submodule.<name>
+EOF
+}
+
+########################################
+# Subtrees - embed external repo code in one commit, merge using the subtree merge strategy
 # See https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/
-# Merge 1 repo as a subtree of current repo
+# Merge/squash an external repo as a subtree of current repo
 git_subtree_add() {
   local REPO="${1:?No remote repository specified}"
   local PREFIX="${2:?No local destination specified}"
@@ -1156,12 +1181,32 @@ git_subtree_add() {
   git subtree add --prefix="$PREFIX" "$REPO" "$REF" --squash
 }
 
-# Merge 1 repo as a subtree of current repo
-git_subtree_update() {
+# Update an external repo subtree
+git_subtree_pull() {
   local REPO="${1:?No remote repository specified}"
   local PREFIX="${2:?No local destination specified}"
   local REF="${3:-master}"
   git subtree pull --prefix="$PREFIX" "$REPO" "$REF" --squash
+}
+
+# Push to an external repo subtree
+git_subtree_push() {
+  local REPO="${1:?No remote repository specified}"
+  local PREFIX="${2:?No local destination specified}"
+  local REF="${3:-master}"
+  git subtree push --prefix="$PREFIX" "$REPO" "$REF"
+}
+
+# Helper
+git_subtree_help() {
+  cat <<-EOF
+# subtree merge strategy hidden by git-subtree
+git remote add -f external-repo /path/to/external-repo
+git merge -s ours --no-commit --allow-unrelated-histories external-repo/master
+git read-tree --prefix=local-repo-dir/ -u external-repo/master
+git commit -m "Merge rnal-repo as our subdirectory"
+git pull -s subtree external-repo master
+EOF
 }
 
 ########################################
