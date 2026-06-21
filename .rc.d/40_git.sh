@@ -87,6 +87,16 @@ cat <<EOF
 EOF
 }
 
+# Setup user/mail
+git_setup_global_user() {
+  git config --global user.name "${1:?No user name specified...}"
+  git config --global user.email "${2:?No user email specified...}"
+}
+git_setup_local_user() {
+  git config user.name "${1:?No user name specified...}"
+  git config user.email "${2:?No user email specified...}"
+}
+
 # Git memory usage options
 # https://stackoverflow.com/questions/4826639/repack-of-git-repository-fails
 # https://stackoverflow.com/questions/10292903/git-on-windows-out-of-memory-malloc-failed
@@ -1175,16 +1185,16 @@ EOF
 # See https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/
 # Merge/squash an external repo as a subtree of current repo
 git_subtree_add() {
-  local REPO="${1:?No remote repository specified}"
-  local PREFIX="${2:?No local destination specified}"
+  local REPO="${1:?No remote repository URL specified...}"
+  local PREFIX="${2:-$(basename "$REPO" .git)}"
   local REF="${3:-master}"
   git subtree add --prefix="$PREFIX" "$REPO" "$REF" --squash
 }
 
 # Update an external repo subtree
 git_subtree_pull() {
-  local REPO="${1:?No remote repository specified}"
-  local PREFIX="${2:?No local destination specified}"
+  local REPO="${1:?No remote repository url specified...}"
+  local PREFIX="${2:-$(basename "$REPO" .git)}"
   local REF="${3:-master}"
   git subtree pull --prefix="$PREFIX" "$REPO" "$REF" --squash
 }
@@ -1192,7 +1202,7 @@ git_subtree_pull() {
 # Push to an external repo subtree
 git_subtree_push() {
   local REPO="${1:?No remote repository specified}"
-  local PREFIX="${2:?No local destination specified}"
+  local PREFIX="${2:-$(basename "$REPO" .git)}"
   local REF="${3:-master}"
   git subtree push --prefix="$PREFIX" "$REPO" "$REF"
 }
@@ -1213,8 +1223,8 @@ EOF
 # https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History
 # https://git-scm.com/docs/git-filter-branch
 
-# Amend author/committer names & emails
-git_update_author() {
+# Legacy: amend author/committer names & emails
+git_amend_author_legacy() {
 (
   # Run in a subshell because we need to export lots of variables
   # Identify who/what the amend is about
@@ -1232,22 +1242,22 @@ git_update_author() {
   export COMMITTER_DATE_2="${6##*:}"
   local REV="${7:-HEAD}"
   # Display what is going to be done
-  [ ! -z "$AUTHOR_1" ] && echo "Replace author name '$AUTHOR_1' by '$AUTHOR_2'"
-  [ ! -z "$AUTHOR_EMAIL_1" ] && echo "Replace author email '$AUTHOR_EMAIL_1' by '$AUTHOR_EMAIL_2'"
-  [ ! -z "$AUTHOR_DATE_1" ] && echo "Replace author date '$AUTHOR_DATE_1' by '$AUTHOR_DATE_2'"
-  [ ! -z "$COMMITTER_1" ] && echo "Replace committer name '$COMMITTER_1' by '$COMMITTER_2'"
-  [ ! -z "$COMMITTER_EMAIL_1" ] && echo "Replace committer email '$COMMITTER_EMAIL_1' by '$COMMITTER_EMAIL_2'"
-  [ ! -z "$COMMITTER_DATE_1" ] && echo "Replace committer date '$COMMITTER_DATE_1' by '$COMMITTER_DATE_2'"
+  [ -n "$AUTHOR_1" ] && echo "Replace author name '$AUTHOR_1' by '$AUTHOR_2'"
+  [ -n "$AUTHOR_EMAIL_1" ] && echo "Replace author email '$AUTHOR_EMAIL_1' by '$AUTHOR_EMAIL_2'"
+  [ -n "$AUTHOR_DATE_1" ] && echo "Replace author date '$AUTHOR_DATE_1' by '$AUTHOR_DATE_2'"
+  [ -n "$COMMITTER_1" ] && echo "Replace committer name '$COMMITTER_1' by '$COMMITTER_2'"
+  [ -n "$COMMITTER_EMAIL_1" ] && echo "Replace committer email '$COMMITTER_EMAIL_1' by '$COMMITTER_EMAIL_2'"
+  [ -n "$COMMITTER_DATE_1" ] && echo "Replace committer date '$COMMITTER_DATE_1' by '$COMMITTER_DATE_2'"
   read -p "Press enter to go on..."
   # Define the replacement script
   local SCRIPT='
     STATUS="no change"
-    if [ ! -z "$AUTHOR_1" -a "$AUTHOR_1" = "$GIT_AUTHOR_NAME" ]; then export GIT_AUTHOR_NAME="$AUTHOR_2"; STATUS="updated"; fi
-    if [ ! -z "$AUTHOR_EMAIL_1" -a "$AUTHOR_EMAIL_1" = "$GIT_AUTHOR_EMAIL" ]; then export GIT_AUTHOR_EMAIL="$AUTHOR_EMAIL_2"; STATUS="updated"; fi
-    if [ ! -z "$AUTHOR_DATE_1" -a "$AUTHOR_DATE_1" = "$GIT_AUTHOR_DATE" ]; then export GIT_AUTHOR_DATE="$AUTHOR_DATE_2"; STATUS="updated"; fi
-    if [ ! -z "$COMMITTER_1" -a "$COMMITTER_1" = "$GIT_COMMITTER_NAME" ]; then export GIT_COMMITTER_NAME="$COMMITTER_2"; STATUS="updated"; fi
-    if [ ! -z "$COMMITTER_EMAIL_1" -a "$COMMITTER_EMAIL_1" = "$GIT_COMMITTER_EMAIL" ]; then export GIT_COMMITTER_EMAIL="$COMMITTER_EMAIL_2"; STATUS="updated"; fi
-    if [ ! -z "$COMMITTER_DATE_1" -a "$COMMITTER_DATE_1" = "$GIT_COMMITTER_DATE" ]; then export GIT_COMMITTER_DATE="$COMMITTER_DATE_2"; STATUS="updated"; fi
+    if [ -n "$AUTHOR_1" -a "$AUTHOR_1" = "$GIT_AUTHOR_NAME" ]; then export GIT_AUTHOR_NAME="$AUTHOR_2"; STATUS="updated"; fi
+    if [ -n "$AUTHOR_EMAIL_1" -a "$AUTHOR_EMAIL_1" = "$GIT_AUTHOR_EMAIL" ]; then export GIT_AUTHOR_EMAIL="$AUTHOR_EMAIL_2"; STATUS="updated"; fi
+    if [ -n "$AUTHOR_DATE_1" -a "$AUTHOR_DATE_1" = "$GIT_AUTHOR_DATE" ]; then export GIT_AUTHOR_DATE="$AUTHOR_DATE_2"; STATUS="updated"; fi
+    if [ -n "$COMMITTER_1" -a "$COMMITTER_1" = "$GIT_COMMITTER_NAME" ]; then export GIT_COMMITTER_NAME="$COMMITTER_2"; STATUS="updated"; fi
+    if [ -n "$COMMITTER_EMAIL_1" -a "$COMMITTER_EMAIL_1" = "$GIT_COMMITTER_EMAIL" ]; then export GIT_COMMITTER_EMAIL="$COMMITTER_EMAIL_2"; STATUS="updated"; fi
+    if [ -n "$COMMITTER_DATE_1" -a "$COMMITTER_DATE_1" = "$GIT_COMMITTER_DATE" ]; then export GIT_COMMITTER_DATE="$COMMITTER_DATE_2"; STATUS="updated"; fi
     echo " => $STATUS"
   '
   # Execute the script
@@ -1256,7 +1266,7 @@ git_update_author() {
 }
 
 # Amend commit log (with git filter-branch).
-git_update_log() {
+git_amend_log_legacy() {
   ( set -e
     local FROM="$(git_hash ${1:?No SHA1_1 specified...})"
     local NEWLOG="${2:?No new log specified...}"
@@ -1273,7 +1283,7 @@ git_update_log() {
 }
 
 # Amend commit file (with git filter-branch).
-git_update_file() {
+git_amend_file_legacy() {
   ( set -e
     local FROM="$(git_hash ${1:?No SHA1_1 specified...})"
     local TO="${2:-$(git_branch)}"
@@ -1288,6 +1298,48 @@ git_update_file() {
     git branch -d _tmp_git_update_file
     git stash pop
   )
+}
+
+##########
+# New: amend author/committer names
+git_amend_author() {
+  local OLD="${1:?No old author/committer name specified...}"
+  local NEW="${2:?No new author/committer name specified...}"
+  local REFS="${3:+--refs $3}"
+  local FORCE="${4:+--force}"
+  git filter-repo $REFS $FORCE --commit-callback "
+    if commit.author_name == b'$OLD':
+      commit.author_name = b'$NEW'
+    if commit.committer_name == b'$OLD':
+      commit.committer_name = b'$NEW'
+    "
+}
+
+git_amend_email() {
+  local OLD="${1:?No old author/committer email specified...}"
+  local NEW="${2:?No new author/committer email specified...}"
+  local REFS="${3:+--refs $3}"
+  local FORCE="${4:+--force}"
+  git filter-repo $REFS $FORCE --commit-callback "
+    if commit.author_email == b'$OLD':
+      commit.author_email = b'$NEW'
+    if commit.committer_email == b'$OLD':
+      commit.committer_email = b'$NEW'
+    "
+}
+
+git_force_author() {
+  local NEW="${1:?No new author/committer name specified...}"
+  local REFS="${2:+--refs $2}"
+  local FORCE="${3:+--force}"
+  git filter-repo $REFS $FORCE --name-callback "return b'$NEW'"
+}
+
+git_force_email() {
+  local NEW="${1:?No new author/committer email specified...}"
+  local REFS="${2:+--refs $2}"
+  local FORCE="${3:+--force}"
+  git filter-repo $REFS $FORCE --email-callback "return b'$NEW'"
 }
 
 ########################################
