@@ -207,6 +207,12 @@ docker_prune() {
     docker buildx prune
 }
 
+# Agrgessive cleanup
+alias docker_clean='docker_prune_all'
+docker_prune_all() {
+    docker system prune -a --volumes
+}
+
 # Get docker run command
 docker_cmdline() {
     python3 - "$@" <<EOF

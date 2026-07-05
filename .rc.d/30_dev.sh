@@ -56,10 +56,11 @@ _DGEXT_CMAKE="CMakeLists.txt|cmakelists.txt|*.cmake"
 _DGEXT_MAKE="*.mk|Makefile|makefile|GNUmakefile|gnumakefile|*.make"
 _DGEXT_MK="$_DGEXT_MAKE|$_DGEXT_CMAKE|$_DGEXT_SCONS"
 _DGEXT_ASM="*.inc|*.S|*.s|*.asm|*.ASM"
+_DGEXT_MATLAB="*.m"
 _DGEXT_XML="*.xml"
 _DGEXT_TEX="*.tex"
 _DGEXT_SHELL="*.sh"
-_DGEXT_REF="$_DGEXT_C|$_DGEXT_H|$_DGEXT_V|$_DGEXT_PY|$_DGEXT_SCONS|$_DGEXT_MK|$_DGEXT_ASM|$_DGEXT_XML|$_DGEXT_SHELL"
+_DGEXT_REF="$_DGEXT_C|$_DGEXT_H|$_DGEXT_V|$_DGEXT_PY|$_DGEXT_SCONS|$_DGEXT_MK|$_DGEXT_ASM|$_DGEXT_MATLAB|$_DGEXT_XML|$_DGEXT_SHELL"
 alias     _c='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_C"'
 alias     _h='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_H"'
 alias     _v='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_V"'
@@ -67,6 +68,7 @@ alias     ch='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_C|$_
 alias     py='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_PY"'
 alias     mk='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_MK"'
 alias    asm='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_ASM"'
+alias     _m='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_MATLAB"'
 alias    xml='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_XML"'
 alias    tex='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_TEX"'
 alias  shell='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_SHELL"'
@@ -78,6 +80,7 @@ alias    ich='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_C|$_
 alias    ipy='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_PY"'
 alias    imk='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_MK"'
 alias   iasm='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_ASM"'
+alias     im='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_MATLAB"'
 alias   ixml='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_XML"'
 alias   itex='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_TEX"'
 alias ishell='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_SHELL"'
