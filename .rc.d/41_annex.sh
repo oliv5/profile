@@ -796,7 +796,9 @@ _annex_transfer() {
   for REPO in $REPOS; do
     echo "Copy local files to $REPO ($(annex_remotes "$REPO"))..."
     if [ $(annex_version) -ge $(annex_version 10.20230408) ]; then
-      $DBG git annex push "$REPO" --fast "$@"
+      local LIST=""
+      for P; do LIST="${LIST:+$LIST }-C \"$P\""; done
+      $DBG eval git annex push "$REPO" --fast "$LIST"
     elif annex_isexported "$REPO"; then
       $DBG git annex export HEAD --to "$REPO" | grep -v "not available"
     else
@@ -999,7 +1001,7 @@ _annex_copy() {
   local FROM=" ${FROM:---from-anywhere} " # add 2 spaces in prefix/suffix
   local TO=" ${TO:---to-here} " # add 2 spaces in prefix/suffix
   annex_exists && ! annex_bare || return 1
-  if [ $(annex_version) -le $(annex_version 10.20230626) ]; then
+  if [ $(annex_version) -lt $(annex_version 10.20230626) ]; then
     echo >&2 "Not supported: git annex copy --from X --to Y"
     return 1
   fi
@@ -1013,7 +1015,11 @@ _annex_copy() {
     fi
     for SRC in ${FROM}; do
       local FROM_SRC="$SRC"
-      if [ "$SRC" != "--from-anywhere" ]; then
+      if [ $(annex_version) -le $(annex_version 10.20230626) ]; then
+        if [ "$SRC" = "--from-anywhere" ]; then
+          FROM_SRC=""
+        fi
+      elif [ "$SRC" != "--from-anywhere" ]; then
         FROM_SRC="--from $SRC"
       fi
       # Drop & last repo == move
