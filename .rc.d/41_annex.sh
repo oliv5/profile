@@ -761,8 +761,7 @@ annex_enum_special_remotes() {
 # $SELECT is used to select files to copy; values: want-get / missing / [all]
 # Note: it is superseeded by `git annex copy --from= --to=` in git-annex version 10+
 # except for the max size management and exported repos
-alias annex_transfer='FROM= SELECT=missing _annex_transfer'
-_annex_transfer() {
+annex_transfer() {
   annex_exists || return 1
   git_bare && echo "BARE REPOS NOT SUPPORTED YET" && return 1
   local REPOS="${1:-$(annex_enabled)}"
@@ -773,6 +772,7 @@ _annex_transfer() {
   #REPOS="$(bash -c "sort <(echo $REPOS | xargs -n1) <(echo $(annex_remotes) | xargs -n1) | uniq -d")"
   REPOS="$(annex_remotes $REPOS)"
   [ -z "$REPOS" ] && return 0
+  SELECT="${SELECT:-missing}"
   [ "$SELECT" = "missing" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--not --in $REPO"; done
   if [ $(annex_version) -ge $(annex_version 9.0) ]; then
     [ "$SELECT" = "want-get" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--want-get-by=$REPO"; done
