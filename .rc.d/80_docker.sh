@@ -201,10 +201,11 @@ docker_rm_img() {
 
 # Prune dangling elements
 docker_prune() {
-    docker container prune -f
-    docker image prune -f
-    docker volume prune -f
-    docker buildx prune
+    docker container prune ${1:+-f}
+    docker image prune ${1:+-f}
+    docker volume prune ${1:+-f}
+    docker builder prune ${1:+-f}
+    docker buildx prune ${1:+-f}
 }
 
 # Agrgessive cleanup
