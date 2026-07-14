@@ -765,7 +765,7 @@ annex_transfer() {
   annex_exists || return 1
   git_bare && echo "BARE REPOS NOT SUPPORTED YET" && return 1
   local REPOS="${1:-$(annex_enabled)}"
-  local MAXSIZE="${2:-1073741824}"
+  local MAXSIZE="${MAXSIZE:-${2:-1073741824}}"
   local DBG="${DBG:+echo}"
   local SELECTED=""
   [ $# -le 2 ] && shift $# || shift 2
