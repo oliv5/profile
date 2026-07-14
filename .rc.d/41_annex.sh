@@ -776,6 +776,7 @@ _annex_transfer() {
   [ "$SELECT" = "missing" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--not --in $REPO"; done
   if [ $(annex_version) -ge $(annex_version 9.0) ]; then
     [ "$SELECT" = "want-get" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--want-get-by=$REPO"; done
+    [ "$SELECT" = "want-absent" ] && for REPO in $REPOS; do SELECTED="${SELECTED:+ $SELECTED --or }--want-get-by=$REPO --and --not --in $REPO"; done
   fi
   echo "REPOS=$REPOS"
   echo "MAXSIZE=$MAXSIZE"
