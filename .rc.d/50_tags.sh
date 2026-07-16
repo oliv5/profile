@@ -15,6 +15,10 @@ _CTAGS_OPTS='--append --fields=+iaS --extra=+qf --c-types=+l --c++-kinds=+p --py
 _CTAGS_REGEX='.*\.(h|c|cc|cpp|hpp|inc|py|S)$'
 _CTAGS_OUT='.tags'
 
+# Universal ctags settings
+_UCTAGS_OPTS=''
+_UCTAGS_OUT='.tags'
+
 # Cscope settings
 _CSCOPE_OPTS='-qbk'
 _CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|py|S)$'
@@ -85,6 +89,19 @@ mkctags() {
     xargs -r0 ctags $_CTAGS_OPTS $* -f "${DB}"
   #ln -fs "${DB}" "${DST}/tags"
   (cd "${DST}" && ln -fs "${_CTAGS_OUT}" "./tags")
+}
+
+# Make universal-ctags db
+mkuctags() {
+  command -v >/dev/null ctags-universal || return
+  local SRC="$(eval echo ${1:-$PWD})" # Remove ~/
+  local DST="$(eval echo ${2:-$PWD})" # Remove ~/
+  local DB="${DST}/${_UCTAGS_OUT}"
+  local EXCLUDE="$3"
+  shift $(($#<=3?$#:3))
+  # Build tag file
+  ctags-universal $_UCTAGS_OPTS $* -f "${DB}" -R .
+  (cd "${DST}" && ln -fs "${_UCTAGS_OUT}" "./tags")
 }
 
 # Make cscope db
@@ -173,6 +190,7 @@ mkinc() {
 # Make all tags
 mktags() {
   mkctags "$@"
+  mkuctags "$@"
   mkgtags "$@"
   mkcscope "$@"
   mkids "$@"
@@ -185,6 +203,13 @@ rmctags() {
   # Get directories, remove ~/
   local DIR="$(eval echo ${1:-$PWD})"
   rm -v "${DIR}/${_CTAGS_OUT}" "${DIR}/tags" 2>/dev/null
+}
+
+# Clean universal-ctags
+rmuctags() {
+  # Get directories, remove ~/
+  local DIR="$(eval echo ${1:-$PWD})"
+  rm -v "${DIR}/${_UCTAGS_OUT}" "${DIR}/tags" 2>/dev/null
 }
 
 # Clean cscope db
@@ -225,6 +250,7 @@ rmstarscope() {
 # Clean all tags
 rmtags() {
   rmctags "$@"
+  rmuctags "$@"
   rmgtags "$@"
   rmcscope "$@"
   rmids "$@"
@@ -250,6 +276,11 @@ mkalltags() {
         rmctags .
         cat "$TAGNAME" | xargs -r echo "[ctags] add:"
         mkinc mkctags . "$_CTAGS_REGEX" "$EXCLUDE" $(cat "$TAGNAME" | xargs -r)
+      fi
+      if tag_selected utags utags; then
+        rmuctags .
+        cat "$TAGNAME" | xargs -r echo "[uctags] add:"
+        mkinc mkuctags . "$_UCTAGS_REGEX" "$EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       if tag_selected cscope cscope; then
         rmcscope .
