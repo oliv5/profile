@@ -1207,6 +1207,26 @@ git_subtree_push() {
   git subtree push --prefix="$PREFIX" "$REPO" "$REF"
 }
 
+# Rejoin/update a renamed subtree prefix
+# https://stackoverflow.com/questions/46055656/git-subtree-move-subtree-to-a-different-directory-and-pull-it
+git_subtree_rejoin() {
+  local PREFIX="${1:?no prefix folder specified...}"
+  git subtree split --rejoin --prefix="$PREFIX" HEAD
+}
+
+# https://stackoverflow.com/questions/46055656/git-subtree-move-subtree-to-a-different-directory-and-pull-it
+git_subtree_rename_prefix() {
+  local OLD_PREFIX="${1:?no old prefix folder specified...}"
+  local NEW_PREFIX="${2:?no new prefix folder specified...}"
+  local EXTERNAL_SHA1="${3:?no external SHA1 to merge...}"
+  git commit --allow-empty -m "
+Reassign subtree dir from $OLD_PREFIX to $NEW_PREFIX
+
+git-subtree-dir: $OLD_PREFIX
+git-subtree-split: $EXTERNAL_SHA1
+"
+}
+
 # Helper
 git_subtree_help() {
   cat <<-EOF
@@ -1773,11 +1793,16 @@ git_edit() {
 ########################################
 # Rebasing
 # https://stackoverflow.com/questions/15915430/what-exactly-does-gits-rebase-preserve-merges-do-and-why/50555740#50555740
+# https://stackoverflow.com/questions/12858199/how-to-rebase-after-git-subtree-add#48293315
 git_rebase() {
   # Base options
-  local OPTS="--interactive --rebase-merges"
-  if [ $(git_version) -lt $(git_version 2.18) ]; then
-    OPTS="--preserve-merges"
+  local OPTS="--interactive"
+  if [ $(git_version) -ge $(git_version 2.24) ]; then
+    OPTS="$OPTS --rebase-merges --strategy subtree"
+  elif [ $(git_version) -ge $(git_version 2.18) ]; then
+    OPTS="$OPTS --rebase-merges"
+  else
+    OPTS="$OPTS --preserve-merges"
   fi
   # Add more options from command line
   while [ "${1##--}" != "$1" ]; do
