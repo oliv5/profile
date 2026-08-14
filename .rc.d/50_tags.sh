@@ -76,6 +76,15 @@ _tags_scandir() {
   fi
 }
 
+# Get nice tools cmdline
+_tags_nice() {
+  local NICE="$(command -v nice || true)"
+  local IONICE="$(command -v ionice || true)"
+  NICE="${NICE:+$NICE -n 19}"
+  IONICE="${IONICE:+$IONICE -c 3}"
+  echo "${NICE}${NICE:+ }${IONICE}"
+}
+
 # Make ctags db
 mkctags() {
   command -v >/dev/null ctags || return
@@ -86,7 +95,7 @@ mkctags() {
   shift $(($#<=3?$#:3))
   # Build tag file
   _tags_scandir "$SRC" "$_CTAGS_REGEX" "$EXCLUDE" |
-    xargs -r0 ctags $_CTAGS_OPTS $* -f "${DB}"
+    xargs -r0 $(_tags_nice) ctags $_CTAGS_OPTS $* -f "${DB}"
   #ln -fs "${DB}" "${DST}/tags"
   (cd "${DST}" && ln -fs "${_CTAGS_OUT}" "./tags")
 }
@@ -100,7 +109,7 @@ mkuctags() {
   local EXCLUDE="$3"
   shift $(($#<=3?$#:3))
   # Build tag file
-  ctags-universal $_UCTAGS_OPTS $* -f "${DB}" -R .
+  $(_tags_nice) ctags-universal $_UCTAGS_OPTS $* -f "${DB}" -R .
   (cd "${DST}" && ln -fs "${_UCTAGS_OUT}" "./tags")
 }
 
@@ -114,7 +123,7 @@ mkcscope() {
   shift $(($#<=3?$#:3))
   # Build tag file
   _tags_scandir "$SRC" "$_CSCOPE_REGEX" "$EXCLUDE" |
-    xargs -r0 cscope $_CSCOPE_OPTS $* -f "$DB" &&
+    xargs -r0 $(_tags_nice) cscope $_CSCOPE_OPTS $* -f "$DB" &&
       rm "${DB}.in" "${DB}.po" 2>/dev/null
 }
 
@@ -128,7 +137,7 @@ mkids() {
   shift $(($#<=3?$#:3))
   # Build tag file
   _tags_scandir "$SRC" "$_MKID_REGEX" "$EXCLUDE" |
-    xargs -r0 mkid $_MKID_OPTS $* -o "$DB"
+    xargs -r0 $(_tags_nice) mkid $_MKID_OPTS $* -o "$DB"
 }
 
 # Make pycscope db
@@ -141,7 +150,7 @@ mkpycscope() {
   shift $(($#<=3?$#:3))
   # Build tag file
   _tags_scandir "$SRC" "$_PYCSCOPE_REGEX" "$EXCLUDE" |
-    xargs -r0 pycscope $_PYCSCOPE_OPTS $* -f "$DB"
+    xargs -r0 $(_tags_nice) pycscope $_PYCSCOPE_OPTS $* -f "$DB"
 }
 
 # Make gtags files
@@ -153,7 +162,7 @@ mkgtags() {
   shift $(($#<=3?$#:3))
   # Build tag files
   _tags_scandir "$SRC" "$_GTAGS_REGEX" "$EXCLUDE" |
-    xargs -r0 -n1 | gtags $_GTAGS_OPTS $* -f - "$DST"
+    xargs -r0 -n1 | $(_tags_nice) gtags $_GTAGS_OPTS $* -f - "$DST"
 }
 
 # Make starscope db
@@ -166,7 +175,7 @@ mkstarscope() {
   shift $(($#<=3?$#:3))
   # Build tag file
   _tags_scandir "$SRC" "$_STARSCOPE_REGEX" "$EXCLUDE" |
-    xargs -r0 starscope $_STARSCOPE_OPTS $* -f "$DB"
+    xargs -r0 $(_tags_nice) starscope $_STARSCOPE_OPTS $* -f "$DB"
 }
 
 # General purpose: make incremental tag db
@@ -183,7 +192,7 @@ mkinc() {
   # tag file list is a marker + \n + list of files with \0
   echo "## rc tags file list ##" > .tags_files
   sort -z -u .tags_tmp >> .tags_files
-  $FCT .tags_files "$DST"
+  $(_tags_nice) $FCT .tags_files "$DST"
   rm .tags_tmp .tags_files
 }
 

@@ -259,6 +259,7 @@ docker_in_docker() {
 }
 
 # Aliases
+alias docker_run_local='USERNAME=${USERNAME:-0} MOUNT=$PWD:$PWD WORKDIR=$PWD docker_run --rm'
 alias docker_run_rm='docker_run --rm'
 alias docker_lsi='docker images'
 alias docker_lsc='docker container ls'

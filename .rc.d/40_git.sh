@@ -2180,6 +2180,7 @@ alias gcfg='git config -g'
 # Git ignore changes
 alias git_ignore_changes='git update-index --assume-unchanged'
 alias git_noignore_changes='git update-index --no-assume-unchanged'
+alias git_unignore_changes='git update-index --no-assume-unchanged'
 # gitk aliases
 alias gk='gitk'
 alias gkt='gitk HEAD $(git_tracking)'
