@@ -101,7 +101,7 @@
 
     // Misc
     "update.mode": "manual",
-    "extensions.autoUpdate": false,
+    "extensions.autoUpdate": "off",
     "settingsSync.keybindingsPerPlatform": false,
     "telemetry.telemetryLevel": "off",
     "http.systemCertificates": false,
