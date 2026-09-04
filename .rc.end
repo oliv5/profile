@@ -359,8 +359,7 @@ duhlx2() { du -hLx -d2 "$@" | sort -h; }
 alias dfh='df -h | grep -v /snap/'
 
 # Env | grep
-unalias pv 2>/dev/null || true
-pv() { for V; do echo "$V=$(eval echo \$$V)"; done; }
+envl() { for V; do echo "$V=$(eval echo \$$V)"; done; }
 alias envg='env | grep -i'
 alias dpkgl='dpkg -l'
 alias dpkgg='dpkg -l | grep -i'
