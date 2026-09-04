@@ -1199,6 +1199,17 @@ git_subtree_pull() {
   git subtree pull --prefix="$PREFIX" "$REPO" "$REF" --squash
 }
 
+# Update an external repo subtree by deleting it & re-adding it
+# Better for the tree view
+git_subtree_update() {
+  local REPO="${1:?No remote repository url specified...}"
+  local PREFIX="${2:-$(basename "$REPO" .git)}"
+  local REF="${3:-master}"
+  git rm -r "$PREFIX" && if [ -d "$PREFIX" ]; then rm -r "$PREFIX"; fi &&
+    git commit -m "Remove subtree '$PREFIX/' before a full update" &&
+    git subtree add --prefix="$PREFIX" "$REPO" "$REF" --squash
+}
+
 # Push to an external repo subtree
 git_subtree_push() {
   local REPO="${1:?No remote repository specified}"
@@ -1722,6 +1733,35 @@ git_tag_annotate() {
   fi
 }
 
+
+########################################
+# Rebasing
+# https://stackoverflow.com/questions/15915430/what-exactly-does-gits-rebase-preserve-merges-do-and-why/50555740#50555740
+# https://stackoverflow.com/questions/12858199/how-to-rebase-after-git-subtree-add#48293315
+_git_rebase_merges_options() {
+  if [ $(git_version) -ge $(git_version 2.24) ]; then
+    echo "--rebase-merges --strategy subtree"
+  elif [ $(git_version) -ge $(git_version 2.18) ]; then
+    echo "--rebase-merges"
+  else
+    echo "--preserve-merges"
+  fi
+}
+
+git_rebase() {
+  # Base options
+  local OPTS="--interactive $(_git_rebase_merges_options)"
+  # Add more options from command line
+  while [ "${1##--}" != "$1" ]; do
+    OPTS="${OPTS:+$OPTS }$1"
+    shift
+  done
+  # Main
+  git_log_fzf 250 HEAD "$@" | xargs -ro sh -c '
+    git rebase $1 ${2}~1
+  ' _ "$OPTS"
+}
+
 ########################################
 # Easy amend of previous commit
 git_squash() {
@@ -1734,22 +1774,22 @@ git_squash() {
 }
 git_autosquash() {
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
-    git rebase --autosquash "${1}~1"
-  ' _
+    git rebase --autosquash $1 "${2}~1"
+  ' _ "$(_git_rebase_merges_options)"
 }
 git_fixup() {
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
     { ! git diff --quiet || ! git diff --cached --quiet; } &&
-      git commit --fixup="$1" # Like --squash=
-    GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash "${1}~1"
-  ' _
+      git commit --fixup="$2" # Like --squash=
+    GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash $1 "${2}~1"
+  ' _ "$(_git_rebase_merges_options)"
 }
 git_amend() {
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
     { git diff --quiet && git diff --cached --quiet; } &&
-      git commit --fixup=reword:"$1"
-    GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash "${1}~1"
-  ' _
+      git commit --fixup=reword:"$2"
+    GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash $1 "${2}~1"
+  ' _ "$(_git_rebase_merges_options)"
 }
 git_revert() {
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
@@ -1760,8 +1800,8 @@ git_exec() {
   local CMD="${1:?No command specified...}"
   shift
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
-    git rebase --interactive --exec "$1" "$2"
-  ' _ "$CMD"
+    git rebase --interactive --exec $1 "$2" "$3"
+  ' _  "$(_git_rebase_merges_options)" "$CMD"
 }
 git_edit() {
   git_log_fzf 50 HEAD "$@" | xargs -ro sh -c '
@@ -1788,31 +1828,6 @@ git_edit() {
       done
       git tag -d "$TAG"
   ' _
-}
-
-########################################
-# Rebasing
-# https://stackoverflow.com/questions/15915430/what-exactly-does-gits-rebase-preserve-merges-do-and-why/50555740#50555740
-# https://stackoverflow.com/questions/12858199/how-to-rebase-after-git-subtree-add#48293315
-git_rebase() {
-  # Base options
-  local OPTS="--interactive"
-  if [ $(git_version) -ge $(git_version 2.24) ]; then
-    OPTS="$OPTS --rebase-merges --strategy subtree"
-  elif [ $(git_version) -ge $(git_version 2.18) ]; then
-    OPTS="$OPTS --rebase-merges"
-  else
-    OPTS="$OPTS --preserve-merges"
-  fi
-  # Add more options from command line
-  while [ "${1##--}" != "$1" ]; do
-    OPTS="${OPTS:+$OPTS }$1"
-    shift
-  done
-  # Main
-  git_log_fzf 250 HEAD "$@" | xargs -ro sh -c '
-    git rebase $1 ${2}~1
-  ' _ "$OPTS"
 }
 
 ########################################
