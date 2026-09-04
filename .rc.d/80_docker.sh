@@ -258,6 +258,60 @@ docker_in_docker() {
     [ -e /.dockerenv ]
 }
 
+# Copy docker to another machine via SSH
+alias docker_copy='docker_export'
+docker_export() {
+    local IMG="${1:?No image specified...}"
+    local HOST="${2:?No remote host specified...}"
+    if command -v pv >/dev/null; then
+        local SIZE="$(docker image inspect -f '{{.Size}}' "$IMG")" || exit 1
+        docker save "$IMG" \
+            | pv -s "$SIZE" \
+            | gzip -1 \
+            | ssh "$HOST" -- docker load
+    else
+        # No percentage written
+        docker save "$IMG" \
+            | dd status=progress \
+            | gzip -1 \
+            | ssh "$HOST" -- docker load
+    fi
+}
+
+docker_import() {
+    local IMG="${1:?No image specified...}"
+    local HOST="${2:?No remote host specified...}"
+    if command -v pv >/dev/null; then
+        local SIZE="$(ssh "$HOST" -- docker image inspect -f '{{.Size}}' "$IMG")" || exit 1
+        ssh "$HOST" -- "docker save \"$IMG\" | gzip -1" \
+            | pv -s "$SIZE" \
+            | docker load
+    else
+        # No percentage written
+        ssh "$HOST" -- "docker save \"$IMG\" | gzip -1" \
+            | dd status=progress \
+            | docker load
+    fi
+}
+
+# Backup an image on disk
+docker_backup() {
+    local IMG="${1:?No image specified...}"
+    local NAME="$(basename "$IMG")-$(date +%Y%m%d-%H%M%S).txz"
+    local OUT="${2:-./${NAME}}"
+    [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/${NAME}"
+    OUT="$(echo ${OUT%%.txz}.txz | tr : -)"
+    local PAR2="${3:-10}"
+    echo "Saving into $OUT ..."
+    eval ${DBG:+echo} "docker save \"$IMG\" | xz -9e -T0 --memlimit-compress=4GiB --check=sha256 > \"$OUT\""
+    echo "Checking integrity..."
+    ${DBG:+echo} xz -t "$OUT"
+    if [ "$PAR2" != "0" ]; then
+        echo "Compute parity..."
+        ${DBG:+echo} par2create -r"$PAR2" -n1 "$OUT"
+    fi
+}
+
 # Aliases
 alias docker_run_local='USERNAME=${USERNAME:-0} MOUNT=$PWD:$PWD WORKDIR=$PWD docker_run --rm'
 alias docker_run_rm='docker_run --rm'
