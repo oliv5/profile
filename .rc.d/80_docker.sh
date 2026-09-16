@@ -312,6 +312,21 @@ docker_backup() {
     fi
 }
 
+# Docker extract file
+docker_extract() {
+    local IMG="${1:?No image specified...}"
+    local CONT_TMP="$(basename "$(mktemp -u --suffix=.container)")"
+    shift
+    echo "Create container for image $IMG with name $CONT_TMP"
+    docker create --name "$CONT_TMP" "$IMG"
+    while [ $# -ge 2 ]; do
+        docker cp "$CONT_TMP":"$1" "$2"
+        shift 2
+    done
+    echo -n "Delete container $CONT_TMP"
+    docker rm "$CONT_TMP"
+}
+
 # Aliases
 alias docker_run_local='USERNAME=${USERNAME:-0} MOUNT=$PWD:$PWD WORKDIR=$PWD docker_run --rm'
 alias docker_run_rm='docker_run --rm'
