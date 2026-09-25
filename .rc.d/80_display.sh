@@ -15,8 +15,18 @@ alias xrandr_cfg="xrandr -q | awk '/connected/{d=\$1}/*/{print d \"\t\" \$1}'"
 xrandr_size() {
   if [ $# -eq 0 ]; then
     xrandr -q | awk '/*/{print $1}'
+  elif [ $# -eq 1 ]; then
+    xrandr -s "$1"
   else
-    xrandr -s "$@"
+    local CMD="--output '$1' --primary --mode '$2'"
+    local PREV="$1"
+    shift 2
+    while [ $# -ge 2 ]; do
+      CMD="$CMD --output '$1' --mode '$2' --right-of '$PREV'"
+      PREV="$1"
+      shift 2
+    done
+    eval xrandr "$CMD"
   fi
 }
 alias xrandr_getres='xrandr_size;'

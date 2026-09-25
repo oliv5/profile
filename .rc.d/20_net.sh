@@ -294,6 +294,40 @@ ssh_sudo_askpass() {
   ask_passwd | ssh -tt "$SSH_OPTS" 'cat - | sudo -S "$@"'
 }
 
+############################
+# SCP/SFTP replacements
+ssh_scp_write() {
+  local SSH_OPTS="${1:?No ssh server/opts specified...}"
+  local SRC="${2:?No source file specified...}"
+  local DST="${3:?No destination file specified...}"
+  ssh $SSH_OPTS "cat > \"$DST\"" < "$SRC"
+}
+ssh_scp_tar_write() {
+  local SSH_OPTS="${1:?No ssh server/opts specified...}"
+  local SRC="${2:?No source file specified...}"
+  local DST="${3:?No destination file specified...}"
+  (
+    if (set -o pipefail) 2>/dev/null; then set -o pipefail; fi
+    tar -cf - -C "$(dirname "$SRC")" "$(basename "$SRC")" | ssh $SSH_OPTS "tar -xf - -C \"$(dirname "$DST")\""
+  )
+}
+
+ssh_scp_read() {
+  local SSH_OPTS="${1:?No ssh server/opts specified...}"
+  local SRC="${2:?No source file specified...}"
+  local DST="${3:?No destination file specified...}"
+  ssh $SSH_OPTS "cat \"$SRC\"" > "$DST"
+}
+ssh_scp_tar_read() {
+  local SSH_OPTS="${1:?No ssh server/opts specified...}"
+  local SRC="${2:?No source file specified...}"
+  local DST="${3:?No destination file specified...}"
+  (
+    if (set -o pipefail) 2>/dev/null; then set -o pipefail; fi
+    ssh $SSH_OPTS "tar -cf - -C \"$(dirname "$SRC")\" \"$(basename "$SRC")\"" | tar -xf - -C "$(dirname "$DST")"
+  )
+}
+
 ##############################
 # SSH command shortcuts
 ssh_ping()        { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; shift; ssh $SSH_OPTS -- echo pong; }

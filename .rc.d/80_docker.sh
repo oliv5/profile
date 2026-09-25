@@ -297,10 +297,10 @@ docker_import() {
 # Backup an image on disk
 docker_backup() {
     local IMG="${1:?No image specified...}"
-    local NAME="$(basename "$IMG")-$(date +%Y%m%d-%H%M%S).txz"
+    local NAME="$(basename "$IMG")-$(date +%Y%m%d-%H%M%S).xz"
     local OUT="${2:-./${NAME}}"
     [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/${NAME}"
-    OUT="$(echo ${OUT%%.txz}.txz | tr : -)"
+    OUT="$(echo ${OUT%%.xz}.xz | tr : -)"
     local PAR2="${3:-10}"
     echo "Saving into $OUT ..."
     eval ${DBG:+echo} "docker save \"$IMG\" | xz -9e -T0 --memlimit-compress=4GiB --check=sha256 > \"$OUT\""
