@@ -306,9 +306,17 @@ ssh_scp_tar_write() {
   local SSH_OPTS="${1:?No ssh server/opts specified...}"
   local SRC="${2:?No source file specified...}"
   local DST="${3:?No destination file specified...}"
+  local PV="cat"
+  local SIZE=""
+  if command -v pv >/dev/null 2>&1; then
+    SIZE="$(du -sb "$SRC" 2>/dev/null | cut -f1)"
+    if [ -n "$SIZE" ]; then PV="pv -s $SIZE"; else PV="pv"; fi
+  fi
   (
     if (set -o pipefail) 2>/dev/null; then set -o pipefail; fi
-    tar -cf - -C "$(dirname "$SRC")" "$(basename "$SRC")" | ssh $SSH_OPTS "tar -xf - -C \"$(dirname "$DST")\""
+    tar -cf - -C "$(dirname "$SRC")" "$(basename "$SRC")" \
+      | $PV \
+      | ssh $SSH_OPTS "tar -xf - -C \"$(dirname "$DST")\""
   )
 }
 
@@ -322,9 +330,17 @@ ssh_scp_tar_read() {
   local SSH_OPTS="${1:?No ssh server/opts specified...}"
   local SRC="${2:?No source file specified...}"
   local DST="${3:?No destination file specified...}"
+  local PV="cat"
+  local SIZE=""
+  if command -v pv >/dev/null 2>&1; then
+    SIZE="$(ssh -n $SSH_OPTS "du -sb \"$SRC\"" 2>/dev/null | cut -f1)"
+    if [ -n "$SIZE" ]; then PV="pv -s $SIZE"; else PV="pv"; fi
+  fi
   (
     if (set -o pipefail) 2>/dev/null; then set -o pipefail; fi
-    ssh $SSH_OPTS "tar -cf - -C \"$(dirname "$SRC")\" \"$(basename "$SRC")\"" | tar -xf - -C "$(dirname "$DST")"
+    ssh $SSH_OPTS "tar -cf - -C \"$(dirname "$SRC")\" \"$(basename "$SRC")\"" \
+      | $PV \
+      | tar -xf - -C "$(dirname "$DST")"
   )
 }
 
