@@ -1044,29 +1044,27 @@ annex_unload() { UNUSED=1 DROP=1 _annex_copy "$@"; }
 
 annex_copy_missing() {
   local FROM="${FROM:+--from $FROM}"
-  if [ $(annex_version) -le $(annex_version 10.20230626) ] && [ -z "$FROM" ]; then
-    echo >&2 "Error: git annex version < 10.20230626, --from-anywhere is not supported. Must set FROM=<repo>!"
-    return 1
+  if [ -z "$FROM" ] && [ $(annex_version) -gt $(annex_version 10.20230626) ]; then
+    FROM="--from-anywhere"
   fi
   if [ $(annex_version) -le $(annex_version 10.20231129) ]; then
     for REPO in ${TO:-${@:-$(annex_enabled)}}; do
       echo "Process $(annex_remotes $REPO) ($REPO) ..."
       git annex find --include='*' --not --in "$REPO" --print0 |
-        xargs -r0 git annex copy --to "$REPO" ${FROM:---from-anywhere}
+        xargs -r0 git annex copy --to "$REPO" ${FROM}
     done
   else
     for REPO in ${TO:-${@:-$(annex_enabled)}}; do
       echo "Process $(annex_remotes $REPO) ($REPO) ..."
-      git annex copy --include='*' --not --in "$REPO" --to "$REPO" ${FROM:---from-anywhere}
+      git annex copy --include='*' --not --in "$REPO" --to "$REPO" ${FROM}
     done
   fi
 }
 
 annex_copy_wanted() {
   local FROM="${FROM:+--from $FROM}"
-  if [ $(annex_version) -le $(annex_version 10.20230626) ] && [ -z "$FROM" ]; then
-    echo >&2 "Error: git annex version < 10.20230626, --from-anywhere is not supported. Must set FROM=<repo>!"
-    return 1
+  if [ -z "$FROM" ] && [ $(annex_version) -gt $(annex_version 10.20230626) ]; then
+    FROM="--from-anywhere"
   fi
   if [ $(annex_version) -le $(annex_version 10.20231129) ]; then
     for REPO in ${TO:-${@:-$(annex_enabled)}}; do
@@ -1075,7 +1073,7 @@ annex_copy_wanted() {
         echo >&2 "Warning: this repo does not want anything! Use annex_copy_missing instead..."
       fi
       git annex find --include='*' --not --in "$REPO" --want-get-by "$REPO" --print0 |
-        xargs -r0 git annex copy --to "$REPO" ${FROM:---from-anywhere}
+        xargs -r0 git annex copy --to "$REPO" ${FROM}
     done
   else
     for REPO in ${TO:-${@:-$(annex_enabled)}}; do
@@ -1083,7 +1081,7 @@ annex_copy_wanted() {
       if [ -z "$(git annex wanted "$REPO")$(git annex required "$REPO")" ]; then
         echo >&2 "Warning: this repo does not want anything! Use annex_copy_missing instead..."
       fi
-      git annex copy --include='*' --not --in "$REPO" --want-get-by "$REPO" --to "$REPO" ${FROM:---from-anywhere}
+      git annex copy --include='*' --not --in "$REPO" --want-get-by "$REPO" --to "$REPO" ${FROM}
     done
   fi
 }
