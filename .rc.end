@@ -354,6 +354,15 @@ duhlx() { du -hLx "$@"; }
 duhlx0() { du -hLx -d0 "$@" | sort -h; }
 duhlx1() { du -hLx -d1 "$@" | sort -h; }
 duhlx2() { du -hLx -d2 "$@" | sort -h; }
+unalias sduh sduh0 sduh1 sduh2 sduhlx sduhlx0 sduhlx1 sduhlx2 2>/dev/null || true
+sduh() { du -h "$@"; }
+sduh0() { sudo du -h -d0 "$@"; }
+sduh1() { sudo du -h -d1 "$@" | sort -h; }
+sduh2() { sudo du -h -d2 "$@" | sort -h; }
+sduhlx() { sudo du -hLx "$@"; }
+sduhlx0() { sudo du -hLx -d0 "$@" | sort -h; }
+sduhlx1() { sudo du -hLx -d1 "$@" | sort -h; }
+sduhlx2() { sudo du -hLx -d2 "$@" | sort -h; }
 
 # df
 alias dfh='df -h | grep -v /snap/'
@@ -547,6 +556,12 @@ pip_ls_sizes() {
   | xargs du -sh 2> /dev/null \
   | sort -hr
 }
+
+# Fail2ban helpers
+if command -v fail2ban-client >/dev/null; then
+  fail2ban_unban() { sudo fail2ban-client set "$1" unbanip "$2"; }
+  fail2ban_status() { sudo fail2ban-client status; ${1:+sudo fail2ban-client status "$1"}; }
+fi
 
 # Misc
 alias mo='mimeopen'
