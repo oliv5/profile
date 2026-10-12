@@ -1044,7 +1044,7 @@ annex_unload() { UNUSED=1 DROP=1 _annex_copy "$@"; }
 
 annex_copy_missing() {
   local FROM="${FROM:+--from $FROM}"
-  if [ $(annex_version) -lt $(annex_version 10.20230626) ] && [ -z "$FROM" ]; then
+  if [ $(annex_version) -le $(annex_version 10.20230626) ] && [ -z "$FROM" ]; then
     echo >&2 "Error: git annex version < 10.20230626, --from-anywhere is not supported. Must set FROM=<repo>!"
     return 1
   fi
@@ -1064,7 +1064,7 @@ annex_copy_missing() {
 
 annex_copy_wanted() {
   local FROM="${FROM:+--from $FROM}"
-  if [ $(annex_version) -lt $(annex_version 10.20230626) ] && [ -z "$FROM" ]; then
+  if [ $(annex_version) -le $(annex_version 10.20230626) ] && [ -z "$FROM" ]; then
     echo >&2 "Error: git annex version < 10.20230626, --from-anywhere is not supported. Must set FROM=<repo>!"
     return 1
   fi
