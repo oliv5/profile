@@ -327,19 +327,59 @@ docker_extract() {
     docker rm "$CONT_TMP"
 }
 
+# Docker rename volume
+docker_rename_volume() {
+    local SRC="${1:?No source volume specified...}"
+    local DST="${2:?No destination volume specified...}"
+    local USED
+
+    if ! docker volume inspect "$SRC" >/dev/null 2>&1; then
+        echo >&2 "ERROR: source volume not found: $SRC"
+        return 1
+    fi
+    if docker volume inspect "$DST" >/dev/null 2>&1; then
+        echo >&2 "ERROR: destination volume already exists: $DST"
+        return 2
+    fi
+    USED=$(docker ps -a -q --filter volume="$SRC") || return 3
+    if [ -n "$USED" ]; then
+        echo >&2 "ERROR: volume $SRC is used by $(echo $USED)"
+        return 4
+    fi
+
+    docker volume create "$DST" >/dev/null || return 5
+
+    # Copy preserving ownership, permissions and dot entries
+    if ! docker run --rm \
+        -v "$SRC":/from:ro \
+        -v "$DST":/to \
+        "alpine" sh -c 'cp -a /from/. /to/'
+    then
+        echo >&2 "ERROR: copy failed, keeping $SRC"
+        docker volume rm "$DST" >/dev/null 2>&1
+        return 6
+    fi
+
+    docker volume rm "$SRC" >/dev/null || return 7
+}
+
 # Aliases
 alias docker_run_local='USERNAME=${USERNAME:-0} MOUNT=$PWD:$PWD WORKDIR=$PWD docker_run --rm'
 alias docker_run_rm='docker_run --rm'
 alias docker_lsi='docker images'
+alias docker_lsv='docker volume ls'
 alias docker_lsc='docker container ls'
 alias docker_lsca='docker container ls -a'
 alias docker_rmi='docker rmi'
 alias docker_rmif='docker rmi -f'
+alias docker_rmv='docker volume rm'
+alias docker_rmvf='docker volume rm -f'
 alias docker_rmc='docker rm'
 alias docker_rmcf='docker rm -f'
 alias docker_rmi_dangling='docker image prune || { docker images -qa -f "dangling=true" | xargs -r docker rmi -f; }'
+alias docker_rmv_dangling='docker volume prune || { docker volume ls | awk "NR>1{print \$2}" | xargs -r docker volume rm -f; }'
 alias docker_rmc_dangling='docker container prune || { docker container ls -a | cut -f1 | tail -n +2 | xargs -r docker rm -f; }'
-alias docker_rm_dangling='docker_rmc_dangling && docker_rmi_dangling'
+alias docker_rm_dangling='docker_rmc_dangling && docker_rmv_dangling && docker_rmi_dangling'
 # Tool to get container runtime parameters
 alias docker_args='docker_cmdline'
 alias runlike="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock:ro assaflavie/runlike"
