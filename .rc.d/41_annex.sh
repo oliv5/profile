@@ -1048,11 +1048,16 @@ annex_copy_missing() {
     FROM="--from-anywhere"
   fi
   if [ $(annex_version) -le $(annex_version 10.20231129) ]; then
-    for REPO in ${TO:-${@:-$(annex_enabled)}}; do
-      echo "Process $(annex_remotes $REPO) ($REPO) ..."
-      git annex find --include='*' --not --in "$REPO" --print0 |
-        xargs -r0 git annex copy --to "$REPO" ${FROM}
-    done
+    if [ -z "$FROM" ]; then
+      echo "Process repos ${TO:-${@:-$(annex_enabled)}} using legacy annex_transfer ..."
+      SELECT=missing annex_transfer "${TO:-${@:-$(annex_enabled)}}"
+    else
+      for REPO in ${TO:-${@:-$(annex_enabled)}}; do
+        echo "Process $(annex_remotes $REPO) ($REPO) ..."
+        git annex find --include='*' --not --in "$REPO" --print0 |
+          xargs -r0 git annex copy --to "$REPO" ${FROM}
+      done
+    fi
   else
     for REPO in ${TO:-${@:-$(annex_enabled)}}; do
       echo "Process $(annex_remotes $REPO) ($REPO) ..."
@@ -1067,14 +1072,19 @@ annex_copy_wanted() {
     FROM="--from-anywhere"
   fi
   if [ $(annex_version) -le $(annex_version 10.20231129) ]; then
-    for REPO in ${TO:-${@:-$(annex_enabled)}}; do
-      echo "Process $(annex_remotes $REPO) ($REPO) ..."
-      if [ -z "$(git annex wanted "$REPO")$(git annex required "$REPO")" ]; then
-        echo >&2 "Warning: this repo does not want anything! Use annex_copy_missing instead..."
-      fi
-      git annex find --include='*' --not --in "$REPO" --want-get-by "$REPO" --print0 |
-        xargs -r0 git annex copy --to "$REPO" ${FROM}
-    done
+    if [ -z "$FROM" ]; then
+      echo "Process repos ${TO:-${@:-$(annex_enabled)}} using legacy annex_transfer ..."
+      SELECT=want-get annex_transfer "${TO:-${@:-$(annex_enabled)}}"
+    else
+      for REPO in ${TO:-${@:-$(annex_enabled)}}; do
+        echo "Process $(annex_remotes $REPO) ($REPO) ..."
+        if [ -z "$(git annex wanted "$REPO")$(git annex required "$REPO")" ]; then
+          echo >&2 "Warning: this repo does not want anything! Use annex_copy_missing instead..."
+        fi
+        git annex find --include='*' --not --in "$REPO" --want-get-by "$REPO" --print0 |
+          xargs -r0 git annex copy --to "$REPO" ${FROM}
+      done
+    fi
   else
     for REPO in ${TO:-${@:-$(annex_enabled)}}; do
       echo "Process $(annex_remotes $REPO) ($REPO) ..."
@@ -1295,6 +1305,14 @@ annex_find_plain() {
   git ls-files > "$TMP1"
   git annex find > "$TMP2"
   awk 'FNR==NR {a[$0]++; next} !a[$0]' "$TMP2" "$TMP1"
+}
+
+annex_find_dead() {
+  git annex fsck --fast 2>&1 | awk '/\*\* No known copies exist of/{print $NF}'
+}
+
+annex_rm_dead() {
+  annex_find_dead | xargs -r -n1 git annex dead --key
 }
 
 ########################################
