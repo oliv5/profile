@@ -867,12 +867,12 @@ annex_transfer() {
 }
 
 ########################################
-# Export files to the specified repos by chunk of a given size
+# Export files from HEAD to the specified repos by chunk of a given size
 #  without downloading the whole repo locally at once
-# $FROM is used to selected the origin repo
-# $DBG is used to print the command on stderr (when not empty)
-# $SELECT is used to select files to export; values: want-get / missing / [all]
-# $FSCK is set to trigger a `fsck`
+# $FROM selects the origin repo
+# $DBG prints the command on stderr (when not empty)
+# $SELECT selects files to export; values: want-get / missing / [all]
+# $FSCK triggers a `fsck`
 alias annex_export='SELECT=want-get _annex_export'
 _annex_export() {
   annex_exists || return 1
@@ -1308,7 +1308,7 @@ annex_find_plain() {
 }
 
 annex_find_dead() {
-  git annex fsck --fast 2>&1 | awk '/\*\* No known copies exist of/{print $NF}'
+  git annex fsck --fast --all 2>&1 | awk '/\*\* No known copies exist of/{print $NF}'
 }
 
 annex_rm_dead() {

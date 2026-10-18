@@ -730,6 +730,8 @@ git_bundle() {
     echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
     return 2
   fi
+  # Run fsck
+  git fsck || return 2
   # Save git LFS files, see https://gist.github.com/dvdveer/a47966db83af115e6200124f92e22761
   # To unbundle, untar *before* running 'git pull' on the bundle file
   # Target folder: `.git/lfs/objects` for plain repo, `lfs/objects` for bare repo
