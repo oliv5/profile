@@ -116,7 +116,7 @@ alias  idefine='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGE
 alias itypedef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_TYPEDEF"'
 
 # Dev replace
-_DSEXCLUDE="-not -path */.svn* -and -not -path */.git* -and -not -type l"
+_DSEXCLUDE="-not -path \*/.svn\* -and -not -path \*/.git\* -and -not -type l"
 #~ _DSEXCLUDE="-not -path '*/.*' -and -not -type l" # issue with quotes
 alias  hhr='FCASE=   FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_REF" SEXCLUDE="$_DSEXCLUDE" SNOCONFIRM=1 _fsed'
 alias ihhr='FCASE=-i FTYPE= FXTYPE= FARGS= SFILES="$_DGEXT_REF" SEXCLUDE="$_DSEXCLUDE" SNOCONFIRM=1 _fsed'
@@ -276,4 +276,22 @@ addr2line_gdb() {
 	for ADDR in "${@:?No relative address specified...}"; do
 		command gdb -q "$BINARY" -ex "info line *${ADDR}" -ex quit
 	done
+}
+
+# Validate yaml
+validate_yaml() {
+	local FILE="${1:?No yaml file specified...}"
+	if command -v ruby >/dev/null; then
+		echo "Using ruby -ryaml..."
+		ruby -ryaml -e "p YAML.load(STDIN.read)" < "$FILE"
+	elif command -v python >/dev/null; then
+		echo "Using python pyyaml..."
+		if ! python -c 'import pyyaml' >/dev/null 2>&1 && command -v pip >/dev/null; then
+			pip install pyyaml
+		fi
+		python -c 'import yaml, sys; print(yaml.safe_load(sys.stdin))' < "$FILE"
+	else
+		echo >&2 "No way to check yaml syntax..."
+		return 1
+	fi
 }

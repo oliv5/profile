@@ -8,8 +8,17 @@ adb_exec() {
 
 # Connect adb over wi-fi
 adb_wifi() {
+    # If connected, restart the remote server
     adb shell "setprop service.adb.tcp.port ${2:-5555} && stop adbd && start adbd"
     adb connect "${1:?No IP address specified...}:${2:-5555}"
+    adb devices
+}
+
+# Pair device over wi-fi
+adb_pair() {
+    # If connected, restart the remote server
+    adb shell "setprop service.adb.tcp.port ${2:-5555} && stop adbd && start adbd"
+    adb pair "${1:?No IP address specified...}:${2:-5555}" "${3:?No pairing code specified...}"
     adb devices
 }
 

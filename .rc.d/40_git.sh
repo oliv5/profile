@@ -1168,7 +1168,7 @@ git submodule add <url> <path>
 # Clone
 git clone --recurse-submodules <repo>
 # Init/Update
-git submodule update --init --recursive
+git submodule update --init --recursive --remote
 git submodule update --remote <path>
 # Track a branch
 git submodule set-branch --branch main <path>
@@ -2207,6 +2207,9 @@ alias gls='git_ls'
 alias glsg='git_ls | grep'
 alias glsc='git_ls_commit'
 alias glscg='git_ls_commit | grep'
+# submodules
+alias gsmu='git submodule update --init --recursive'
+alias gsmua='git submodule update --init --recursive --remote'
 
 
 ########################################

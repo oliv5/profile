@@ -82,7 +82,7 @@ diffhr() {
   ' _ "{}" "$1" "$2" \;
 }
 
-# Diff a list of files in a root folder
+# Diff a list of files in 2 folders
 _diffrt() {
   local CMD="${1:?Diff command not specified...}"
   local DIR1="${2:?No folder1 specified...}"
@@ -99,6 +99,16 @@ diffrt() { _diffrt "diff" "$@"; }
 diffrtm() { _diffrt "meld" "$@"; }
 diffrtl() { _diffrt "diff" . "$@"; }
 diffrtml() { _diffrt "meld" . "$@"; }
+
+# Diff a file in multiple root folders
+diffmr() {
+  local FILE="${1:?No file specified...}"
+  shift
+  local CMD=""
+  if [ $# -lt 2 ]; then set -- . "$@"; fi
+  for R; do CMD="$CMD '$R/$FILE'"; done
+  eval "meld $CMD"
+}
 
 #######################
 
