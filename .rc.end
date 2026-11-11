@@ -466,7 +466,7 @@ sys_up() {
   command -v apt-get >/dev/null &&
     apt-get update $APT_YES &&
     apt-get full-upgrade $APT_YES &&
-    apt-get autoremove APT_YES;
+    apt-get autoremove $APT_YES;
   command -v pkcon >/dev/null &&
     pkcon refresh &&
     pkcon get-updates &&
