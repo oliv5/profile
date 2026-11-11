@@ -460,25 +460,34 @@ sys_up() {
   local APT_YES="${1:+-y}"
   local PKCON_YES="${1:+-y}"
   local FLATPAK_YES="${1:+-y}"
+  local DO_APT="${2:-1}"
+  local DO_PKCON="${3:-1}"
+  local DO_SNAP="${4:-1}"
+  local DO_FLATPAK="${5:-1}"
   screen -c /dev/null -m sudo sh -c "
   set +e; set -x;
   echo System update starting...;
-  command -v apt-get >/dev/null &&
-    apt-get update $APT_YES &&
-    apt-get full-upgrade $APT_YES &&
-    apt-get autoremove $APT_YES;
-  command -v pkcon >/dev/null &&
-    pkcon refresh &&
-    pkcon get-updates &&
-    pkcon update $PKCON_YES;
-  command -v snap >/dev/null &&
-    snap refresh;
-  command -v flatpak >/dev/null &&
-    flatpak upgrade $FLATPAK_YES;
-    flatpak uninstall --unused;
-  command -v flatpak >/dev/null &&
-    flatpak --user upgrade $FLATPAK_YES;
-    flatpak --user uninstall --unused;
+  [ '$DO_APT' = 1 ] &&
+    command -v apt-get >/dev/null &&
+      apt-get update $APT_YES &&
+      apt-get full-upgrade $APT_YES &&
+      apt-get autoremove $APT_YES;
+  [ '$DO_PKCON' = 1 ] &&
+    command -v pkcon >/dev/null &&
+      pkcon refresh &&
+      pkcon get-updates &&
+      pkcon update $PKCON_YES;
+  [ '$DO_SNAP' = 1 ] &&
+    command -v snap >/dev/null &&
+      snap refresh;
+  [ '$DO_FLATPAK' = 1 ] &&
+    command -v flatpak >/dev/null &&
+      flatpak upgrade $FLATPAK_YES &&
+      flatpak uninstall --unused;
+  [ '$DO_FLATPAK' = 1 ] &&
+    command -v flatpak >/dev/null &&
+      flatpak --user upgrade $FLATPAK_YES &&
+      flatpak --user uninstall --unused;
   set +x;
   echo Done... press enter to quit;
   read VAR;
