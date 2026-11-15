@@ -24,18 +24,6 @@ bwctrl2='trickle'           # trickle -d 20 -u 20
 bwctrl3='pv -L'             # eval ... | pv -L 256kb
 
 ############################
-# Enable/disable ipv4/v6 until next reboot
-alias ipv4_disable='for V in $(sysctl -a -N -r "net.ipv4.conf.*.disable_ipv4"); do sudo sysctl -w $V=1; done'
-alias ipv4_enable='for V in $(sysctl -a -N -r "net.ipv4.conf.*.disable_ipv4"); do sudo sysctl -w $V=0; done'
-alias ipv6_disable='for V in $(sysctl -a -N -r "net.ipv6.conf.*.disable_ipv6"); do sudo sysctl -w $V=1; done'
-alias ipv6_enable='for V in $(sysctl -a -N -r "net.ipv6.conf.*.disable_ipv6"); do sudo sysctl -w $V=0; done'
-# Persistent enable/disable ipv4/v6 in sysctl.conf
-alias ipv4_disable_persistent='sudo sed -i -e "s/disable_ipv4\s*=.*/disable_ipv4 = 1/" /etc/sysctl.conf'
-alias ipv4_enable_persistent='sudo sed -i -e "s/disable_ipv4\s*=.*/disable_ipv4 = 0/" /etc/sysctl.conf'
-alias ipv6_disable_persistent='sudo sed -i -e "s/disable_ipv6\s*=.*/disable_ipv6 = 1/" /etc/sysctl.conf'
-alias ipv6_enable_persistent='sudo sed -i -e "s/disable_ipv6\s*=.*/disable_ipv6 = 0/" /etc/sysctl.conf'
-
-############################
 # Test if itf exists/up/down
 net_itf_exists() {
   ip addr show dev "$1" >/dev/null 2>$1
@@ -48,52 +36,8 @@ net_itf_down() {
 }
 
 ############################
-# iptables list all
-iptables_ls() {
-  for TABLE in filter nat mangle raw security; do
-    echo "** Table $TABLE **"
-    sudo iptables -vL -t $TABLE
-  done
-}
-
-# iptables flush all (must be done by a script at once)
-iptables_flush() {
-  # Set table filter policies to ACCEPT
-  sudo iptables -t filter -P INPUT ACCEPT
-  sudo iptables -t filter -P FORWARD ACCEPT
-  sudo iptables -t filter -P OUTPUT ACCEPT
-  # Remove all existing rules
-  for TABLE in filter nat mangle raw security; do
-    sudo iptables -t $TABLE -F	# All rules
-    sudo iptables -t $TABLE -X	# Delete all user defined-chains (ex: ssh established session)
-  done
-}
-
-############################
 # DHCP client
 alias dhcp_renew='sudo dhclient -r; sudo dhclient -1'
-
-############################
-# Local IP addr get
-ip_addr_get() {
-  local FILTER="${1:-inet}"
-  if [ $# -gt 1 ]; then
-    shift
-    for DEV; do
-      ip address show dev "$DEV"
-    done
-  else
-    ip address
-  fi | awk "/$FILTER/ {print \$2}"
-}
-
-ipv4_addr_get() {
-  ip_addr_get "inet " "$@"
-}
-
-ipv6_addr_get() {
-  ip_addr_get "inet6" "$@"
-}
 
 ############################
 # Local IP addr monitor
@@ -103,23 +47,18 @@ ip_monit() {
   done
 }
 ip_monit_new() {
+  local ACTION="${1:?No action specified...}"
+  shift
   for DEV; do
-    sh -c "ip monitor address dev '$DEV' | awk '! /Deleted/ && /inet/ {system(\". ip.monit.send.sh '$DEV' \" \$4 )}' " &
+    sh -c "ip monitor address dev '$DEV' | awk '! /Deleted/ && /inet/ {system(\"$ACTION '$DEV' \" \$4 )}' " &
   done
 }
 ip_monit_del() {
+  local ACTION="${1:?No action specified...}"
+  shift
   for DEV; do
-    sh -c "ip monitor address dev '$DEV' | awk '/Deleted/ && /inet/ {system(\". ip.monit.send.sh '$DEV' \" \$4 )}' " &
+    sh -c "ip monitor address dev '$DEV' | awk '/Deleted/ && /inet/ {system(\"$ACTION '$DEV' \" \$4 )}' " &
   done
-}
-
-############################
-# IPv6
-ipv6_supported() {
-  test -f /proc/net/if_inet6 && echo "IPv6 supported" || echo "IPv6 not supported"
-}
-ipv6_enabled() {
-  sysctl -a 2>/dev/null | grep disable_ipv6
 }
 
 ############################
